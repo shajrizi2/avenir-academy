@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+
+# pnpm 11: explicit allow/deny list for dependency build scripts
+allowBuilds:
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  '@swc/core': true
+  bcrypt: true
+  esbuild: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true
