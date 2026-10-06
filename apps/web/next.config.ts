@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   transpilePackages: ['@ai-academy/shared'],
+  // Two root layouts ((site) and [locale]) mean no single layout can own the 404 page.
+  experimental: { globalNotFound: true },
   turbopack: {
     rules: {
       '*.css': {

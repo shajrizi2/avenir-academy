@@ -1,0 +1,253 @@
+{
+  "landing": {
+    "meta": {
+      "title": "AI Academy: Learn AI and digital marketing, live",
+      "description": "Live classes on Google Meet with real instructors, monthly tests and a clear path from AI basics to coding and digital marketing. Register for free.",
+      "ogAlt": "AI Academy: Learn AI. Use it at work."
+    },
+    "skipLink": "Skip to content",
+    "dates": {
+      "months": [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+      ]
+    },
+    "nav": {
+      "label": "Main navigation",
+      "howItWorks": "How it works",
+      "tracks": "Tracks",
+      "faq": "FAQ",
+      "login": "Log in",
+      "register": "Register",
+      "openMenu": "Open menu",
+      "menuTitle": "Menu",
+      "language": "Language",
+      "switchTo": "Shqip"
+    },
+    "hero": {
+      "eyebrow": "Live courses · Taught in Albanian",
+      "title": "Learn AI. Use it at work.",
+      "subtitle": "Live classes on Google Meet with real instructors, monthly tests and a clear path: from AI basics to coding and digital marketing.",
+      "badgeCohort": "Next cohort starts {date}",
+      "badgeOpen": "Registration is open",
+      "ctaPrimary": "Register now",
+      "ctaSecondary": "See courses",
+      "trust": "Registration is free. You only pay once your seat is confirmed.",
+      "path": {
+        "label": "Example learning path, one module at a time",
+        "title": "Your path",
+        "course": "AI Foundations",
+        "progress": "1 of 4 modules passed",
+        "moduleLabel": "Module {number}",
+        "modules": ["AI Basics", "AI Integration", "AI Coding", "AI in Your Profession"],
+        "status": {
+          "passed": "Passed",
+          "active": "Active",
+          "locked": "Locked"
+        },
+        "footnote": "Pass the monthly test and the next module unlocks."
+      }
+    },
+    "whyNow": {
+      "eyebrow": "Why now",
+      "title": "AI is changing every job. Start learning it today.",
+      "points": [
+        {
+          "title": "Everyday work is being automated",
+          "text": "Writing, analysis, reports and customer replies all get done faster with AI. People who know how to use it get more done in less time."
+        },
+        {
+          "title": "Employers want AI skills",
+          "text": "More and more roles ask for practical AI skills, not only in tech but also in marketing, finance, education and services."
+        },
+        {
+          "title": "The sooner you start, the easier it gets",
+          "text": "Tools change fast, but the fundamentals stay. Learn them now, step by step, and every new release will feel familiar."
+        }
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "How it works",
+      "title": "Four steps, one clear path",
+      "intro": "No endless videos and no learning alone. You learn with a group, an instructor and a clear goal every month.",
+      "steps": [
+        {
+          "title": "Register",
+          "text": "Create a free account and choose your course. Our team confirms your seat."
+        },
+        {
+          "title": "Live classes on Google Meet",
+          "text": "Learn directly from your instructor, ask questions and work with your group."
+        },
+        {
+          "title": "Monthly test",
+          "text": "Each module ends with a short online test. Score 70% or more to pass."
+        },
+        {
+          "title": "Next module unlocks",
+          "text": "Passed the test? The next module opens right away and you keep going."
+        }
+      ],
+      "cta": "Take the first step"
+    },
+    "tracks": {
+      "eyebrow": "Tracks",
+      "title": "Choose your track",
+      "intro": "Each track has four monthly modules, from the basics to advanced use at work.",
+      "languageBadge": "Taught in Albanian",
+      "perModule": "~1 month per module",
+      "modulesLabel": "Track modules",
+      "viewTrack": "View track",
+      "unavailable": "We couldn't load the tracks right now. Please try again shortly."
+    },
+    "audience": {
+      "eyebrow": "Who it's for",
+      "title": "For people who want results at work",
+      "items": [
+        {
+          "title": "Professionals",
+          "text": "Automate repetitive tasks and spend your time on the work that matters."
+        },
+        {
+          "title": "Business owners",
+          "text": "Find where AI saves you time and money, and put it to work in your business."
+        },
+        {
+          "title": "Marketers",
+          "text": "Create content, campaigns and reports faster, and to a higher standard."
+        },
+        {
+          "title": "Students",
+          "text": "Add in-demand skills to your CV before you graduate."
+        },
+        {
+          "title": "Career changers",
+          "text": "Move into a new field with a clear plan and step-by-step support."
+        }
+      ]
+    },
+    "benefits": {
+      "eyebrow": "Why us",
+      "title": "Real teaching, not just videos",
+      "items": [
+        {
+          "title": "Live instructors",
+          "text": "Every class is live. Ask, discuss and get answers on the spot."
+        },
+        {
+          "title": "Practical projects",
+          "text": "You learn by working on real tasks you can use at work straight away."
+        },
+        {
+          "title": "Taught in Albanian",
+          "text": "Every class is taught in Albanian, with examples close to your own work."
+        },
+        {
+          "title": "Progress proven by tests",
+          "text": "Every module ends with a test, so you know exactly what you've learned."
+        },
+        {
+          "title": "One module at a time",
+          "text": "Small, clear steps, so you never feel overwhelmed."
+        },
+        {
+          "title": "Support between classes",
+          "text": "Questions after class? Our instructors and team are here to help."
+        }
+      ]
+    },
+    "instructors": {
+      "eyebrow": "Instructors",
+      "title": "Meet your instructors",
+      "intro": "Practitioners who teach live and support you every step of the way.",
+      "fallbackRole": "Instructor"
+    },
+    "testimonials": {
+      "eyebrow": "Testimonials",
+      "title": "What our students say"
+    },
+    "cohort": {
+      "eyebrow": "Next cohort",
+      "title": "Reserve your seat in the next cohort",
+      "intro": "Groups are kept small so every student gets the attention they need. Seats are limited.",
+      "startLabel": "Starts",
+      "startTbd": "Date to be announced soon",
+      "scheduleLabel": "Schedule",
+      "tbd": "To be announced soon",
+      "seatsLabel": "Seats",
+      "seatsValue": "{count} seats per cohort",
+      "priceLabel": "Price",
+      "priceContact": "Contact us for pricing",
+      "cta": "Reserve your seat",
+      "note": "Nothing to pay online. After you register, we contact you to confirm your seat and arrange payment."
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Questions we hear most",
+      "items": [
+        {
+          "question": "When are the classes?",
+          "answer": "Classes run live on Google Meet, usually in the evening so you can join after work. The schedule for the next cohort is shown above, and after you enroll you'll also see it on your dashboard."
+        },
+        {
+          "question": "What if I miss a class?",
+          "answer": "It happens. Materials from every class are posted on the module page, and you can reach out to your instructor with any questions. Attendance is recorded, so try to join live as often as you can."
+        },
+        {
+          "question": "How do the tests work?",
+          "answer": "The test opens in the last week of each module and you take it online. It lasts about 45 minutes, with single-choice, multiple-choice and true/false questions. You pass with 70% or more."
+        },
+        {
+          "question": "What if I don't pass?",
+          "answer": "You get two attempts at each test. If you don't pass on the second try, contact us: our team will review your case and can give you another chance."
+        },
+        {
+          "question": "How does payment work?",
+          "answer": "There's no online payment. Register and request a seat in a course, and our team will contact you to confirm it and arrange payment."
+        },
+        {
+          "question": "What language are the courses in?",
+          "answer": "Albanian. Some tools and terms are in English, but everything is explained in Albanian, step by step."
+        },
+        {
+          "question": "What do I need to take part?",
+          "answer": "A computer or laptop with a stable internet connection, a camera and a microphone. Google Meet runs right in your browser. For the coding module, a computer is essential."
+        },
+        {
+          "question": "What do I get at the end?",
+          "answer": "Practical skills you'll use at work, the projects you built during the course, and passed tests that show your progress, module by module."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Ready for the first step?",
+      "text": "Register for free today and reserve your seat in the next cohort.",
+      "cta": "Register now"
+    },
+    "contact": {
+      "title": "Questions? Get in touch",
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "Message us on WhatsApp"
+    },
+    "footer": {
+      "tagline": "Live courses in AI and digital marketing, taught in Albanian.",
+      "navLabel": "Footer links",
+      "courses": "Courses",
+      "rights": "All rights reserved."
+    },
+    "mobileBar": {
+      "cta": "Register now"
+    }
+  }
+}

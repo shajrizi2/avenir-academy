@@ -23,14 +23,15 @@ const STATUS_STYLES: Record<ModuleStatus, { label: string; className: string; Ic
   };
 
 /** The single, consistent way to show a module's status everywhere in the app. */
-export function ModuleStatusBadge({
-  status,
-  className,
-}: {
+interface ModuleStatusBadgeProps {
   status: ModuleStatus;
+  /** Override the English label (e.g. translated copy on the landing page). */
+  label?: string;
   className?: string;
-}) {
-  const { label, className: tone, Icon } = STATUS_STYLES[status];
+}
+
+export function ModuleStatusBadge({ status, label, className }: ModuleStatusBadgeProps) {
+  const { label: defaultLabel, className: tone, Icon } = STATUS_STYLES[status];
   return (
     <span
       className={cn(
@@ -40,7 +41,7 @@ export function ModuleStatusBadge({
       )}
     >
       <Icon className="size-3.5" aria-hidden />
-      {label}
+      {label ?? defaultLabel}
     </span>
   );
 }

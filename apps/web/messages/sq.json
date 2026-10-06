@@ -1,0 +1,253 @@
+{
+  "landing": {
+    "meta": {
+      "title": "AI Academy: Mëso AI dhe marketing digjital, live në shqip",
+      "description": "Kurse live në Google Meet me instruktorë të vërtetë, teste mujore dhe një rrugë të qartë: nga bazat e AI-së te kodimi dhe marketingu digjital. Regjistrohu falas.",
+      "ogAlt": "AI Academy: Mëso AI. Përdore në punë."
+    },
+    "skipLink": "Kalo te përmbajtja",
+    "dates": {
+      "months": [
+        "janar",
+        "shkurt",
+        "mars",
+        "prill",
+        "maj",
+        "qershor",
+        "korrik",
+        "gusht",
+        "shtator",
+        "tetor",
+        "nëntor",
+        "dhjetor"
+      ]
+    },
+    "nav": {
+      "label": "Navigimi kryesor",
+      "howItWorks": "Si funksionon",
+      "tracks": "Programet",
+      "faq": "Pyetje",
+      "login": "Hyr",
+      "register": "Regjistrohu",
+      "openMenu": "Hap menynë",
+      "menuTitle": "Menyja",
+      "language": "Gjuha",
+      "switchTo": "English"
+    },
+    "hero": {
+      "eyebrow": "Kurse live · Në shqip",
+      "title": "Mëso AI. Përdore në punë.",
+      "subtitle": "Kurse live në Google Meet me instruktorë të vërtetë, teste mujore dhe një rrugë të qartë: nga bazat e AI-së deri te kodimi dhe marketingu digjital.",
+      "badgeCohort": "Grupi i ardhshëm nis më {date}",
+      "badgeOpen": "Regjistrimet janë të hapura",
+      "ctaPrimary": "Regjistrohu tani",
+      "ctaSecondary": "Shiko kurset",
+      "trust": "Regjistrimi është falas. Paguan vetëm pasi të konfirmohet vendi yt.",
+      "path": {
+        "label": "Shembull i rrugës së mësimit, modul pas moduli",
+        "title": "Rruga jote",
+        "course": "AI Foundations",
+        "progress": "1 nga 4 module të kaluara",
+        "moduleLabel": "Moduli {number}",
+        "modules": ["Bazat e AI-së", "Integrimi i AI-së", "Kodimi me AI", "AI në profesionin tënd"],
+        "status": {
+          "passed": "Kaluar",
+          "active": "Aktiv",
+          "locked": "I kyçur"
+        },
+        "footnote": "Kalo testin mujor dhe hapet moduli tjetër."
+      }
+    },
+    "whyNow": {
+      "eyebrow": "Pse tani",
+      "title": "AI po ndryshon çdo profesion. Fillo ta mësosh sot.",
+      "points": [
+        {
+          "title": "Punët e përditshme po automatizohen",
+          "text": "Shkrimi, analiza, raportet dhe përgjigjet ndaj klientëve bëhen më shpejt me AI. Kush di ta përdorë, bën më shumë në më pak kohë."
+        },
+        {
+          "title": "Punëdhënësit kërkojnë aftësi me AI",
+          "text": "Gjithnjë e më shumë vende pune kërkojnë njohuri praktike me AI, jo vetëm në teknologji, por edhe në marketing, financë, arsim dhe shërbime."
+        },
+        {
+          "title": "Sa më herët, aq më e lehtë",
+          "text": "Mjetet ndryshojnë shpejt, por bazat mbeten. Mësoji tani, hap pas hapi, dhe çdo risi e re do të të duket e njohur."
+        }
+      ]
+    },
+    "howItWorks": {
+      "eyebrow": "Si funksionon",
+      "title": "Katër hapa, një rrugë e qartë",
+      "intro": "Pa video të pafundme dhe pa u humbur vetëm. Mëson me grup, me instruktor dhe me një objektiv të qartë çdo muaj.",
+      "steps": [
+        {
+          "title": "Regjistrohu",
+          "text": "Krijo llogarinë falas dhe zgjidh kursin. Ekipi ynë ta konfirmon vendin."
+        },
+        {
+          "title": "Klasa live në Google Meet",
+          "text": "Mëso drejtpërdrejt me instruktorin, bëj pyetje dhe puno me grupin."
+        },
+        {
+          "title": "Testi mujor",
+          "text": "Në fund të çdo moduli bën një test të shkurtër online. E kalon me 70% e lart."
+        },
+        {
+          "title": "Hapet moduli tjetër",
+          "text": "E kalove testin? Moduli i radhës hapet menjëherë dhe ti vazhdon përpara."
+        }
+      ],
+      "cta": "Fillo hapin e parë"
+    },
+    "tracks": {
+      "eyebrow": "Programet",
+      "title": "Zgjidh rrugën tënde",
+      "intro": "Çdo program ka katër module mujore, nga bazat deri te përdorimi i avancuar në punë.",
+      "languageBadge": "Në shqip",
+      "perModule": "~1 muaj për modul",
+      "modulesLabel": "Modulet e programit",
+      "viewTrack": "Shiko programin",
+      "unavailable": "Programet nuk u ngarkuan dot për momentin. Provo sërish pas pak."
+    },
+    "audience": {
+      "eyebrow": "Për kë është",
+      "title": "Për njerëz që duan rezultate në punë",
+      "items": [
+        {
+          "title": "Profesionistët",
+          "text": "Automatizo detyrat e përsëritura dhe merru me punën që ka vërtet rëndësi."
+        },
+        {
+          "title": "Pronarët e bizneseve",
+          "text": "Gjej ku të kursen AI kohë e para, dhe vëre në punë në biznesin tënd."
+        },
+        {
+          "title": "Marketerët",
+          "text": "Krijo përmbajtje, fushata dhe raporte më shpejt dhe me cilësi më të lartë."
+        },
+        {
+          "title": "Studentët",
+          "text": "Shto në CV aftësi që kërkohen në tregun e punës, që para diplomimit."
+        },
+        {
+          "title": "Kush ndryshon karrierë",
+          "text": "Hyr në një fushë të re me plan të qartë dhe mbështetje hap pas hapi."
+        }
+      ]
+    },
+    "benefits": {
+      "eyebrow": "Pse ne",
+      "title": "Mësim i vërtetë, jo vetëm video",
+      "items": [
+        {
+          "title": "Instruktorë live",
+          "text": "Çdo klasë zhvillohet live. Pyet, diskuto dhe merr përgjigje në çast."
+        },
+        {
+          "title": "Projekte praktike",
+          "text": "Mëson duke punuar mbi detyra reale, që i përdor menjëherë në punë."
+        },
+        {
+          "title": "Në gjuhën shqipe",
+          "text": "Të gjitha klasat zhvillohen në shqip, me shembuj të afërt me punën tënde."
+        },
+        {
+          "title": "Progres i provuar me teste",
+          "text": "Çdo modul mbyllet me test, ndaj e di saktë çfarë ke mësuar."
+        },
+        {
+          "title": "Një modul në një kohë",
+          "text": "Hapa të vegjël dhe të qartë. Nuk ndihesh asnjëherë i mbingarkuar."
+        },
+        {
+          "title": "Mbështetje mes klasave",
+          "text": "Ke pyetje pas mësimit? Instruktorët dhe ekipi ynë janë këtu për ty."
+        }
+      ]
+    },
+    "instructors": {
+      "eyebrow": "Instruktorët",
+      "title": "Njihu me instruktorët",
+      "intro": "Profesionistë që japin mësim live dhe të ndihmojnë në çdo hap.",
+      "fallbackRole": "Instruktor"
+    },
+    "testimonials": {
+      "eyebrow": "Përvojat",
+      "title": "Çfarë thonë studentët tanë"
+    },
+    "cohort": {
+      "eyebrow": "Grupi i ardhshëm",
+      "title": "Rezervo vendin në grupin e ardhshëm",
+      "intro": "Grupet mbahen të vogla, që çdo student të marrë vëmendjen e duhur. Vendet janë të kufizuara.",
+      "startLabel": "Fillimi",
+      "startTbd": "Data njoftohet së shpejti",
+      "scheduleLabel": "Orari",
+      "tbd": "Njoftohet së shpejti",
+      "seatsLabel": "Vende",
+      "seatsValue": "{count} vende në grup",
+      "priceLabel": "Çmimi",
+      "priceContact": "Na kontaktoni për çmimin",
+      "cta": "Rezervo vendin tënd",
+      "note": "Nuk paguan asgjë online. Pasi regjistrohesh, të kontaktojmë për konfirmimin dhe pagesën."
+    },
+    "faq": {
+      "eyebrow": "Pyetje të shpeshta",
+      "title": "Pyetjet që na bëni më shpesh",
+      "items": [
+        {
+          "question": "Kur zhvillohen klasat?",
+          "answer": "Klasat zhvillohen live në Google Meet, zakonisht në mbrëmje, që t'i ndjekësh pas punës. Orarin e grupit të ardhshëm e gjen më sipër dhe, pas regjistrimit, edhe në panelin tënd."
+        },
+        {
+          "question": "Po nëse humbas një klasë?",
+          "answer": "Ndodh. Materialet e çdo klase vendosen në faqen e modulit dhe mund t'i drejtohesh instruktorit për çdo paqartësi. Prezenca regjistrohet, ndaj përpiqu t'i ndjekësh klasat live sa më shumë."
+        },
+        {
+          "question": "Si funksionojnë testet?",
+          "answer": "Testi hapet në javën e fundit të modulit dhe bëhet online. Zgjat rreth 45 minuta, me pyetje me një ose disa përgjigje të sakta dhe pyetje e vërtetë/e gabuar. E kalon me 70% e lart."
+        },
+        {
+          "question": "Po nëse nuk e kaloj testin?",
+          "answer": "Ke dy tentativa për çdo test. Nëse nuk e kalon as herën e dytë, na kontakto: ekipi ynë e shqyrton rastin dhe mund të të japë një mundësi tjetër."
+        },
+        {
+          "question": "Si bëhet pagesa?",
+          "answer": "Nuk ka pagesë online. Regjistrohu dhe kërko vendin në kurs. Ekipi ynë të kontakton për konfirmimin dhe mënyrën e pagesës."
+        },
+        {
+          "question": "Në ç'gjuhë zhvillohen kurset?",
+          "answer": "Në shqip. Disa mjete dhe terma janë në anglisht, por çdo gjë shpjegohet në shqip, hap pas hapi."
+        },
+        {
+          "question": "Çfarë më duhet për të ndjekur kursin?",
+          "answer": "Një kompjuter ose laptop me internet të qëndrueshëm, kamerë dhe mikrofon. Google Meet hapet direkt në shfletues. Për modulin e kodimit, kompjuteri është i domosdoshëm."
+        },
+        {
+          "question": "Çfarë fitoj në fund?",
+          "answer": "Aftësi praktike që i përdor në punë, projektet që ke ndërtuar gjatë kursit dhe teste të kaluara që tregojnë progresin tënd, modul pas moduli."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Gati për hapin e parë?",
+      "text": "Regjistrohu falas sot dhe rezervo vendin në grupin e ardhshëm.",
+      "cta": "Regjistrohu tani"
+    },
+    "contact": {
+      "title": "Ke pyetje? Na shkruaj",
+      "email": "Email",
+      "phone": "Telefon",
+      "whatsapp": "Na shkruaj në WhatsApp"
+    },
+    "footer": {
+      "tagline": "Kurse live për AI dhe marketing digjital, në shqip.",
+      "navLabel": "Lidhje në fund të faqes",
+      "courses": "Kurset",
+      "rights": "Të gjitha të drejtat e rezervuara."
+    },
+    "mobileBar": {
+      "cta": "Regjistrohu tani"
+    }
+  }
+}

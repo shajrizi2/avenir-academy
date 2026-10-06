@@ -97,3 +97,52 @@
     @apply font-sans;
   }
 }
+
+/* ---------- Landing page ---------- */
+
+/* Smooth in-page anchor scrolling, only for people who don't prefer reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-scroll-behavior='smooth'] {
+    scroll-behavior: smooth;
+  }
+}
+
+/* The hero's only decoration: a faint indigo grid that fades out toward the bottom. */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgb(79 70 229 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(79 70 229 / 0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* Two sections with the same background in a row (e.g. when an optional section is hidden). */
+.landing-section[data-tone='white'] + .landing-section[data-tone='white'],
+.landing-section[data-tone='muted'] + .landing-section[data-tone='muted'] {
+  border-top: 1px solid var(--border);
+}
+
+/*
+ * Fade/slide-in on scroll, CSS only (scroll-driven animations). Browsers without support,
+ * and visitors who prefer reduced motion, simply see the content without animation.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}

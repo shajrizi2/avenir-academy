@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start --port 3000",
     "lint": "eslint .",
-    "type-check": "next typegen && tsc --noEmit"
+    "type-check": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@ai-academy/shared": "workspace:*",
@@ -28,6 +30,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.1",
     "@types/react": "^19",
@@ -36,6 +39,7 @@
     "eslint-config-next": "16.4.0",
     "eslint-config-prettier": "^10.1.8",
     "tailwindcss": "^4",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
   }
 }

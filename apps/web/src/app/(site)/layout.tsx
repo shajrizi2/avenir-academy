@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Providers } from '@/components/providers';
-import './globals.css';
+import { SITE_URL } from '@/lib/site';
+import '../globals.css';
 
 const inter = Inter({ variable: '--font-inter', subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: { default: 'AI Academy', template: '%s · AI Academy' },
   description:
     'Live, cohort-based courses on AI and digital marketing. Learn on Google Meet, pass each module, unlock the next.',
