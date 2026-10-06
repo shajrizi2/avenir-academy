@@ -12,3 +12,19 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+
+# pnpm 11 blocks very recent releases by default (supply-chain guard). Next 16.4.0 was
+# only days old when installed; drop these entries once it ages past the threshold.
+minimumReleaseAgeExclude:
+  - '@next/env@16.4.0'
+  - '@next/eslint-plugin-next@16.4.0'
+  - '@next/swc-darwin-arm64@16.4.0'
+  - '@next/swc-darwin-x64@16.4.0'
+  - '@next/swc-linux-arm64-gnu@16.4.0'
+  - '@next/swc-linux-arm64-musl@16.4.0'
+  - '@next/swc-linux-x64-gnu@16.4.0'
+  - '@next/swc-linux-x64-musl@16.4.0'
+  - '@next/swc-win32-arm64-msvc@16.4.0'
+  - '@next/swc-win32-x64-msvc@16.4.0'
+  - eslint-config-next@16.4.0
+  - next@16.4.0

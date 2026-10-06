@@ -1,0 +1,21 @@
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { UserManagement } from '@/components/admin/user-management';
+import { PageHeader } from '@/components/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export const metadata: Metadata = { title: 'Users' };
+
+export default function AdminUsersPage() {
+  return (
+    <>
+      <PageHeader
+        title="Users"
+        description="Find accounts and change their role. Instructors can manage modules assigned to them."
+      />
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+        <UserManagement />
+      </Suspense>
+    </>
+  );
+}
