@@ -1,3 +1,4 @@
+import type { Locale } from './constants.js';
 import type { EnrollmentStatus, Role } from './enums.js';
 
 /** Dates travel over JSON as ISO-8601 UTC strings. */
@@ -10,6 +11,9 @@ export interface PublicUser {
   lastName: string;
   phone: string | null;
   role: Role;
+  avatarUrl: string | null;
+  title: string | null;
+  bio: string | null;
   createdAt: IsoDateString;
 }
 
@@ -74,4 +78,39 @@ export interface ApiErrorBody {
   statusCode: number;
   message: string | string[];
   error?: string;
+}
+
+/** Public instructor card on the landing page (no contact details). */
+export interface PublicInstructor {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  title: string | null;
+  bio: string | null;
+}
+
+export interface PublicTestimonial {
+  id: string;
+  name: string;
+  role: string | null;
+  quote: string;
+  avatarUrl: string | null;
+  locale: Locale;
+}
+
+/** Landing-page values editable without a deploy (SiteSettings row). */
+export interface SiteSettings {
+  nextCohortStart: IsoDateString | null;
+  scheduleSq: string | null;
+  scheduleEn: string | null;
+  seatsTotal: number | null;
+  /** Whole currency units; null means "contact us". */
+  priceAmount: number | null;
+  priceCurrency: string;
+  priceNoteSq: string | null;
+  priceNoteEn: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  whatsappNumber: string | null;
 }

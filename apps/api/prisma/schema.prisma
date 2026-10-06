@@ -43,6 +43,12 @@ enum AttemptStatus {
   EXPIRED
 }
 
+/// Languages of the public marketing site.
+enum Locale {
+  sq
+  en
+}
+
 model User {
   id           String           @id @default(cuid())
   email        String           @unique
@@ -51,6 +57,10 @@ model User {
   lastName     String
   phone        String?
   role         Role             @default(STUDENT)
+  /// Public profile shown on the landing page for instructors.
+  avatarUrl    String?
+  title        String?
+  bio          String?
   createdAt    DateTime         @default(now())
   enrollments  Enrollment[]
   progress     ModuleProgress[]
@@ -193,4 +203,37 @@ model TestAttempt {
   answers     Json
   test        Test          @relation(fields: [testId], references: [id])
   user        User          @relation(fields: [userId], references: [id])
+}
+
+/// Real student testimonials for the landing page. Never seed or invent these.
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  role        String?
+  quote       String
+  avatarUrl   String?
+  isPublished Boolean  @default(false)
+  locale      Locale
+  createdAt   DateTime @default(now())
+
+  @@index([locale, isPublished])
+}
+
+/// Singleton row (id = 1) with landing-page values the team can change without a deploy.
+model SiteSettings {
+  id              Int       @id @default(1)
+  nextCohortStart DateTime?
+  scheduleSq      String?
+  scheduleEn      String?
+  seatsTotal      Int?
+  /// Whole currency units (e.g. 150 = 150 EUR). Null shows "contact us".
+  priceAmount     Int?
+  priceCurrency   String    @default("EUR")
+  priceNoteSq     String?
+  priceNoteEn     String?
+  contactEmail    String?
+  contactPhone    String?
+  /// International format without "+" or spaces, used for https://wa.me/<number>.
+  whatsappNumber  String?
+  updatedAt       DateTime  @updatedAt
 }

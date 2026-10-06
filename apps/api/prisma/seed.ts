@@ -259,6 +259,25 @@ async function main(): Promise<void> {
     });
   }
 
+  // Landing-page settings. Every value is a PLACEHOLDER for the team to replace (via
+  // PATCH /api/v1/site-settings or Prisma Studio). `update: {}` keeps edits on re-seed.
+  await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      nextCohortStart: marketingCourse.startDate,
+      scheduleSq: '2 mbrëmje në javë, 19:00–20:30',
+      scheduleEn: '2 evenings a week, 19:00–20:30',
+      seatsTotal: 20,
+      priceAmount: null, // null renders "contact us for the price"
+      contactEmail: 'info@example.com',
+      contactPhone: '+383 44 000 000',
+      whatsappNumber: '38344000000',
+    },
+  });
+  // Testimonials are intentionally NOT seeded: only real quotes may appear on the site.
+
   console.log('Seed complete.');
   console.table([
     { role: 'ADMIN', email: admin.email },

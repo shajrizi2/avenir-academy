@@ -4,7 +4,12 @@ import { type Prisma, Role } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import type { ListUsersQueryDto } from './dto/list-users-query.dto.js';
 import type { UpdateProfileDto } from './dto/update-profile.dto.js';
-import { publicUserSelect, type PublicUserRecord } from './user.select.js';
+import {
+  publicInstructorSelect,
+  type PublicInstructorRecord,
+  publicUserSelect,
+  type PublicUserRecord,
+} from './user.select.js';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +24,14 @@ export class UsersService {
   updateProfile(id: string, dto: UpdateProfileDto): Promise<PublicUserRecord> {
     return this.prisma.user.update({
       where: { id },
-      data: { firstName: dto.firstName, lastName: dto.lastName, phone: dto.phone },
+      data: {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        phone: dto.phone,
+        title: dto.title,
+        bio: dto.bio,
+        avatarUrl: dto.avatarUrl,
+      },
       select: publicUserSelect,
     });
   }
@@ -46,6 +58,15 @@ export class UsersService {
       this.prisma.user.count({ where }),
     ]);
     return { items, total, page: query.page, pageSize: query.pageSize };
+  }
+
+  /** Instructors for the public landing page, alphabetically. */
+  listInstructors(): Promise<PublicInstructorRecord[]> {
+    return this.prisma.user.findMany({
+      where: { role: Role.INSTRUCTOR },
+      select: publicInstructorSelect,
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
+    });
   }
 
   async updateRole(actorId: string, userId: string, role: Role): Promise<PublicUserRecord> {

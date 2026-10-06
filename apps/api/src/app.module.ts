@@ -11,6 +11,8 @@ import { MailModule } from './mail/mail.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CoursesModule } from './modules/courses/courses.module.js';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module.js';
+import { SiteSettingsModule } from './modules/site-settings/site-settings.module.js';
+import { TestimonialsModule } from './modules/testimonials/testimonials.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 
@@ -29,6 +31,8 @@ import { PrismaModule } from './prisma/prisma.module.js';
     UsersModule,
     CoursesModule,
     EnrollmentsModule,
+    SiteSettingsModule,
+    TestimonialsModule,
   ],
   controllers: [HealthController],
   providers: [

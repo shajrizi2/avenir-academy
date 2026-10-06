@@ -5,6 +5,9 @@ export const NAME_MAX_LENGTH = 60;
 export const EMAIL_MAX_LENGTH = 254;
 export const PHONE_MAX_LENGTH = 30;
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const TITLE_MAX_LENGTH = 80;
+export const BIO_MAX_LENGTH = 280;
+export const URL_MAX_LENGTH = 500;
 export const PHONE_PATTERN = /^\+?[0-9 ()-]{6,30}$/;
 
 /** Test defaults (editable per test). */
@@ -21,3 +24,11 @@ export const SESSION_JOIN_WINDOW_MIN = 15;
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;
+
+/** Languages of the public marketing site. Albanian is the primary language. */
+export const LOCALES = ['sq', 'en'] as const;
+export type Locale = (typeof LOCALES)[number];
+export const DEFAULT_LOCALE: Locale = 'sq';
+export function isLocale(value: unknown): value is Locale {
+  return typeof value === 'string' && (LOCALES as readonly string[]).includes(value);
+}
