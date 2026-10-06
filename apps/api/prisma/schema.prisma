@@ -1,0 +1,196 @@
+// AI Academy data model. Changes require product-owner approval (see CLAUDE.md).
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum EnrollmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ModuleStatus {
+  LOCKED
+  ACTIVE
+  PASSED
+  FAILED
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTI_CHOICE
+  TRUE_FALSE
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+}
+
+model User {
+  id           String           @id @default(cuid())
+  email        String           @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  role         Role             @default(STUDENT)
+  createdAt    DateTime         @default(now())
+  enrollments  Enrollment[]
+  progress     ModuleProgress[]
+  attempts     TestAttempt[]
+  attendance   Attendance[]
+  teaching     Module[]         @relation("ModuleInstructor")
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  summary     String
+  description String
+  coverUrl    String?
+  startDate   DateTime?
+  isPublished Boolean      @default(false)
+  modules     Module[]
+  enrollments Enrollment[]
+}
+
+model Module {
+  id            String           @id @default(cuid())
+  courseId      String
+  course        Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  order         Int
+  title         String
+  description   String
+  durationWeeks Int              @default(4)
+  instructorId  String?
+  instructor    User?            @relation("ModuleInstructor", fields: [instructorId], references: [id])
+  sessions      LiveSession[]
+  materials     Material[]
+  test          Test?
+  progress      ModuleProgress[]
+
+  @@unique([courseId, order])
+}
+
+model Enrollment {
+  id        String           @id @default(cuid())
+  userId    String
+  courseId  String
+  status    EnrollmentStatus @default(PENDING)
+  note      String?
+  createdAt DateTime         @default(now())
+  decidedAt DateTime?
+  user      User             @relation(fields: [userId], references: [id])
+  course    Course           @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+model ModuleProgress {
+  id         String       @id @default(cuid())
+  userId     String
+  moduleId   String
+  status     ModuleStatus @default(LOCKED)
+  unlockedAt DateTime?
+  passedAt   DateTime?
+  user       User         @relation(fields: [userId], references: [id])
+  module     Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleId])
+}
+
+model LiveSession {
+  id          String       @id @default(cuid())
+  moduleId    String
+  title       String
+  startsAt    DateTime
+  durationMin Int          @default(90)
+  meetUrl     String
+  module      Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  attendance  Attendance[]
+}
+
+model Attendance {
+  sessionId String
+  userId    String
+  present   Boolean     @default(true)
+  session   LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id])
+
+  @@id([sessionId, userId])
+}
+
+model Material {
+  id       String @id @default(cuid())
+  moduleId String
+  title    String
+  url      String
+  kind     String
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+}
+
+model Test {
+  id           String        @id @default(cuid())
+  moduleId     String        @unique
+  title        String
+  passMark     Int           @default(70)
+  timeLimitMin Int           @default(45)
+  maxAttempts  Int           @default(2)
+  opensAt      DateTime
+  closesAt     DateTime
+  isPublished  Boolean       @default(false)
+  module       Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  questions    Question[]
+  attempts     TestAttempt[]
+}
+
+model Question {
+  id      String       @id @default(cuid())
+  testId  String
+  order   Int
+  type    QuestionType
+  text    String
+  points  Int          @default(1)
+  test    Test         @relation(fields: [testId], references: [id], onDelete: Cascade)
+  options Option[]
+}
+
+model Option {
+  id         String   @id @default(cuid())
+  questionId String
+  text       String
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model TestAttempt {
+  id          String        @id @default(cuid())
+  testId      String
+  userId      String
+  status      AttemptStatus @default(IN_PROGRESS)
+  startedAt   DateTime      @default(now())
+  submittedAt DateTime?
+  scorePct    Int?
+  passed      Boolean?
+  answers     Json
+  test        Test          @relation(fields: [testId], references: [id])
+  user        User          @relation(fields: [userId], references: [id])
+}

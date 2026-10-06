@@ -1,0 +1,34 @@
+import { type INestApplication, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
+import type { EnvironmentVariables } from './config/env.validation.js';
+
+export const API_PREFIX = 'api/v1';
+
+/** App-wide configuration shared by main.ts and the e2e tests. */
+export function setupApp(app: INestApplication): void {
+  const config = app.get<ConfigService<EnvironmentVariables, true>>(ConfigService);
+  const expressApp = app as NestExpressApplication;
+
+  expressApp.set('trust proxy', config.get('TRUST_PROXY', { infer: true }));
+  expressApp.disable('x-powered-by');
+  app.setGlobalPrefix(API_PREFIX);
+  app.use(cookieParser());
+  app.enableCors({
+    origin: config
+      .get('CORS_ORIGINS', { infer: true })
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
+    credentials: true,
+  });
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  app.enableShutdownHooks();
+}

@@ -1,0 +1,21 @@
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@ai-academy/shared';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, Max, Min } from 'class-validator';
+
+export class PaginationQueryDto {
+  @ApiPropertyOptional({ minimum: 1, default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: MAX_PAGE_SIZE, default: DEFAULT_PAGE_SIZE })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(MAX_PAGE_SIZE)
+  pageSize = DEFAULT_PAGE_SIZE;
+}
