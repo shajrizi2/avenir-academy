@@ -11,7 +11,9 @@
     "CORS_ORIGINS",
     "TRUST_PROXY",
     "RATE_LIMIT_PER_MIN",
-    "API_INTERNAL_URL"
+    "API_INTERNAL_URL",
+    "SITE_URL",
+    "CI"
   ],
   "tasks": {
     "build": {
@@ -35,6 +37,10 @@
     },
     "test:e2e": {
       "dependsOn": ["^build"],
+      "cache": false
+    },
+    "@ai-academy/web#test:e2e": {
+      "dependsOn": ["build"],
       "cache": false
     }
   }

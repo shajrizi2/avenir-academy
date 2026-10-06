@@ -8,25 +8,26 @@ AI Academy is an LMS for live, cohort-based courses on AI and digital marketing.
 - **apps/web:** Next.js 16 (App Router), Tailwind CSS 4, shadcn/ui, TanStack Query 5, react-hook-form + zod 4.
 - **apps/api:** NestJS 12 (ESM), Prisma 7 (`prisma-client` generator + `@prisma/adapter-pg`), PostgreSQL 16, Passport JWT, bcrypt, class-validator. Global prefix `/api/v1`, Swagger at `/api/docs`.
 - **packages/shared** (`@ai-academy/shared`): enums, zod schemas, and API response types shared by web and api. It compiles to `dist/`.
-- **Tests:** Vitest for API unit and e2e tests (not Jest; see PLAN D1). Playwright for web, from Sprint 4.
+- **Tests:** Vitest for unit tests (api, web, shared) and API e2e (not Jest; see PLAN D1). Playwright for web e2e (`apps/web/e2e`, runs on the system Chrome).
+- **i18n:** the marketing site (`/sq`, `/en`) is bilingual through a small native helper (no i18n library, see PLAN D8). Albanian (`sq`) is the primary language. The signed-in app is English-only for now.
 
 ## Commands (run from the repo root)
 
-| Command           | What it does                                                   |
-| ----------------- | -------------------------------------------------------------- |
-| `pnpm install`    | Install everything (also generates the Prisma client)          |
-| `pnpm bootstrap`  | First-time setup: env files, Postgres, migrations, seed        |
-| `pnpm db:up`      | Start Postgres (docker compose), waiting until it is healthy   |
-| `pnpm db:migrate` | `prisma migrate dev` (creates or applies migrations)           |
-| `pnpm db:seed`    | Seed users, both tracks, a sample session and a sample test    |
-| `pnpm db:reset`   | Drop the database, re-run all migrations, re-seed              |
-| `pnpm dev`        | Run web (:3000), api (:4000), and the shared package watcher   |
-| `pnpm build`      | Build all packages                                             |
-| `pnpm lint`       | ESLint in every package                                        |
-| `pnpm type-check` | `tsc --noEmit` in every package                                |
-| `pnpm test`       | Unit tests (Vitest)                                            |
-| `pnpm test:e2e`   | API e2e tests (needs Postgres running; uses `ai_academy_test`) |
-| `pnpm format`     | Prettier write                                                 |
+| Command           | What it does                                                  |
+| ----------------- | ------------------------------------------------------------- |
+| `pnpm install`    | Install everything (also generates the Prisma client)         |
+| `pnpm bootstrap`  | First-time setup: env files, Postgres, migrations, seed       |
+| `pnpm db:up`      | Start Postgres (docker compose), waiting until it is healthy  |
+| `pnpm db:migrate` | `prisma migrate dev` + `prisma generate`                      |
+| `pnpm db:seed`    | Seed users, both tracks, a sample session and a sample test   |
+| `pnpm db:reset`   | Drop the database, re-run all migrations, re-seed             |
+| `pnpm dev`        | Run web (:3000), api (:4000), and the shared package watcher  |
+| `pnpm build`      | Build all packages                                            |
+| `pnpm lint`       | ESLint in every package                                       |
+| `pnpm type-check` | `tsc --noEmit` in every package                               |
+| `pnpm test`       | Unit tests (Vitest)                                           |
+| `pnpm test:e2e`   | API e2e (needs Postgres; uses `ai_academy_test`) + Playwright |
+| `pnpm format`     | Prettier write                                                |
 
 To run a single package, use `pnpm --filter @ai-academy/api <script>` (or `@ai-academy/web`, `@ai-academy/shared`).
 
@@ -48,12 +49,19 @@ apps/api/
   src/modules/         auth, users, courses, enrollments, ... (one Nest module per folder)
   test/                e2e tests (*.e2e-spec.ts)
 apps/web/
-  src/app/(public)/    home, catalog, course detail, auth pages (header + footer layout)
-  src/app/(app)/       dashboard, profile, admin/* (sidebar layout, client-side guarded)
+  messages/sq.json     landing copy (Albanian, source of truth); en.json mirrors its keys
+  e2e/                 Playwright tests
+  src/app/[locale]/    ROOT LAYOUT #1: marketing landing page /sq, /en (+ opengraph-image)
+  src/app/(site)/      ROOT LAYOUT #2 (lang="en"): everything else
+    (public)/          catalog, course detail, auth pages (header + footer layout)
+    (app)/             dashboard, profile, admin/* (sidebar layout, client-side guarded)
+  src/app/global-not-found.tsx, sitemap.ts, robots.ts
+  src/components/landing/  one component per landing section + header/footer/CTA helpers
+  src/i18n/            locale helpers: getLandingMessages() (via next/root-params), format()
   src/components/ui/   shadcn/ui primitives (generated; edit sparingly)
   src/components/      app components (layout, course, status badge, ...)
-  src/lib/             api client, auth context, query client, utils
-  src/proxy.ts         redirects to /login when there is no session cookie (UX only; the API enforces auth)
+  src/lib/             api client, auth context, queries, landing-data (fail-soft loaders), analytics track()
+  src/proxy.ts         "/" → /sq or /en (aa_locale cookie); /login redirect without a session cookie (UX only)
 packages/shared/src/   enums.ts, schemas/*.ts (zod), types.ts (API DTO shapes)
 scripts/bootstrap.mjs  first-run local setup
 docs/PLAN.md           spec, roadmap, decisions
@@ -75,15 +83,23 @@ docs/PLAN.md           spec, roadmap, decisions
   - The refresh token is a 7-day JWT in the httpOnly `aa_refresh` cookie (path `/`).
   - Refresh and reset tokens are signed with the secret plus a fingerprint of the password hash (PLAN D2).
 - **Errors:** throw Nest HTTP exceptions with a clear message. Prisma `P2002` maps to 409, `P2025` to 404, and `P2003` to 409 (global filter).
-- **Times:** store UTC and render in the viewer's local time with `<LocalDateTime>` (a client component).
+- **Times:** store UTC and render in the viewer's local time with `<LocalDateTime>` (a client component). Browsers ship **no Albanian Intl data** (`Intl.DateTimeFormat('sq')` silently prints English), so Albanian dates use translated month names from the messages (`<DateTemplate>` on the landing page).
 - **Web data:**
   - Next.js 16 runs with **Cache Components**. Read `apps/web/node_modules/next/dist/docs/` before using unfamiliar APIs; they differ from older Next versions.
   - Public pages are server components that fetch the API directly (`serverGet`, `API_INTERNAL_URL`). Every uncached fetch, `params` read and `useSearchParams()` must sit inside `<Suspense>`.
   - Don't use `'use cache'` for API data; it would make `next build` call the API.
+  - When catching errors around fetches in server components, call `unstable_rethrow(error)` first, so Next's own prerender signals aren't swallowed (see `lib/landing-data.ts`).
   - Don't call `new Date()` in server components.
   - `export const dynamic` is not allowed.
   - The signed-in area uses `export const instant = false` (client-gated).
   - Authenticated pages use TanStack Query through `apiFetch` (`src/lib/api.ts`), which attaches the access token and retries once after `/auth/refresh`.
+- **Landing page (`/[locale]`):** its only goal is registrations.
+  - All copy lives in `messages/{sq,en}.json` under `landing`; never hard-code strings. Read it with `const { locale, t } = await getLandingMessages()`. A unit test enforces identical keys and placeholders in both files.
+  - Every CTA is a `<CtaLink cta="…">`, which calls `track('cta_click', …)` (`lib/analytics.ts`, a no-op until GA/Plausible is plugged in).
+  - Data (tracks, instructors, testimonials, site settings) loads through `lib/landing-data.ts` inside `<Suspense>`. Loaders fail soft, so the page renders and converts even when the API is down.
+  - Cohort date, schedule, seats, price and contact details come from the `SiteSettings` row (admin `PATCH /site-settings`), never from code.
+  - Never invent testimonials, statistics or instructor details. The testimonials section renders only real, published entries.
+  - Motion is CSS-only (`.reveal`, scroll-driven) and respects `prefers-reduced-motion`. Targets: Lighthouse Performance ≥ 90, Accessibility ≥ 95, SEO 100.
 - **UI:**
   - Components stay small. Use shadcn primitives and Tailwind only, with no custom CSS beyond theme tokens in `globals.css`.
   - Primary colour is indigo-600; neutrals are slate. Cards use `rounded-xl` (12px), spacing follows the 8px grid, content uses `max-w-[1200px]`, and every page must work at 375px.

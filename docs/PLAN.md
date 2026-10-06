@@ -9,6 +9,7 @@ Tracks cover AI (basics → AI integration → AI coding → AI in your professi
 - Classes happen **live on Google Meet**. The platform only stores the Meet link for each session.
 - Students register on the site and request enrollment in a course. An admin approves the request, which unlocks **Module 1**.
 - Each module lasts about **one month** and ends with an **online test**. Passing the test unlocks the next module.
+- A bilingual **marketing landing page** (`/sq`, `/en`; Albanian first) sells the platform. Its one goal is to turn a visitor into a registration (see §6.1).
 
 ### Tracks (seed data)
 
@@ -25,7 +26,7 @@ Tracks cover AI (basics → AI integration → AI coding → AI in your professi
 
 ### Out of scope
 
-Online payments (an admin approves enrollment manually), certificates, video hosting, the Google Calendar API, chat, and i18n (English only for now).
+Online payments (an admin approves enrollment manually), certificates, video hosting, the Google Calendar API, chat, and i18n of the signed-in app (it stays English for now; only the landing page is bilingual).
 
 ## 2. Business rules
 
@@ -50,22 +51,22 @@ All times are stored in UTC and displayed in the viewer's local time.
 
 ## 3. Tech stack
 
-| Area      | Choice                                                                                               |
-| --------- | ---------------------------------------------------------------------------------------------------- |
-| Monorepo  | pnpm workspaces + Turborepo, TypeScript everywhere, ESLint + Prettier                                |
-| Web       | Next.js (App Router), Tailwind CSS, shadcn/ui, TanStack Query, react-hook-form + zod                 |
-| API       | NestJS, Prisma ORM, PostgreSQL, Passport JWT (access + refresh tokens), bcrypt, class-validator DTOs |
-| API paths | Global prefix `/api/v1`, Swagger at `/api/docs`                                                      |
-| Shared    | `packages/shared`: zod schemas, enums, and API types used by both web and api                        |
-| Local dev | `docker-compose.yml` with PostgreSQL 16, plus a `.env.example` in each app                           |
-| Tests     | **Vitest** for API unit and e2e tests (see decision D1), Playwright for web (from Sprint 4)          |
-| CI        | GitHub Actions: install, lint, type-check, test                                                      |
+| Area      | Choice                                                                                                                 |
+| --------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Monorepo  | pnpm workspaces + Turborepo, TypeScript everywhere, ESLint + Prettier                                                  |
+| Web       | Next.js (App Router), Tailwind CSS, shadcn/ui, TanStack Query, react-hook-form + zod                                   |
+| API       | NestJS, Prisma ORM, PostgreSQL, Passport JWT (access + refresh tokens), bcrypt, class-validator DTOs                   |
+| API paths | Global prefix `/api/v1`, Swagger at `/api/docs`                                                                        |
+| Shared    | `packages/shared`: zod schemas, enums, and API types used by both web and api                                          |
+| Local dev | `docker-compose.yml` with PostgreSQL 16, plus a `.env.example` in each app                                             |
+| Tests     | **Vitest** for API unit and e2e tests (see decision D1), Playwright for web (landing page now; main flows in Sprint 4) |
+| CI        | GitHub Actions: install, lint, type-check, test                                                                        |
 
 ## 4. Data model
 
 `apps/api/prisma/schema.prisma` is the source of truth. Entities:
 
-- `User`: email (unique), passwordHash, firstName, lastName, phone?, role (`STUDENT` | `INSTRUCTOR` | `ADMIN`)
+- `User`: email (unique), passwordHash, firstName, lastName, phone?, role (`STUDENT` | `INSTRUCTOR` | `ADMIN`), plus a public instructor profile: avatarUrl?, title?, bio?
 - `Course`: slug (unique), title, summary, description, coverUrl?, startDate?, isPublished
 - `Module`: course, order (unique per course), title, description, durationWeeks (4), instructor?
 - `Enrollment`: user + course (unique), status (`PENDING` | `APPROVED` | `REJECTED` | `CANCELLED`), note?, decidedAt?
@@ -77,6 +78,8 @@ All times are stored in UTC and displayed in the viewer's local time.
 - `Question`: test, order, type, text, points (1)
 - `Option`: question, text, isCorrect
 - `TestAttempt`: test, user, status (`IN_PROGRESS` | `SUBMITTED` | `EXPIRED`), startedAt, submittedAt?, scorePct?, passed?, answers (JSON)
+- `Testimonial`: name, role?, quote, avatarUrl?, isPublished, locale (`sq` | `en`). Only real quotes; never seeded.
+- `SiteSettings`: singleton row (id 1) holding nextCohortStart?, scheduleSq?/scheduleEn?, seatsTotal?, priceAmount? (whole units; null shows "contact us"), priceCurrency, priceNoteSq?/priceNoteEn?, contactEmail?, contactPhone?, whatsappNumber?
 
 Changes to the data model need the product owner's approval first.
 
@@ -93,10 +96,11 @@ Changes to the data model need the product owner's approval first.
 | materials   | `POST /modules/:id/materials` (multipart or link), `DELETE /materials/:id`                                                                                                                                                                                                      |
 | tests       | `POST /modules/:id/test`, `PUT /tests/:id/questions`, `PATCH /tests/:id/publish`; `POST /tests/:id/attempts` (student, response contains no answers); `PATCH /attempts/:id`; `POST /attempts/:id/submit`; `GET /tests/:id/results`; `PATCH /progress/:id` (manual unlock/reset) |
 | progress    | `GET /me/progress`                                                                                                                                                                                                                                                              |
+| landing     | `GET /instructors`, `GET /testimonials?locale=`, `GET /site-settings` (public); `PATCH /site-settings` (admin)                                                                                                                                                                  |
 
 ## 6. Pages (Next.js)
 
-- **Public:** `/`, `/courses`, `/courses/[slug]`, `/register`, `/login`, `/forgot-password` (+ `/reset-password`)
+- **Public:** `/` (redirects to `/sq` or `/en`), `/[locale]` landing page, `/courses`, `/courses/[slug]`, `/register`, `/login`, `/forgot-password` (+ `/reset-password`)
 - **Student:** `/dashboard`, `/learn/[courseSlug]`, `/learn/[courseSlug]/[moduleId]` (sessions with a "Join on Google Meet" button that becomes active 15 minutes before the start, materials, a test card), `/tests/[testId]`, `/tests/[testId]/result`, `/profile`
 - **Admin:** `/admin`, `/admin/enrollments`, `/admin/courses`, `/admin/courses/[id]`, `/admin/modules/[id]/sessions`, `/admin/modules/[id]/materials`, `/admin/modules/[id]/test`, `/admin/modules/[id]/results`, `/admin/users`
 
@@ -108,6 +112,30 @@ Changes to the data model need the product owner's approval first.
 - Cards have a 12px radius. Spacing follows an 8px grid. Content is at most 1200px wide.
 - Mobile-first: every page must be usable at 375px.
 - Times are stored in UTC and shown in the viewer's local time.
+
+### 6.1 Marketing landing page (`/[locale]`, built before S2)
+
+The page has one goal: a registration. Its sections, in order, each a component in `apps/web/src/components/landing/`:
+
+1. **Hero:** headline, one-line promise, "next cohort starts <date>" badge, "Register now" (→ `/register`) and "See courses" (→ `#tracks`). Beside them, an HTML/CSS visual of the module path (lock → unlocked).
+2. **Why now:** three points, with no invented statistics.
+3. **How it works:** Register → live classes on Google Meet → monthly test → next module unlocks, then a CTA.
+4. **Tracks** (`#tracks`): the published courses from the API, each with its 4 modules in order, ~1 month per module, a language badge, and "View track".
+5. **Who it's for:** professionals, business owners, marketers, students, career changers.
+6. **Why us:** live instructors, practical projects, taught in Albanian, progress proven by tests, one module at a time, support between classes.
+7. **Instructors:** users with role INSTRUCTOR (photo, name, title, bio). Hidden when there are none.
+8. **Testimonials:** only real, published ones for the current locale; the section is hidden otherwise.
+9. **Next cohort and price:** values from `SiteSettings`, so they change without a deploy. Then "Reserve your seat".
+10. **FAQ:** 8 questions in an accordion.
+11. **Final CTA band** with contact details (email, phone, WhatsApp), then the footer.
+
+Other requirements:
+
+- **Header and mobile:** a sticky header with anchors, a language switch, Login and Register. On phones, a sheet menu and a sticky bottom "Register now" bar.
+- **Copy:** in `apps/web/messages/{sq,en}.json` (`landing` namespace). Albanian is written natively, not translated.
+- **SEO:** server-rendered, per-locale metadata, hreflang alternates, Open Graph image, `sitemap.xml`, `robots.txt`, and JSON-LD (EducationalOrganization, Course list, FAQPage).
+- **Analytics:** every CTA calls `track('cta_click', { cta, href, locale })`. It is a no-op until GA or Plausible is chosen.
+- **Quality bar:** Lighthouse Performance ≥ 90, Accessibility ≥ 95, SEO 100, at 375 / 768 / 1280 px. Playwright covers `/sq` and `/en`.
 
 ## 7. Sprint roadmap
 
@@ -121,6 +149,13 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **Web:** home, catalog, course detail (the Enroll button sends logged-out users to login), register, login, forgot/reset password, per-role dashboard placeholders, admin user management, profile.
 - **Tests:** unit tests for the auth and courses services, plus an e2e test (register → login → `GET /users/me`).
 
+### S1.5: Marketing landing page ✅
+
+- **Landing:** the bilingual landing page (§6.1) and the `/` language redirect, plus the per-locale root layout.
+- **API:** instructor profile fields, the `Testimonial` and `SiteSettings` models with their public endpoints, and admin `PATCH /site-settings`.
+- **Profile:** instructors can edit their public profile (title, bio, photo) on `/profile`.
+- **Tests:** Playwright tests for `/sq` and `/en`.
+
 ### S2: Enrollment + sessions + materials
 
 - **Enrollments:** the admin approval queue (approving creates ModuleProgress rows) and the student "My courses" view.
@@ -128,6 +163,7 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **Live sessions:** CRUD and attendance for instructors and admins, the student's upcoming sessions, and the "Join on Google Meet" button that activates 15 minutes before the start.
 - **Materials:** links and file uploads.
 - **Module access:** `GET /modules/:id` requires an enrollment and an unlocked module.
+- **Landing admin:** CRUD for testimonials (`/admin/testimonials`), a site settings form (`/admin/settings`), and admin editing of instructor profiles.
 
 ### S3: Tests + progression + dashboards
 
@@ -138,6 +174,7 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 
 ### S4: QA + launch
 
+- Plug an analytics provider (GA4 or Plausible) into `track()`. Decide whether course and module content needs Albanian versions (see D11).
 - Playwright e2e for the main flows, accessibility and mobile pass, and security review (rate limits, headers, CORS).
 - Production email provider (needs approval; it may be a paid service), deployment behind a reverse proxy that sets `X-Forwarded-For` (see D3), backups, monitoring.
 
@@ -157,3 +194,7 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
   - Public pages fetch the API inside `<Suspense>` without `'use cache'`, so `next build` never needs the API to be running.
   - The signed-in area (`(app)/`) is client-rendered behind `RequireAuth` (the access token lives in memory), and `instant = false` marks it as not prerenderable.
   - `src/proxy.ts` redirects visitors without the session cookie to `/login` (UX only).
+- **D8.** The landing page's i18n is native, not a library: typed JSON messages plus `next/root-params` (`locale()`) in server components, and strings passed as props to the few client components. This avoids compatibility risk with Cache Components; next-intl can be adopted later if the whole app goes bilingual. Browsers ship no Albanian Intl data, so Albanian dates use translated month names.
+- **D9.** The app has two root layouts: `app/[locale]/layout.tsx` (`<html lang="sq|en">`) and `app/(site)/layout.tsx` (`lang="en"`), plus `global-not-found.tsx` (an experimental flag). Navigating between them is a full page load, which is acceptable for landing → register.
+- **D10.** Landing values that change often (cohort date, schedule, seats, price, contact) live in a `SiteSettings` database row, not a config file, so they change without a deploy. The page renders them per request.
+- **D11.** Course and module titles and descriptions come from the database in English, so on `/sq` the track cards show English course content inside Albanian copy. Localizing that content would need per-locale fields, which is a data-model change for the product owner to decide.

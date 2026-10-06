@@ -20,11 +20,11 @@ pnpm dev         # web on :3000, API on :4000, shared package watcher
 
 Once it's running:
 
-| URL                            | What                              |
-| ------------------------------ | --------------------------------- |
-| http://localhost:3000          | Web app                           |
-| http://localhost:4000/api/v1   | REST API (the web app proxies it) |
-| http://localhost:4000/api/docs | Swagger UI                        |
+| URL                            | What                                       |
+| ------------------------------ | ------------------------------------------ |
+| http://localhost:3000/sq       | Landing page (Albanian; `/en` for English) |
+| http://localhost:4000/api/v1   | REST API (the web app proxies it)          |
+| http://localhost:4000/api/docs | Swagger UI                                 |
 
 **Seed accounts** (password `Password123!`):
 
@@ -37,20 +37,27 @@ Once it's running:
 
 In development, emails such as password reset links are printed in the API log instead of being sent.
 
+### Landing-page content
+
+- **Copy:** `apps/web/messages/sq.json` (Albanian, primary) and `en.json`.
+- **Cohort date, schedule, seats, price and contact details:** the `SiteSettings` row. Change them with `PATCH /api/v1/site-settings` as an admin (see Swagger) or in `pnpm --filter @ai-academy/api db:studio`. No deploy is needed.
+- **Instructor cards:** instructors fill in their title, bio and photo URL on `/profile`.
+- **Testimonials:** only published `Testimonial` rows appear. None are seeded; the admin UI arrives in Sprint 2.
+
 ## Scripts
 
-| Command           | Description                                                 |
-| ----------------- | ----------------------------------------------------------- |
-| `pnpm dev`        | Run all apps in watch mode                                  |
-| `pnpm build`      | Build every package                                         |
-| `pnpm lint`       | ESLint everywhere                                           |
-| `pnpm type-check` | TypeScript checks everywhere                                |
-| `pnpm test`       | Unit tests (Vitest)                                         |
-| `pnpm test:e2e`   | API end-to-end tests against the `ai_academy_test` database |
-| `pnpm db:migrate` | Create or apply Prisma migrations (`prisma migrate dev`)    |
-| `pnpm db:seed`    | Re-run the idempotent seed                                  |
-| `pnpm db:reset`   | Drop and recreate the dev database, then seed               |
-| `pnpm format`     | Prettier                                                    |
+| Command           | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| `pnpm dev`        | Run all apps in watch mode                               |
+| `pnpm build`      | Build every package                                      |
+| `pnpm lint`       | ESLint everywhere                                        |
+| `pnpm type-check` | TypeScript checks everywhere                             |
+| `pnpm test`       | Unit tests (Vitest)                                      |
+| `pnpm test:e2e`   | API e2e (`ai_academy_test` DB) + Playwright web e2e      |
+| `pnpm db:migrate` | Create or apply Prisma migrations (`prisma migrate dev`) |
+| `pnpm db:seed`    | Re-run the idempotent seed                               |
+| `pnpm db:reset`   | Drop and recreate the dev database, then seed            |
+| `pnpm format`     | Prettier                                                 |
 
 ## Repository layout
 
