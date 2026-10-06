@@ -139,7 +139,7 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 ### S4: QA + launch
 
 - Playwright e2e for the main flows, accessibility and mobile pass, and security review (rate limits, headers, CORS).
-- Production email provider (needs approval; it may be a paid service), deployment, backups, monitoring.
+- Production email provider (needs approval; it may be a paid service), deployment behind a reverse proxy that sets `X-Forwarded-For` (see D3), backups, monitoring.
 
 ## 8. Decisions log
 
@@ -149,6 +149,11 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
   - Both refresh and reset tokens are signed with the secret plus a fingerprint of the user's current password hash. Changing or resetting the password therefore invalidates every outstanding refresh and reset token, which also makes reset tokens single-use.
   - Server-side revocation of individual sessions would need a `RefreshToken` table, which is a proposed data-model change for a later sprint.
 - **D3.** The web app proxies `/api/v1/*` to the API through a Next.js rewrite. The browser stays same-origin: no CORS preflights, and the refresh cookie is first-party.
+  - The rewrite passes an incoming `X-Forwarded-For` through but does not add the client IP itself. The API trusts loopback proxies (`TRUST_PROXY`), so per-IP rate limiting needs a load balancer or reverse proxy in front of Next.js that sets `X-Forwarded-For`, which is standard for any production deployment. Without one, all users share one rate-limit bucket (verified in S1). This is an S4 deployment requirement.
 - **D4.** TypeScript is pinned to 6.0.x. TypeScript 7 is not yet supported by typescript-eslint.
 - **D5.** Prisma is pinned to the latest stable 7.x. npm's `latest` tag currently points at an 8.0 release candidate.
 - **D6.** The student-side `POST /courses/:id/enroll` (create a PENDING request) and `GET /me/enrollments` were pulled into S1 so the Enroll button does something real. The admin approval flow is still S2.
+- **D7.** The web app runs Next.js 16 with Cache Components (the create-next-app default):
+  - Public pages fetch the API inside `<Suspense>` without `'use cache'`, so `next build` never needs the API to be running.
+  - The signed-in area (`(app)/`) is client-rendered behind `RequireAuth` (the access token lives in memory), and `instant = false` marks it as not prerenderable.
+  - `src/proxy.ts` redirects visitors without the session cookie to `/login` (UX only).

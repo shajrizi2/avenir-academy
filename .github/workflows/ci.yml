@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, type-check and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: academy
+          POSTGRES_PASSWORD: academy
+          POSTGRES_DB: ai_academy_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U academy -d ai_academy_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # API config for unit/e2e tests (CI-only secrets, not used anywhere else)
+      DATABASE_URL: postgresql://academy:academy@localhost:5432/ai_academy_test?schema=public
+      DATABASE_URL_TEST: postgresql://academy:academy@localhost:5432/ai_academy_test?schema=public
+      JWT_ACCESS_SECRET: ci-access-secret-0123456789abcdefghijklmnop
+      JWT_REFRESH_SECRET: ci-refresh-secret-0123456789abcdefghijklmnop
+      JWT_RESET_SECRET: ci-reset-secret-0123456789abcdefghijklmnopqr
+      TURBO_TELEMETRY_DISABLED: 1
+      NEXT_TELEMETRY_DISABLED: 1
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Format
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm type-check
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: API e2e tests
+        run: pnpm test:e2e
+
+      - name: Build
+        run: pnpm build

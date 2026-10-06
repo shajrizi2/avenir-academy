@@ -15,6 +15,7 @@ AI Academy is an LMS for live, cohort-based courses on AI and digital marketing.
 | Command           | What it does                                                   |
 | ----------------- | -------------------------------------------------------------- |
 | `pnpm install`    | Install everything (also generates the Prisma client)          |
+| `pnpm bootstrap`  | First-time setup: env files, Postgres, migrations, seed        |
 | `pnpm db:up`      | Start Postgres (docker compose), waiting until it is healthy   |
 | `pnpm db:migrate` | `prisma migrate dev` (creates or applies migrations)           |
 | `pnpm db:seed`    | Seed users, both tracks, a sample session and a sample test    |
@@ -54,6 +55,7 @@ apps/web/
   src/lib/             api client, auth context, query client, utils
   src/proxy.ts         redirects to /login when there is no session cookie (UX only; the API enforces auth)
 packages/shared/src/   enums.ts, schemas/*.ts (zod), types.ts (API DTO shapes)
+scripts/bootstrap.mjs  first-run local setup
 docs/PLAN.md           spec, roadmap, decisions
 ```
 
@@ -75,7 +77,12 @@ docs/PLAN.md           spec, roadmap, decisions
 - **Errors:** throw Nest HTTP exceptions with a clear message. Prisma `P2002` maps to 409, `P2025` to 404, and `P2003` to 409 (global filter).
 - **Times:** store UTC and render in the viewer's local time with `<LocalDateTime>` (a client component).
 - **Web data:**
-  - Public pages are server components that fetch the API directly (`API_INTERNAL_URL`).
+  - Next.js 16 runs with **Cache Components**. Read `apps/web/node_modules/next/dist/docs/` before using unfamiliar APIs; they differ from older Next versions.
+  - Public pages are server components that fetch the API directly (`serverGet`, `API_INTERNAL_URL`). Every uncached fetch, `params` read and `useSearchParams()` must sit inside `<Suspense>`.
+  - Don't use `'use cache'` for API data; it would make `next build` call the API.
+  - Don't call `new Date()` in server components.
+  - `export const dynamic` is not allowed.
+  - The signed-in area uses `export const instant = false` (client-gated).
   - Authenticated pages use TanStack Query through `apiFetch` (`src/lib/api.ts`), which attaches the access token and retries once after `/auth/refresh`.
 - **UI:**
   - Components stay small. Use shadcn primitives and Tailwind only, with no custom CSS beyond theme tokens in `globals.css`.

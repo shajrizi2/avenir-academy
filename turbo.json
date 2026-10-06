@@ -1,6 +1,18 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "stream",
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "DATABASE_URL_TEST",
+    "JWT_*",
+    "BCRYPT_ROUNDS",
+    "PORT",
+    "WEB_URL",
+    "CORS_ORIGINS",
+    "TRUST_PROXY",
+    "RATE_LIMIT_PER_MIN",
+    "API_INTERNAL_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
