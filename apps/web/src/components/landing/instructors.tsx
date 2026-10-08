@@ -11,6 +11,7 @@ export async function Instructors() {
   return (
     <LandingSection
       id="instructors"
+      tone="soft"
       eyebrow={t.instructors.eyebrow}
       title={t.instructors.title}
       intro={t.instructors.intro}
@@ -21,14 +22,14 @@ export async function Instructors() {
           return (
             <li
               key={person.id}
-              className="reveal flex w-full flex-col items-center rounded-xl border bg-white p-6 text-center sm:w-72"
+              className="reveal border-line rounded-card bg-background flex w-full flex-col items-center border p-8 text-center sm:w-80"
             >
               <PersonAvatar name={name} src={person.avatarUrl} size={96} />
-              <h3 className="mt-4 font-semibold text-slate-900">{name}</h3>
-              <p className="text-primary text-sm font-medium">
+              <h3 className="text-ink mt-5 text-lg font-bold">{name}</h3>
+              <p className="text-track-ai-ink text-sm font-bold">
                 {person.title ?? t.instructors.fallbackRole}
               </p>
-              {person.bio && <p className="mt-3 text-sm leading-6 text-slate-600">{person.bio}</p>}
+              {person.bio && <p className="text-ink-soft mt-3 leading-7">{person.bio}</p>}
             </li>
           );
         })}

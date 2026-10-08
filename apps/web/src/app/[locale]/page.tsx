@@ -11,6 +11,7 @@ import { Instructors } from '@/components/landing/instructors';
 import { LandingFooter } from '@/components/landing/landing-footer';
 import { LandingHeader } from '@/components/landing/landing-header';
 import { MobileCtaBar } from '@/components/landing/mobile-cta-bar';
+import { SocialProof } from '@/components/landing/social-proof';
 import { Testimonials } from '@/components/landing/testimonials';
 import { Tracks } from '@/components/landing/tracks';
 import { WhyNow } from '@/components/landing/why-now';
@@ -47,13 +48,14 @@ export default async function LandingPage() {
     <>
       <a
         href="#main"
-        className="text-primary sr-only z-50 rounded-lg bg-white px-4 py-2 font-medium shadow focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        className="text-ink bg-background sr-only z-50 rounded-lg px-4 py-2 font-semibold shadow focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
         {t.skipLink}
       </a>
       <LandingHeader locale={locale} nav={t.nav} />
       <main id="main" className="flex-1">
         <Hero />
+        <SocialProof />
         <WhyNow />
         <HowItWorks />
         <Tracks />
@@ -71,7 +73,7 @@ export default async function LandingPage() {
       </main>
       {/* Bottom padding keeps the footer clear of the mobile CTA bar. */}
       <div className="pb-20 md:pb-0">
-        <LandingFooter locale={locale} t={t} />
+        <LandingFooter />
       </div>
       <MobileCtaBar locale={locale} label={t.mobileBar.cta} />
     </>

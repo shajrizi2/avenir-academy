@@ -16,12 +16,47 @@ for (const { locale, t } of locales) {
       await expect(page).toHaveTitle(t.meta.title);
     });
 
-    test('"Register now" goes to /register', async ({ page }) => {
+    test('the hero CTAs go to /register and to the tracks', async ({ page }) => {
       await page.goto(`/${locale}`);
       const hero = page.getByRole('region', { name: t.hero.title });
+      await hero.getByRole('link', { name: t.hero.ctaSecondary }).click();
+      await expect(page).toHaveURL(/#tracks$/);
+      await expect(page.getByRole('heading', { name: t.tracks.title })).toBeInViewport();
       await hero.getByRole('link', { name: t.hero.ctaPrimary }).click();
       await expect(page).toHaveURL(/\/register$/);
       await expect(page.getByText('Create your account')).toBeVisible();
+    });
+
+    test('the header "Start now" button goes to /register', async ({ page }) => {
+      await page.goto(`/${locale}`);
+      await page.getByRole('banner').getByRole('link', { name: t.nav.cta }).click();
+      await expect(page).toHaveURL(/\/register$/);
+    });
+
+    test('the hero demo gives instant feedback on an answer', async ({ page }) => {
+      await page.goto(`/${locale}`);
+      const { demo } = t.hero;
+      const topic = demo.topics[2];
+      await page.getByRole('tab', { name: topic.tab }).click();
+      await expect(page.getByRole('tab', { name: topic.tab })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      const panel = page.getByRole('tabpanel');
+      await expect(panel.getByRole('heading', { name: topic.question })).toBeVisible();
+
+      const wrong = topic.options.findIndex((_, i) => i !== topic.answer);
+      await panel.getByRole('button', { name: topic.options[wrong] }).click();
+      await expect(panel.getByTestId('demo-feedback')).toContainText(demo.incorrect);
+
+      await panel.getByRole('button', { name: topic.options[topic.answer] }).click();
+      const feedback = panel.getByTestId('demo-feedback');
+      await expect(feedback).toContainText(demo.correct);
+      await expect(feedback).toContainText(topic.explanation);
+      await expect(feedback.getByRole('link', { name: demo.cta })).toHaveAttribute(
+        'href',
+        '/register',
+      );
     });
 
     test('has SEO essentials', async ({ page }) => {

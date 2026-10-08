@@ -38,8 +38,19 @@ describe('landing messages', () => {
       expect(landing.audience.items).toHaveLength(5);
       expect(landing.howItWorks.steps).toHaveLength(4);
       expect(landing.whyNow.points).toHaveLength(3);
-      expect(landing.hero.path.modules).toHaveLength(4);
+      expect(landing.proof.items).toHaveLength(3);
       expect(landing.dates.months).toHaveLength(12);
     }
+  });
+
+  it('give every hero demo question a valid answer, the same in both languages', () => {
+    expect(sq.landing.hero.demo.topics).toHaveLength(4);
+    sq.landing.hero.demo.topics.forEach((topic, i) => {
+      const english = en.landing.hero.demo.topics[i];
+      expect(english.options).toHaveLength(topic.options.length);
+      expect(english.answer).toBe(topic.answer);
+      expect(topic.answer).toBeGreaterThanOrEqual(0);
+      expect(topic.answer).toBeLessThan(topic.options.length);
+    });
   });
 });

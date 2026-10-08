@@ -29,6 +29,7 @@
       "faq": "FAQ",
       "login": "Log in",
       "register": "Register",
+      "cta": "Start now",
       "openMenu": "Open menu",
       "menuTitle": "Menu",
       "language": "Language",
@@ -40,23 +41,76 @@
       "subtitle": "Live classes on Google Meet with real instructors, monthly tests and a clear path: from AI basics to coding and digital marketing.",
       "badgeCohort": "Next cohort starts {date}",
       "badgeOpen": "Registration is open",
-      "ctaPrimary": "Register now",
+      "ctaPrimary": "I want to learn",
       "ctaSecondary": "See courses",
       "trust": "Registration is free. You only pay once your seat is confirmed.",
-      "path": {
-        "label": "Example learning path, one module at a time",
-        "title": "Your path",
-        "course": "AI Foundations",
-        "progress": "1 of 4 modules passed",
-        "moduleLabel": "Module {number}",
-        "modules": ["AI Basics", "AI Integration", "AI Coding", "AI in Your Profession"],
-        "status": {
-          "passed": "Passed",
-          "active": "Active",
-          "locked": "Locked"
-        },
-        "footnote": "Pass the monthly test and the next module unlocks."
+      "demo": {
+        "eyebrow": "Try a question",
+        "tablistLabel": "Choose a topic",
+        "correct": "Correct!",
+        "incorrect": "Not quite.",
+        "tryAgain": "Try again",
+        "outro": "This is how our monthly tests feel.",
+        "cta": "Start now",
+        "topics": [
+          {
+            "tab": "AI Basics",
+            "question": "Which prompt gets the better answer?",
+            "options": [
+              "Write something about marketing.",
+              "Write 3 Instagram captions for a bakery’s new croissant, in a friendly tone, under 20 words each."
+            ],
+            "answer": 1,
+            "explanation": "Specific prompts, with context, format and tone, give the AI what it needs to help."
+          },
+          {
+            "tab": "AI Coding",
+            "question": "The code the AI gave you doesn’t run. What’s the best next step?",
+            "options": [
+              "Paste the exact error message and ask it to explain and fix it.",
+              "Ask the same question again.",
+              "Give up: AI can’t code."
+            ],
+            "answer": 0,
+            "explanation": "AI fixes code best when it sees the real error. Reading errors is something we practise in class."
+          },
+          {
+            "tab": "Digital Marketing",
+            "question": "Which goal is easier to measure?",
+            "options": ["More followers.", "50 sign-ups from Instagram ads within 30 days."],
+            "answer": 1,
+            "explanation": "Specific, measurable goals with a deadline show you exactly what’s working."
+          },
+          {
+            "tab": "AI at Work",
+            "question": "An AI tool gives you a statistic for a client report. What do you do?",
+            "options": [
+              "Paste it straight into the report.",
+              "Delete every number.",
+              "Check it against a reliable source first."
+            ],
+            "answer": 2,
+            "explanation": "AI can sound confident and still be wrong. Check facts before you share them."
+          }
+        ]
       }
+    },
+    "proof": {
+      "label": "AI Academy in numbers",
+      "items": [
+        {
+          "value": "4",
+          "label": "monthly modules in every track"
+        },
+        {
+          "value": "100%",
+          "label": "of classes are live, with a real instructor"
+        },
+        {
+          "value": "70%",
+          "label": "is all it takes to pass each module’s test"
+        }
+      ]
     },
     "whyNow": {
       "eyebrow": "Why now",
@@ -108,7 +162,10 @@
       "perModule": "~1 month per module",
       "modulesLabel": "Track modules",
       "viewTrack": "View track",
-      "unavailable": "We couldn't load the tracks right now. Please try again shortly."
+      "unavailable": "We couldn't load the tracks right now. Please try again shortly.",
+      "moduleLabel": "Module {number}",
+      "startHere": "Starts here",
+      "lockedUntil": "Unlocks after module {number}"
     },
     "audience": {
       "eyebrow": "Who it's for",
@@ -244,7 +301,12 @@
       "tagline": "Live courses in AI and digital marketing, taught in Albanian.",
       "navLabel": "Footer links",
       "courses": "Courses",
-      "rights": "All rights reserved."
+      "rights": "All rights reserved.",
+      "platform": "Platform",
+      "company": "Company",
+      "contact": "Contact",
+      "allCourses": "All courses",
+      "contactSoon": "Contact details are coming soon."
     },
     "mobileBar": {
       "cta": "Register now"

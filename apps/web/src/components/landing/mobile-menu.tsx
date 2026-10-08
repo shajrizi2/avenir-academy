@@ -40,17 +40,17 @@ export function MobileMenu({ locale, otherLocale, links, nav }: MobileMenuProps)
               key={link.href}
               href={link.href}
               onClick={close}
-              className="rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
+              className="text-ink hover:bg-soft rounded-xl px-4 py-3 text-lg font-bold"
             >
               {link.label}
             </a>
           ))}
         </nav>
-        <div className="mt-6 flex flex-col gap-3 border-t pt-6">
-          <CtaLink href="/register" cta="menu_register" locale={locale} size="lg" className="h-11">
-            {nav.register}
+        <div className="mt-6 flex flex-col gap-4 border-t pt-6">
+          <CtaLink href="/register" cta="menu_register" locale={locale} variant="chunky" size="lg">
+            {nav.cta}
           </CtaLink>
-          <Button asChild variant="outline" size="lg" className="h-11">
+          <Button asChild variant="chunky-outline" size="lg">
             <Link href="/login">{nav.login}</Link>
           </Button>
           <LanguageSwitch

@@ -11,23 +11,25 @@ import { JsonLd } from './json-ld';
 export async function FinalCta() {
   const { locale, t } = await getLandingMessages();
   return (
-    <section aria-labelledby="final-cta-title" className="bg-primary">
-      <div className="mx-auto grid w-full max-w-[1200px] gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+    <section aria-labelledby="final-cta-title" className="bg-ink">
+      <div className="mx-auto grid w-full max-w-[1200px] gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:py-28">
         <div className="reveal">
           <h2
             id="final-cta-title"
-            className="text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl"
+            className="text-primary-foreground text-title lg:text-display font-extrabold text-balance"
           >
             {t.finalCta.title}
           </h2>
-          <p className="mt-4 max-w-xl text-lg text-indigo-100">{t.finalCta.text}</p>
+          <p className="text-primary-foreground/80 mt-5 max-w-xl text-lg sm:text-xl">
+            {t.finalCta.text}
+          </p>
           <CtaLink
             href="/register"
             cta="final_register"
             locale={locale}
-            variant="secondary"
-            size="lg"
-            className="mt-8 h-12 bg-white px-6 text-base text-indigo-700 hover:bg-indigo-50"
+            variant="chunky-outline"
+            size="xl"
+            className="mt-10"
           >
             {t.finalCta.cta} <ArrowRight data-icon="inline-end" />
           </CtaLink>
@@ -61,15 +63,15 @@ async function Contact() {
   if (!email && !phone && !whatsapp) return organization;
 
   const linkClass =
-    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-white hover:bg-white/10 focus-visible:bg-white/10';
+    'text-primary-foreground hover:bg-primary-foreground/10 focus-visible:bg-primary-foreground/10 flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5';
   return (
-    <div className="reveal rounded-2xl bg-white/10 p-6 ring-1 ring-white/20">
-      <h3 className="px-3 font-semibold text-white">{t.contact.title}</h3>
+    <div className="reveal rounded-card bg-primary-foreground/5 border-primary-foreground/20 border-2 p-6">
+      <h3 className="text-primary-foreground px-3 text-lg font-bold">{t.contact.title}</h3>
       <ul className="mt-3 space-y-1">
         {email && (
           <li>
             <a href={`mailto:${email}`} className={linkClass}>
-              <Mail className="size-5 text-indigo-200" aria-hidden />
+              <Mail className="text-track-ai-tint size-5" aria-hidden />
               <span className="sr-only">{t.contact.email}: </span>
               {email}
             </a>
@@ -78,7 +80,7 @@ async function Contact() {
         {phone && (
           <li>
             <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className={linkClass}>
-              <Phone className="size-5 text-indigo-200" aria-hidden />
+              <Phone className="text-track-ai-tint size-5" aria-hidden />
               <span className="sr-only">{t.contact.phone}: </span>
               {phone}
             </a>
@@ -86,11 +88,7 @@ async function Contact() {
         )}
       </ul>
       {whatsapp && (
-        <Button
-          asChild
-          size="lg"
-          className="mt-4 h-11 w-full bg-green-700 text-white hover:bg-green-800"
-        >
+        <Button asChild variant="chunky-outline" size="lg" className="mt-4 w-full">
           <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
             <MessageCircle aria-hidden /> {t.contact.whatsapp}
           </a>

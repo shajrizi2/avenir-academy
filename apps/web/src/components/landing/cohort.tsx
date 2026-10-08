@@ -16,25 +16,27 @@ export async function Cohort() {
   return (
     <LandingSection
       id="cohort"
+      tone="soft"
       eyebrow={t.cohort.eyebrow}
       title={t.cohort.title}
       intro={t.cohort.intro}
     >
-      <div className="reveal mx-auto max-w-3xl rounded-2xl border bg-white p-6 shadow-sm sm:p-10">
+      <div className="reveal border-ink rounded-card bg-background mx-auto max-w-3xl border-2 p-6 shadow-[0_6px_0_var(--ink)] sm:p-10">
         <Suspense fallback={<Skeleton className="h-40 w-full" />}>
           <CohortDetails />
         </Suspense>
-        <div className="mt-8 flex flex-col items-center gap-3 border-t pt-8 text-center">
+        <div className="border-line mt-8 flex flex-col items-center gap-4 border-t pt-8 text-center">
           <CtaLink
             href="/register"
             cta="cohort_reserve"
             locale={locale}
-            size="lg"
-            className="h-12 w-full px-8 text-base sm:w-auto"
+            variant="chunky"
+            size="xl"
+            className="w-full sm:w-auto"
           >
             {t.cohort.cta}
           </CtaLink>
-          <p className="max-w-md text-sm text-slate-600">{t.cohort.note}</p>
+          <p className="text-ink-soft max-w-md text-sm">{t.cohort.note}</p>
         </div>
       </div>
     </LandingSection>
@@ -71,14 +73,14 @@ async function CohortDetails() {
     <dl className="grid gap-6 sm:grid-cols-2">
       {rows.map(({ icon: Icon, label, value }) => (
         // dt/dd must be direct children of the group div, so the icon lives inside <dt>.
-        <div key={label} className="relative min-h-10 pl-14">
-          <dt className="text-sm text-slate-600">
-            <span className="bg-accent text-accent-foreground absolute top-0 left-0 flex size-10 items-center justify-center rounded-lg">
+        <div key={label} className="relative min-h-11 pl-15">
+          <dt className="text-ink-soft text-sm">
+            <span className="bg-track-ai-tint text-track-ai-ink absolute top-0 left-0 flex size-11 items-center justify-center rounded-xl">
               <Icon className="size-5" aria-hidden />
             </span>
             {label}
           </dt>
-          <dd className="mt-0.5 font-semibold text-slate-900">{value}</dd>
+          <dd className="text-ink mt-0.5 text-lg font-bold">{value}</dd>
         </div>
       ))}
     </dl>

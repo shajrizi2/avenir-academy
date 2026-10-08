@@ -34,7 +34,7 @@ export function PersonAvatar({ name, src, size, className }: PersonAvatarProps) 
     <span
       aria-hidden
       className={cn(
-        'bg-accent text-accent-foreground flex items-center justify-center rounded-full font-semibold',
+        'bg-track-ai-tint text-track-ai-ink flex items-center justify-center rounded-full font-extrabold',
         className,
       )}
       style={{ width: size, height: size, fontSize: size / 2.8 }}
