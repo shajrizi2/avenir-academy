@@ -90,19 +90,20 @@ Changes to the data model need the product owner's approval first.
 | auth        | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/forgot-password`, `/auth/reset-password`                                                                                                                                                          |
 | users       | `GET/PATCH /users/me`; `GET /users`, `PATCH /users/:id/role` (admin)                                                                                                                                                                                                            |
 | courses     | `GET /courses`, `GET /courses/:slug` (public); `POST/PATCH/DELETE` (admin)                                                                                                                                                                                                      |
-| modules     | `POST /courses/:id/modules`, `PATCH /modules/:id` (admin); `GET /modules/:id` (enrolled + unlocked)                                                                                                                                                                             |
-| enrollments | `POST /courses/:id/enroll` (student); `GET /enrollments?status=PENDING`, `PATCH /enrollments/:id` approve/reject (admin; approving creates the ModuleProgress rows)                                                                                                             |
-| sessions    | `POST /modules/:id/sessions`, `PATCH /sessions/:id`, `PUT /sessions/:id/attendance` (instructor/admin); `GET /me/sessions/upcoming` (student)                                                                                                                                   |
-| materials   | `POST /modules/:id/materials` (multipart or link), `DELETE /materials/:id`                                                                                                                                                                                                      |
+| modules     | `POST /courses/:id/modules`, `PATCH /modules/:id`, `DELETE /modules/:id` (last module, nobody started; admin); `GET /modules/:id` (enrolled + unlocked, the module's instructor, admins); `GET /me/modules` (instructor/admin); `GET /me/courses/:slug` (approved student)      |
+| enrollments | `POST /courses/:id/enroll`, `GET /me/enrollments` (student); `GET /enrollments?status=&courseId=`, `PATCH /enrollments/:id` approve/reject (admin; approving creates the ModuleProgress rows)                                                                                   |
+| sessions    | `GET/POST /modules/:id/sessions`, `PATCH/DELETE /sessions/:id`, `GET/PUT /sessions/:id/attendance` (instructor of the module/admin); `GET /me/sessions/upcoming` (student)                                                                                                      |
+| materials   | `POST /modules/:id/materials` (JSON link or multipart file), `DELETE /materials/:id` (instructor/admin); `GET /materials/:id/download` (same access as `GET /modules/:id`)                                                                                                      |
 | tests       | `POST /modules/:id/test`, `PUT /tests/:id/questions`, `PATCH /tests/:id/publish`; `POST /tests/:id/attempts` (student, response contains no answers); `PATCH /attempts/:id`; `POST /attempts/:id/submit`; `GET /tests/:id/results`; `PATCH /progress/:id` (manual unlock/reset) |
 | progress    | `GET /me/progress`                                                                                                                                                                                                                                                              |
-| landing     | `GET /instructors`, `GET /testimonials?locale=`, `GET /site-settings` (public); `PATCH /site-settings` (admin)                                                                                                                                                                  |
+| landing     | `GET /instructors`, `GET /testimonials?locale=`, `GET /site-settings` (public); `PATCH /site-settings`, `GET /testimonials?all=true`, `POST/PATCH/DELETE /testimonials/:id`, `PATCH /users/:id/profile` (admin)                                                                 |
 
 ## 6. Pages (Next.js)
 
 - **Public:** `/` (redirects to `/sq` or `/en`), `/[locale]` landing page, `/courses`, `/courses/[slug]`, `/register`, `/login`, `/forgot-password` (+ `/reset-password`)
-- **Student:** `/dashboard`, `/learn/[courseSlug]`, `/learn/[courseSlug]/[moduleId]` (sessions with a "Join on Google Meet" button that becomes active 15 minutes before the start, materials, a test card), `/tests/[testId]`, `/tests/[testId]/result`, `/profile`
-- **Admin:** `/admin`, `/admin/enrollments`, `/admin/courses`, `/admin/courses/[id]`, `/admin/modules/[id]/sessions`, `/admin/modules/[id]/materials`, `/admin/modules/[id]/test`, `/admin/modules/[id]/results`, `/admin/users`
+- **Student:** `/dashboard` (upcoming sessions, my courses), `/learn/[courseSlug]`, `/learn/[courseSlug]/[moduleId]` (sessions with a "Join on Google Meet" button that becomes active 15 minutes before the start, materials, a test card in S3), `/tests/[testId]`, `/tests/[testId]/result`, `/profile`
+- **Instructor (and admin):** `/teach` (my modules), `/teach/modules/[id]` (sessions and materials; the test and results pages join it in S3), `/teach/sessions/[id]` (attendance). See D14.
+- **Admin:** `/admin`, `/admin/enrollments`, `/admin/courses`, `/admin/courses/[id]` (details, modules, instructor assignment), `/admin/users`, `/admin/instructors`, `/admin/testimonials`, `/admin/settings`
 
 ### Design
 
@@ -157,7 +158,7 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **Profile:** instructors can edit their public profile (title, bio, photo) on `/profile`.
 - **Tests:** Playwright tests for `/sq` and `/en`.
 
-### S2: Enrollment + sessions + materials
+### S2: Enrollment + sessions + materials ✅
 
 - **Enrollments:** the admin approval queue (approving creates ModuleProgress rows) and the student "My courses" view.
 - **Admin course and module management:** CRUD pages and instructor assignment.
@@ -201,3 +202,6 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **D11.** Course and module titles and descriptions come from the database in English, so on `/sq` the track cards show English course content inside Albanian copy. Localizing that content would need per-locale fields, which is a data-model change for the product owner to decide.
 - **D12.** Design refresh before S2: the indigo/slate look was replaced by a brighter, playful "learn by doing" system (ink primary, warm off-white, violet/orange track accents, pressable buttons and cards, original SVG illustrations, an interactive quiz in the hero). All of it is our own work; nothing is copied from reference sites. Tokens live in `globals.css` and are reviewed at `/design`.
 - **D13.** A course's accent colour is derived from its slug (`marketing` in the slug → orange, otherwise violet) because courses have no category field. Adding one is a schema change for the product owner to decide.
+- **D14.** Module management (sessions, attendance, materials) lives under `/teach/*`, not `/admin/modules/*`: instructors need the same pages for their own modules, and `/admin/*` is admin-only. Admins reach them from the course editor. The API still checks `module.instructorId === user.id` for instructors.
+- **D15.** Uploaded materials are stored on the API server's disk (`UPLOAD_DIR`, default `apps/api/uploads`, gitignored), behind a small `StorageService` so an object store can replace it later. That needs a paid service, so the product owner decides. Files are at most 20 MB, use an allow-list of extensions, and are only downloadable through `GET /materials/:id/download` with the same access rules as the module page (always as an attachment, `nosniff`). A production deploy needs a persistent, backed-up volume for that folder.
+- **D16.** The server, not the browser, enforces the join window: students get a session's Meet link only from 15 minutes before the start until it ends; staff always see it. Pages with Join buttons refetch every 30 seconds.

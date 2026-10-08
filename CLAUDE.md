@@ -77,11 +77,12 @@ docs/PLAN.md           spec, roadmap, decisions
 - **Never return `passwordHash`.** Read users through `publicUserSelect` (`src/modules/users/user.select.ts`), never a bare `findUnique` that returns the whole row to a client.
 - **Auth:**
   - Every route requires a JWT by default (global `JwtAuthGuard`). Mark public routes with `@Public()` and restrict them with `@Roles(Role.ADMIN, ...)`.
-  - Instructors may touch only modules where `module.instructorId === user.id`. Check this in the service.
+  - Instructors may touch only modules where `module.instructorId === user.id`. Check this in the service with `ModuleAccessService` (`src/modules/course-modules/module-access.service.ts`): `assertStaff()` for writes, `assertCanView()` for reads (students need an APPROVED enrollment and a module that isn't LOCKED).
 - **Tokens:**
   - The access token is a 15-minute JWT returned in the response body; the web app keeps it in memory.
   - The refresh token is a 7-day JWT in the httpOnly `aa_refresh` cookie (path `/`).
   - Refresh and reset tokens are signed with the secret plus a fingerprint of the password hash (PLAN D2).
+- **Uploads:** materials go to local disk through `StorageService` (`UPLOAD_DIR`, see PLAN D15); never serve that folder statically. Downloads go through `GET /materials/:id/download`, and the web app uses `apiDownload()` (plain links can't carry the in-memory token).
 - **Errors:** throw Nest HTTP exceptions with a clear message. Prisma `P2002` maps to 409, `P2025` to 404, and `P2003` to 409 (global filter).
 - **Times:** store UTC and render in the viewer's local time with `<LocalDateTime>` (a client component). Browsers ship **no Albanian Intl data** (`Intl.DateTimeFormat('sq')` silently prints English), so Albanian dates use translated month names from the messages (`<DateTemplate>` on the landing page).
 - **Web data:**
@@ -91,7 +92,10 @@ docs/PLAN.md           spec, roadmap, decisions
   - When catching errors around fetches in server components, call `unstable_rethrow(error)` first, so Next's own prerender signals aren't swallowed (see `lib/landing-data.ts`).
   - Don't call `new Date()` in server components.
   - `export const dynamic` is not allowed.
-  - The signed-in area uses `export const instant = false` (client-gated).
+  - The signed-in area uses `export const instant = false` (client-gated). Pages with a dynamic segment are a small server `page.tsx` that renders a client component inside `<Suspense>`, which reads the id with `useParams()`.
+  - Read the clock in client components with `useNow()` (`lib/use-now.ts`, ticks every 15 s). Never pass `() => Date.now()` to `useSyncExternalStore`: the snapshot changes on every call and React loops forever.
+  - Forms use the helpers in `components/form/` (`TextField`, `TextareaField`, `SelectField`); they generate unique ids, so two forms can share a page. Dialogs use `components/ui/dialog.tsx`, and destructive actions use `<ConfirmDialog>`.
+  - Section titles inside cards are headings: `<CardTitle as="h2">`.
   - Authenticated pages use TanStack Query through `apiFetch` (`src/lib/api.ts`), which attaches the access token and retries once after `/auth/refresh`.
 - **Landing page (`/[locale]`):** its only goal is registrations.
   - All copy lives in `messages/{sq,en}.json` under `landing`; never hard-code strings. Read it with `const { locale, t } = await getLandingMessages()`. A unit test enforces identical keys and placeholders in both files.
