@@ -4,22 +4,10 @@ import { cn } from '@/lib/utils';
 
 const STATUS_STYLES: Record<ModuleStatus, { label: string; className: string; Icon: typeof Lock }> =
   {
-    PASSED: {
-      label: 'Passed',
-      className: 'bg-green-50 text-green-700 ring-green-600/20',
-      Icon: CheckCircle2,
-    },
-    ACTIVE: {
-      label: 'Active',
-      className: 'bg-amber-50 text-amber-800 ring-amber-600/20',
-      Icon: CircleDot,
-    },
-    LOCKED: {
-      label: 'Locked',
-      className: 'bg-slate-100 text-slate-600 ring-slate-500/20',
-      Icon: Lock,
-    },
-    FAILED: { label: 'Failed', className: 'bg-red-50 text-red-700 ring-red-600/20', Icon: XCircle },
+    PASSED: { label: 'Passed', className: 'bg-passed-tint text-passed-ink', Icon: CheckCircle2 },
+    ACTIVE: { label: 'Active', className: 'bg-active-tint text-active-ink', Icon: CircleDot },
+    LOCKED: { label: 'Locked', className: 'bg-locked-tint text-locked-ink', Icon: Lock },
+    FAILED: { label: 'Failed', className: 'bg-failed-tint text-failed-ink', Icon: XCircle },
   };
 
 /** The single, consistent way to show a module's status everywhere in the app. */
@@ -35,7 +23,7 @@ export function ModuleStatusBadge({ status, label, className }: ModuleStatusBadg
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+        'inline-flex h-6 items-center gap-1 rounded-full px-2.5 text-xs font-semibold',
         tone,
         className,
       )}

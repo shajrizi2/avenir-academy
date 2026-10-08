@@ -2,11 +2,65 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+/*
+ * Design system. Every colour, radius and type size used by components comes from here;
+ * components never hard-code colours. Review the whole system at /design (dev only).
+ */
+
 @theme inline {
+  /* Fonts */
+  --font-sans: var(--font-jakarta);
+  --font-heading: var(--font-jakarta);
+
+  /* Type scale: 14 / 16 / 18 / 24 / 32 / 44 / 64 (sm, base and lg are Tailwind's own). */
+  --text-subheading: 1.5rem;
+  --text-subheading--line-height: 1.3;
+  --text-heading: 2rem;
+  --text-heading--line-height: 1.2;
+  --text-title: 2.75rem;
+  --text-title--line-height: 1.1;
+  --text-display-sm: 2.5rem;
+  --text-display-sm--line-height: 1.1;
+  --text-display: 4rem;
+  --text-display--line-height: 1.05;
+  --tracking-heading: -0.02em;
+
+  /* Brand palette */
+  --color-canvas: var(--bg);
+  --color-soft: var(--bg-soft);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  /* Track accents: the plain colour is for fills and decoration only (it fails text
+     contrast); use -ink for text and icons on white or on the tint. */
+  --color-track-ai: var(--track-ai);
+  --color-track-ai-ink: var(--track-ai-ink);
+  --color-track-ai-tint: var(--track-ai-tint);
+  --color-track-ai-shadow: var(--track-ai-shadow);
+  --color-track-marketing: var(--track-marketing);
+  --color-track-marketing-ink: var(--track-marketing-ink);
+  --color-track-marketing-tint: var(--track-marketing-tint);
+  --color-track-marketing-shadow: var(--track-marketing-shadow);
+
+  /* Module status */
+  --color-passed: var(--passed);
+  --color-passed-ink: var(--passed-ink);
+  --color-passed-tint: var(--passed-tint);
+  --color-active: var(--active);
+  --color-active-ink: var(--active-ink);
+  --color-active-tint: var(--active-tint);
+  --color-locked: var(--locked);
+  --color-locked-ink: var(--locked-ink);
+  --color-locked-tint: var(--locked-tint);
+  --color-failed: var(--failed);
+  --color-failed-ink: var(--failed-ink);
+  --color-failed-tint: var(--failed-tint);
+
+  /* shadcn/ui semantic colours (mapped onto the palette in :root) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-inter);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -36,50 +90,85 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Radii: cards 16px, buttons 14px, pills 999px (rounded-full); inputs use rounded-lg. */
+  --radius-card: 1rem;
+  --radius-button: 0.875rem;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.5);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-xl: calc(var(--radius) * 1.25);
+  --radius-2xl: calc(var(--radius) * 1.5);
+  --radius-3xl: calc(var(--radius) * 2);
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 :root {
-  /* Brand: one primary (indigo-600) on slate neutrals. */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.208 0.042 265.755); /* slate-900 */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.208 0.042 265.755);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.208 0.042 265.755);
-  --primary: oklch(0.511 0.262 276.966); /* indigo-600 */
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896); /* slate-100 */
-  --secondary-foreground: oklch(0.279 0.041 260.031);
-  --muted: oklch(0.984 0.003 247.858); /* slate-50 */
-  --muted-foreground: oklch(0.554 0.046 257.417); /* slate-500 */
-  --accent: oklch(0.962 0.018 272.314); /* indigo-50 */
-  --accent-foreground: oklch(0.457 0.24 277.023); /* indigo-700 */
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508); /* slate-200 */
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.585 0.233 277.117); /* indigo-500 */
-  --chart-1: oklch(0.511 0.262 276.966);
-  --chart-2: oklch(0.704 0.04 256.788);
-  --chart-3: oklch(0.554 0.046 257.417);
-  --chart-4: oklch(0.372 0.044 257.287);
-  --chart-5: oklch(0.279 0.041 260.031);
-  /* lg = 8px; cards use rounded-xl = 12px (see @theme radii) */
-  --radius: 0.5rem;
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-primary: oklch(0.511 0.262 276.966);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.962 0.018 272.314);
-  --sidebar-accent-foreground: oklch(0.457 0.24 277.023);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.585 0.233 277.117);
+  /* Neutrals: white and a warm off-white, near-black ink. */
+  --bg: #ffffff;
+  --bg-soft: #f7f6f3;
+  --ink: #141414;
+  --ink-soft: #5b5b5b; /* 6.8:1 on white, 6.3:1 on bg-soft */
+  --border: #e4e2dd;
+  --border-strong: #d3d0c9; /* outlines and shadows of white chunky elements */
+  --press-ink: #000000; /* bottom shadow of black chunky elements */
+
+  /* Track accents */
+  --track-ai: #7c5cfc;
+  --track-ai-ink: #5b3be0; /* 6.7:1 on white */
+  --track-ai-tint: #f0ecff;
+  --track-ai-shadow: #5a3fd6;
+  --track-marketing: #ff8a3d;
+  --track-marketing-ink: #b4500c; /* 5.1:1 on white */
+  --track-marketing-tint: #fff1e6;
+  --track-marketing-shadow: #d9681f;
+
+  /* Module status: green PASSED, amber ACTIVE, slate LOCKED, red FAILED. */
+  --passed: #22a35a;
+  --passed-ink: #15803d;
+  --passed-tint: #dcfce7;
+  --active: #f5a524;
+  --active-ink: #92400e;
+  --active-tint: #fef3c7;
+  --locked: #94a3b8;
+  --locked-ink: #475569;
+  --locked-tint: #f1f5f9;
+  --failed: #e5484d;
+  --failed-ink: #b91c1c;
+  --failed-tint: #fee2e2;
+
+  /* shadcn/ui: primary is ink (black buttons, white text). */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--bg);
+  --card-foreground: var(--ink);
+  --popover: var(--bg);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: #ffffff;
+  --secondary: var(--bg-soft);
+  --secondary-foreground: var(--ink);
+  --muted: var(--bg-soft);
+  --muted-foreground: var(--ink-soft);
+  --accent: #efede8;
+  --accent-foreground: var(--ink);
+  --destructive: var(--failed-ink);
+  --input: var(--border-strong);
+  --ring: var(--track-ai);
+  --chart-1: var(--track-ai);
+  --chart-2: var(--track-marketing);
+  --chart-3: var(--passed);
+  --chart-4: var(--active);
+  --chart-5: var(--locked);
+  --radius: 0.75rem;
+  --sidebar: var(--bg);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--ink);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--bg-soft);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--track-ai);
 }
 
 @layer base {
@@ -88,6 +177,12 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading tracking-heading;
   }
   button:not(:disabled),
   [role='button']:not(:disabled) {
@@ -98,28 +193,40 @@
   }
 }
 
-/* ---------- Landing page ---------- */
+/*
+ * "Pressable": a 2px outline and a solid bottom shadow in a darker shade (--press). It lifts
+ * 1px on hover and sinks 3px when pressed. Used by the chunky button and pressable card
+ * variants; set --press (and the border colour) per variant.
+ */
+@utility pressable {
+  border-width: 2px;
+  box-shadow: 0 4px 0 var(--press, var(--ink));
+  transition-property: translate, box-shadow, background-color, border-color, color;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+  &:hover:not(:disabled, [aria-disabled='true']) {
+    translate: 0 -1px;
+    box-shadow: 0 5px 0 var(--press, var(--ink));
+  }
+  &:active:not(:disabled, [aria-disabled='true']) {
+    translate: 0 3px;
+    box-shadow: 0 1px 0 var(--press, var(--ink));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 0ms;
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      translate: none;
+    }
+  }
+}
+
+/* ---------- Motion ---------- */
 
 /* Smooth in-page anchor scrolling, only for people who don't prefer reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
   html[data-scroll-behavior='smooth'] {
     scroll-behavior: smooth;
   }
-}
-
-/* The hero's only decoration: a faint indigo grid that fades out toward the bottom. */
-.hero-grid {
-  background-image:
-    linear-gradient(to right, rgb(79 70 229 / 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(79 70 229 / 0.07) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 40%, transparent 100%);
-}
-
-/* Two sections with the same background in a row (e.g. when an optional section is hidden). */
-.landing-section[data-tone='white'] + .landing-section[data-tone='white'],
-.landing-section[data-tone='muted'] + .landing-section[data-tone='muted'] {
-  border-top: 1px solid var(--border);
 }
 
 /*
@@ -134,6 +241,12 @@
       animation-range: entry 0% entry 35%;
     }
   }
+  .animate-pop {
+    animation: pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .animate-shake {
+    animation: shake 360ms ease-in-out;
+  }
 }
 
 @keyframes reveal-in {
@@ -144,5 +257,33 @@
   to {
     opacity: 1;
     translate: 0 0;
+  }
+}
+
+/* The small bounce of a correct answer in the hero demo. */
+@keyframes pop {
+  0% {
+    scale: 1;
+  }
+  40% {
+    scale: 1.04;
+    translate: 0 -4px;
+  }
+  100% {
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: -4px 0;
+  }
+  75% {
+    translate: 4px 0;
   }
 }
