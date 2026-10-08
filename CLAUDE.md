@@ -99,11 +99,21 @@ docs/PLAN.md           spec, roadmap, decisions
   - Data (tracks, instructors, testimonials, site settings) loads through `lib/landing-data.ts` inside `<Suspense>`. Loaders fail soft, so the page renders and converts even when the API is down.
   - Cohort date, schedule, seats, price and contact details come from the `SiteSettings` row (admin `PATCH /site-settings`), never from code.
   - Never invent testimonials, statistics or instructor details. The testimonials section renders only real, published entries.
-  - Motion is CSS-only (`.reveal`, scroll-driven) and respects `prefers-reduced-motion`. Targets: Lighthouse Performance ≥ 90, Accessibility ≥ 95, SEO 100.
-- **UI:**
-  - Components stay small. Use shadcn primitives and Tailwind only, with no custom CSS beyond theme tokens in `globals.css`.
-  - Primary colour is indigo-600; neutrals are slate. Cards use `rounded-xl` (12px), spacing follows the 8px grid, content uses `max-w-[1200px]`, and every page must work at 375px.
-  - Show module status everywhere with `<ModuleStatusBadge>` (green PASSED, amber ACTIVE, slate LOCKED + lock icon, red FAILED).
+  - The hero demo (`hero-demo.tsx`) is the main "learn by doing" signal: one quiz question per topic tab, from `hero.demo` in the messages. Every question's `answer` index must match in both languages (unit-tested).
+  - The proof band (`social-proof.tsx`) shows only facts that hold for every cohort (4 modules, live classes, 70% pass mark). Never learner counts.
+  - Motion is CSS-only (`.reveal` scroll-driven fade-in; `.animate-pop` / `.animate-shake` on demo answers) and is disabled under `prefers-reduced-motion`. Targets: Lighthouse Performance ≥ 90, Accessibility ≥ 95, SEO 100.
+- **UI (design system; review it all at `/design`, dev only):** clean, bright, playful, "learn by doing". Light mode only.
+  - **Tokens only.** Every colour comes from `globals.css`. Never use Tailwind palette colours (`slate-*`, `indigo-*`, `white`, …) or hex values in components. The one exception is `opengraph-image.tsx`, because `ImageResponse` can't read CSS variables.
+    - Neutrals: `bg-background` (white), `bg-soft` (#F7F6F3 warm off-white, the app's page background), `text-ink` (#141414), `text-ink-soft` (#5B5B5B secondary text), `border-line` / `border-line-strong`.
+    - Primary is ink: black buttons with white text (`text-primary-foreground`).
+    - Track accents: `track-ai` (violet) and `track-marketing` (orange), each with `-tint` (backgrounds), `-ink` (text and icons) and `-shadow`. The plain accent fails text contrast, so use it only for fills and decoration. Pick a course's accent with `trackTheme(slug)` from `components/course/track-theme.ts`.
+    - Status: `passed` / `active` / `locked` / `failed`, each with `-tint` and `-ink`.
+  - **Type:** Plus Jakarta Sans (`app/fonts.ts`). Headings are 700–800 with `tracking-heading`; body is 400–500. The scale is 14 / 16 / 18 / 24 / 32 / 44 / 64: `text-sm`, `text-base`, `text-lg`, `text-subheading`, `text-heading`, `text-title`, `text-display` (plus `text-display-sm` = 40 for the mobile hero). When you add a token class, register it in `lib/utils.ts` (`createCn`), or `cn` will drop it.
+  - **Shapes:** cards use `rounded-card` (16px), buttons `rounded-button` (14px), pills `rounded-full`.
+  - **Pressable:** primary actions use `<Button variant="chunky">` (black) or `variant="chunky-outline"` (white, also on dark bands). Clickable cards use `<Card variant="pressable">`. Both are built on the `pressable` utility (2px border plus a solid bottom shadow in `--press`: lifts 1px on hover, sinks 3px when pressed). Don't make static content pressable.
+  - **Layout:** 8px grid; landing sections use `py-16 lg:py-28` and alternate `bg-background` / `bg-soft`; content is `max-w-[1200px]` with `px-4 sm:px-6`; every page must work at 375px with no horizontal scroll. Tap targets are at least 44px (`h-11` inputs).
+  - **Illustrations:** original inline SVG components in `components/illustrations/` (flat track-colour shapes with a 2px ink outline, `aria-hidden`). Never download or copy third-party art.
+  - Show a learner's module status everywhere with `<ModuleStatusBadge>` (green PASSED, amber ACTIVE, slate LOCKED + lock icon, red FAILED). Show a course's public module order with `<ModulePath>`.
 - **Business rules that must hold (see PLAN §2):**
   - Grading runs only on the server, and `isCorrect` never reaches students.
   - A passed attempt sets the module to PASSED and the next module (order + 1) to ACTIVE in one `$transaction`.
