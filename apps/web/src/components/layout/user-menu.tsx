@@ -39,7 +39,7 @@ export function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
-          <p className="truncate font-medium text-slate-900">
+          <p className="text-ink truncate font-bold">
             {user.firstName} {user.lastName}
           </p>
           <p className="text-muted-foreground truncate text-xs">{user.email}</p>

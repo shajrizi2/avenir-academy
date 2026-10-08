@@ -11,7 +11,7 @@ import { UserMenu } from './user-menu';
 export function HeaderAuth() {
   const { status, user } = useAuth();
 
-  if (status === 'loading') return <Skeleton className="h-8 w-24" />;
+  if (status === 'loading') return <Skeleton className="rounded-button h-10 w-32" />;
 
   if (user) {
     return (
@@ -26,11 +26,14 @@ export function HeaderAuth() {
 
   return (
     <div className="flex items-center gap-2">
-      <Button asChild variant="ghost">
-        <Link href="/login">Log in</Link>
-      </Button>
-      <Button asChild>
-        <Link href="/register">Get started</Link>
+      <Link
+        href="/login"
+        className="text-ink rounded-lg px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline"
+      >
+        Log in
+      </Link>
+      <Button asChild variant="chunky">
+        <Link href="/register">Start now</Link>
       </Button>
     </div>
   );

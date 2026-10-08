@@ -27,17 +27,20 @@ export function UserStats() {
         const result = results[i];
         return (
           <li key={role}>
-            <Link href={`/admin/users?role=${role}`} className="block h-full">
-              <Card className="h-full rounded-xl transition-shadow hover:shadow-md">
+            <Link
+              href={`/admin/users?role=${role}`}
+              className="rounded-card focus-visible:ring-ring/50 block h-full outline-none focus-visible:ring-3"
+            >
+              <Card variant="pressable" className="h-full">
                 <CardHeader>
                   <CardDescription className="flex items-center gap-2">
                     <Icon className="size-4" aria-hidden /> {label}
                   </CardDescription>
-                  <CardTitle className="text-3xl">
+                  <CardTitle className="text-title font-extrabold">
                     {result.data ? result.data.total : <Skeleton className="h-9 w-12" />}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-primary text-sm">Manage →</CardContent>
+                <CardContent className="text-ink text-sm font-bold">Manage →</CardContent>
               </Card>
             </Link>
           </li>

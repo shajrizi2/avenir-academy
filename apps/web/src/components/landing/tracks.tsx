@@ -1,6 +1,7 @@
 import type { CourseDetail } from '@ai-academy/shared';
-import { ArrowRight, Clock, Languages, Lock } from 'lucide-react';
+import { ArrowRight, Clock, Languages } from 'lucide-react';
 import { Suspense } from 'react';
+import { ModulePath } from '@/components/course/module-path';
 import { trackTheme } from '@/components/course/track-theme';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from '@/i18n/format';
@@ -77,39 +78,17 @@ function TrackCard({ track, locale, t }: TrackCardProps) {
       </div>
 
       <h4 className="sr-only">{t.modulesLabel}</h4>
-      <ol className="mt-8 flex-1">
-        {track.modules.map((module, i) => {
-          const first = i === 0;
-          const last = i === track.modules.length - 1;
-          return (
-            <li key={module.id} className="relative flex gap-4 pb-5 last:pb-0">
-              {!last && (
-                <span
-                  aria-hidden
-                  className="bg-ink/20 absolute top-10 bottom-1 left-[19px] w-0.5"
-                />
-              )}
-              <span
-                aria-hidden
-                className={cn(
-                  'border-ink flex size-10 shrink-0 items-center justify-center rounded-full border-2 text-sm font-extrabold',
-                  first ? cn(theme.fill, 'text-ink') : 'bg-background text-ink-soft',
-                )}
-              >
-                {first ? module.order : <Lock className="size-4" />}
-              </span>
-              <div className="min-w-0 pt-0.5">
-                <p className="text-ink-soft text-xs font-semibold">
-                  {format(t.moduleLabel, { number: module.order })}
-                  <span aria-hidden> · </span>
-                  {first ? t.startHere : format(t.lockedUntil, { number: module.order - 1 })}
-                </p>
-                <p className="text-ink font-bold">{module.title}</p>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+      <div className="mt-8 flex-1">
+        <ModulePath
+          accent={theme.fill}
+          steps={track.modules.map((module, i) => ({
+            ...module,
+            caption: `${format(t.moduleLabel, { number: module.order })} · ${
+              i === 0 ? t.startHere : format(t.lockedUntil, { number: module.order - 1 })
+            }`,
+          }))}
+        />
+      </div>
 
       <CtaLink
         href={`/courses/${track.slug}`}

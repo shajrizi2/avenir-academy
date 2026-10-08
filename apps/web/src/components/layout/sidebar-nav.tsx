@@ -28,11 +28,12 @@ export function SidebarNav({ role, onNavigate }: SidebarNavProps) {
           onClick={onNavigate}
           aria-current={active?.href === href ? 'page' : undefined}
           className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-            active?.href === href && 'bg-accent text-accent-foreground hover:bg-accent',
+            'text-ink-soft hover:bg-soft hover:text-ink flex min-h-11 items-center gap-3 rounded-xl border-2 border-transparent px-3 py-2 text-sm font-semibold',
+            active?.href === href &&
+              'border-ink bg-track-ai-tint text-ink hover:bg-track-ai-tint font-bold',
           )}
         >
-          <Icon className="size-4" aria-hidden />
+          <Icon className="size-5" aria-hidden />
           {label}
         </Link>
       ))}

@@ -14,7 +14,7 @@ export default function ProfilePage() {
         title="Profile"
         description="Your personal details. Your email is used to log in."
       />
-      <Card className="rounded-xl">
+      <Card>
         <CardContent>
           <ProfileForm user={user} />
         </CardContent>

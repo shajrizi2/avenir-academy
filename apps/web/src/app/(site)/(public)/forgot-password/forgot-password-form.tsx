@@ -51,7 +51,7 @@ export function ForgotPasswordForm() {
       <FieldGroup>
         <FormError message={error} />
         <TextField form={form} name="email" label="Email" type="email" autoComplete="email" />
-        <Button type="submit" size="lg" disabled={form.formState.isSubmitting}>
+        <Button type="submit" variant="chunky" size="lg" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Sending…' : 'Send reset link'}
         </Button>
       </FieldGroup>

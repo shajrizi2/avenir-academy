@@ -52,11 +52,14 @@ export function LoginForm() {
           autoComplete="current-password"
         />
         <div className="-mt-2 text-right">
-          <Link href="/forgot-password" className="text-primary text-sm hover:underline">
+          <Link
+            href="/forgot-password"
+            className="text-ink text-sm font-semibold underline-offset-4 hover:underline"
+          >
             Forgot your password?
           </Link>
         </div>
-        <Button type="submit" size="lg" disabled={form.formState.isSubmitting}>
+        <Button type="submit" variant="chunky" size="lg" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Logging in…' : 'Log in'}
         </Button>
       </FieldGroup>

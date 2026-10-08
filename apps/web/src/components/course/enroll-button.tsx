@@ -34,12 +34,12 @@ export function EnrollButton({ courseId, courseSlug }: EnrollButtonProps) {
   });
 
   if (status === 'loading' || (isStudent && enrollments.isPending)) {
-    return <Skeleton className="h-9 w-40" />;
+    return <Skeleton className="rounded-button h-12 w-full" />;
   }
 
   if (!user) {
     return (
-      <Button asChild size="lg">
+      <Button asChild variant="chunky" size="lg" className="w-full">
         <Link href={`/login?next=${encodeURIComponent(`/courses/${courseSlug}`)}`}>Enroll</Link>
       </Button>
     );
@@ -54,14 +54,14 @@ export function EnrollButton({ courseId, courseSlug }: EnrollButtonProps) {
   const existing = enrollments.data?.find((e) => e.course.id === courseId);
   if (existing?.status === 'APPROVED') {
     return (
-      <p className="inline-flex items-center gap-2 text-sm font-medium text-green-700">
+      <p className="text-passed-ink inline-flex items-center gap-2 font-semibold">
         <CheckCircle2 className="size-4" aria-hidden /> You are enrolled in this course.
       </p>
     );
   }
   if (existing?.status === 'PENDING') {
     return (
-      <p className="inline-flex items-center gap-2 text-sm font-medium text-amber-800">
+      <p className="text-active-ink inline-flex items-center gap-2 font-semibold">
         <Clock className="size-4" aria-hidden /> Your request is waiting for admin approval.
       </p>
     );
@@ -75,7 +75,13 @@ export function EnrollButton({ courseId, courseSlug }: EnrollButtonProps) {
   }
 
   return (
-    <Button size="lg" onClick={() => enroll.mutate()} disabled={enroll.isPending}>
+    <Button
+      variant="chunky"
+      size="lg"
+      className="w-full"
+      onClick={() => enroll.mutate()}
+      disabled={enroll.isPending}
+    >
       {enroll.isPending ? 'Sending request…' : 'Enroll'}
     </Button>
   );
