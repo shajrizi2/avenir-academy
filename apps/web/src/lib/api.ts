@@ -85,6 +85,52 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   return parseResponse<T>(res);
 }
 
+/** Multipart upload (e.g. a material file) with the same auth and retry as apiFetch. */
+export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
+  const send = () =>
+    fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      },
+      body: form,
+    });
+  let res = await send();
+  if (res.status === 401 && accessToken && (await refreshSession())) res = await send();
+  return parseResponse<T>(res);
+}
+
+/**
+ * Downloads an authenticated file and hands it to the browser as a normal download. Plain
+ * links can't carry the in-memory access token.
+ */
+export async function apiDownload(path: string, fallbackName: string): Promise<void> {
+  const send = () =>
+    fetch(`${API_BASE}${path}`, {
+      credentials: 'same-origin',
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    });
+  let res = await send();
+  if (res.status === 401 && accessToken && (await refreshSession())) res = await send();
+  if (!res.ok) return parseResponse<void>(res);
+
+  const disposition = res.headers.get('Content-Disposition') ?? '';
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1];
+  const plain = /filename="([^"]+)"/i.exec(disposition)?.[1];
+  const name = encoded ? decodeURIComponent(encoded) : (plain ?? fallbackName);
+
+  const url = URL.createObjectURL(await res.blob());
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
 export async function parseResponse<T>(res: Response): Promise<T> {
   if (res.status === 204) return undefined as T;
   const data: unknown = await res.json().catch(() => null);

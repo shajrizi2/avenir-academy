@@ -46,9 +46,14 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
+/** A div by default; pass `as="h2"` (or h3) when the title heads a page section. */
+function CardTitle({
+  className,
+  as: Comp = 'div',
+  ...props
+}: React.ComponentProps<'div'> & { as?: 'div' | 'h2' | 'h3' }) {
   return (
-    <div
+    <Comp
       data-slot="card-title"
       className={cn(
         'font-heading tracking-heading text-lg leading-snug font-bold group-data-[size=sm]/card:text-base',

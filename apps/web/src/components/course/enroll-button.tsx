@@ -54,9 +54,14 @@ export function EnrollButton({ courseId, courseSlug }: EnrollButtonProps) {
   const existing = enrollments.data?.find((e) => e.course.id === courseId);
   if (existing?.status === 'APPROVED') {
     return (
-      <p className="text-passed-ink inline-flex items-center gap-2 font-semibold">
-        <CheckCircle2 className="size-4" aria-hidden /> You are enrolled in this course.
-      </p>
+      <div className="space-y-3">
+        <p className="text-passed-ink inline-flex items-center gap-2 font-semibold">
+          <CheckCircle2 className="size-4" aria-hidden /> You are enrolled in this course.
+        </p>
+        <Button asChild variant="chunky" size="lg" className="w-full">
+          <Link href={`/learn/${courseSlug}`}>Open your course</Link>
+        </Button>
+      </div>
     );
   }
   if (existing?.status === 'PENDING') {

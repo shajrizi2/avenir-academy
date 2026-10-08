@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen } from 'lucide-react';
+import { ArrowRight, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { EnrollmentStatusBadge } from '@/components/course/enrollment-status-badge';
 import { trackTheme } from '@/components/course/track-theme';
@@ -13,9 +13,19 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { Skeleton } from '@/components/ui/skeleton';
 import { errorMessage } from '@/lib/api';
 import { myEnrollmentsQuery } from '@/lib/queries';
+import { UpcomingSessions } from './upcoming-sessions';
 import { cn } from '@/lib/utils';
 
 export function StudentDashboard() {
+  return (
+    <>
+      <UpcomingSessions />
+      <MyCourses />
+    </>
+  );
+}
+
+function MyCourses() {
   const { data, isPending, error } = useQuery(myEnrollmentsQuery);
 
   return (
@@ -58,6 +68,18 @@ export function StudentDashboard() {
                     Requested{' '}
                     <LocalDateTime value={enrollment.createdAt} options={{ dateStyle: 'medium' }} />
                   </p>
+                  {enrollment.status === 'APPROVED' && (
+                    <Button asChild variant="chunky" className="mt-2 self-start">
+                      <Link href={`/learn/${enrollment.course.slug}`}>
+                        Open course <ArrowRight data-icon="inline-end" />
+                      </Link>
+                    </Button>
+                  )}
+                  {enrollment.status === 'PENDING' && (
+                    <p className="text-active-ink text-sm font-semibold">
+                      We’ll contact you to confirm your seat. Module 1 opens once you’re approved.
+                    </p>
+                  )}
                 </CardHeader>
               </Card>
             </li>
