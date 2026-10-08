@@ -39,6 +39,14 @@ export class CoursesController {
     return this.courses.list(Boolean(query.all) && user?.role === Role.ADMIN);
   }
 
+  /** Admin editing works by id, since the slug itself can change. */
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Get('by-id/:id')
+  findById(@Param('id') id: string): Promise<CourseDetailRecord> {
+    return this.courses.findById(id);
+  }
+
   @Public()
   @Get(':slug')
   findOne(

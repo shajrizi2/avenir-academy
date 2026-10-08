@@ -37,3 +37,10 @@ export const AttemptStatus = {
   EXPIRED: 'EXPIRED',
 } as const;
 export type AttemptStatus = (typeof AttemptStatus)[keyof typeof AttemptStatus];
+
+/** Stored in Material.kind (a plain string column). */
+export const MaterialKind = {
+  LINK: 'LINK',
+  FILE: 'FILE',
+} as const;
+export type MaterialKind = (typeof MaterialKind)[keyof typeof MaterialKind];

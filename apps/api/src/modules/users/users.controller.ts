@@ -45,4 +45,15 @@ export class UsersController {
   ): Promise<PublicUserRecord> {
     return this.users.updateRole(actor.id, id, dto.role);
   }
+
+  /** Admins edit anyone's profile, e.g. an instructor's public title, bio and photo. */
+  @Roles(Role.ADMIN)
+  @Patch(':id/profile')
+  async updateProfile(
+    @Param('id') id: string,
+    @Body() dto: UpdateProfileDto,
+  ): Promise<PublicUserRecord> {
+    await this.users.findById(id);
+    return this.users.updateProfile(id, dto);
+  }
 }

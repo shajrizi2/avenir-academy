@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { Locale } from '../../../generated/prisma/enums.js';
 
 export class ListTestimonialsQueryDto {
@@ -7,4 +8,10 @@ export class ListTestimonialsQueryDto {
   @IsOptional()
   @IsEnum(Locale)
   locale?: Locale;
+
+  @ApiPropertyOptional({ description: 'Admins only: include unpublished testimonials' })
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => value === 'true' || value === true)
+  @IsBoolean()
+  all?: boolean;
 }
