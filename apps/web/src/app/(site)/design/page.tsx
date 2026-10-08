@@ -2,6 +2,15 @@ import type { ModuleStatus } from '@ai-academy/shared';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import {
+  ChatSparkles,
+  LaptopCode,
+  LiveClass,
+  MegaphoneChart,
+  NeuralNetwork,
+  PathUnlock,
+  TestCheck,
+} from '@/components/illustrations';
 import { EnrollmentStatusBadge } from '@/components/course/enrollment-status-badge';
 import { Logo } from '@/components/logo';
 import { ModuleStatusBadge } from '@/components/module-status-badge';
@@ -55,6 +64,16 @@ const BUTTON_VARIANTS = [
   'destructive',
   'link',
 ] as const;
+
+const ILLUSTRATIONS = [
+  { name: 'NeuralNetwork', Component: NeuralNetwork },
+  { name: 'ChatSparkles', Component: ChatSparkles },
+  { name: 'MegaphoneChart', Component: MegaphoneChart },
+  { name: 'LaptopCode', Component: LaptopCode },
+  { name: 'PathUnlock', Component: PathUnlock },
+  { name: 'LiveClass', Component: LiveClass },
+  { name: 'TestCheck', Component: TestCheck },
+];
 
 const STATUSES: ModuleStatus[] = ['PASSED', 'ACTIVE', 'LOCKED', 'FAILED'];
 
@@ -185,6 +204,17 @@ export default function DesignPage() {
             <EnrollmentStatusBadge key={status} status={status} />
           ))}
         </div>
+      </Section>
+
+      <Section title="Illustrations">
+        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {ILLUSTRATIONS.map(({ name, Component }) => (
+            <li key={name} className="border-line rounded-card bg-background border p-4">
+              <Component />
+              <code className="text-ink-soft mt-2 block text-sm">{name}</code>
+            </li>
+          ))}
+        </ul>
       </Section>
 
       <Section title="Inputs">
