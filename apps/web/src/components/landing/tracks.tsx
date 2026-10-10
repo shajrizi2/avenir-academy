@@ -8,6 +8,7 @@ import { format } from '@/i18n/format';
 import type { LandingMessages } from '@/i18n/messages';
 import { getLandingMessages } from '@/i18n/server';
 import { getTracks } from '@/lib/landing-data';
+import { localizeCourse } from '@/lib/localize';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import { cn } from '@/lib/utils';
 import { CtaLink } from './cta-link';
@@ -32,7 +33,8 @@ export async function Tracks() {
 }
 
 async function TrackList() {
-  const [{ locale, t }, tracks] = await Promise.all([getLandingMessages(), getTracks()]);
+  const [{ locale, t }, loaded] = await Promise.all([getLandingMessages(), getTracks()]);
+  const tracks = loaded?.map((track) => localizeCourse(track, locale));
   if (!tracks || tracks.length === 0) {
     return <p className="text-ink-soft text-center">{t.tracks.unavailable}</p>;
   }
@@ -135,6 +137,7 @@ function coursesJsonLd(tracks: CourseDetail[]) {
         name: track.title,
         description: track.summary,
         url: `${SITE_URL}/courses/${track.slug}`,
+        // Classes are taught in Albanian whichever language this page is in.
         inLanguage: 'sq',
         provider: { '@type': 'EducationalOrganization', name: SITE_NAME, url: SITE_URL },
         hasCourseInstance: {

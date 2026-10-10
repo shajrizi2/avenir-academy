@@ -22,6 +22,20 @@ export class CreateModuleDto {
   @Length(10, MODULE_DESCRIPTION_MAX_LENGTH)
   description: string;
 
+  @ApiPropertyOptional({ description: 'Albanian title; empty or null = not translated' })
+  @Transform(emptyToNull)
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @Length(3, MODULE_TITLE_MAX_LENGTH)
+  titleSq?: string | null;
+
+  @ApiPropertyOptional({ description: 'Albanian description' })
+  @Transform(emptyToNull)
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @Length(10, MODULE_DESCRIPTION_MAX_LENGTH)
+  descriptionSq?: string | null;
+
   @ApiPropertyOptional({ default: MODULE_DEFAULT_DURATION_WEEKS })
   @IsOptional()
   @IsInt()

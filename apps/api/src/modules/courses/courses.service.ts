@@ -15,6 +15,8 @@ const courseFields = {
   slug: true,
   title: true,
   summary: true,
+  titleSq: true,
+  summarySq: true,
   coverUrl: true,
   startDate: true,
   isPublished: true,
@@ -23,6 +25,7 @@ const courseFields = {
 const courseDetailSelect = {
   ...courseFields,
   description: true,
+  descriptionSq: true,
   modules: {
     orderBy: { order: 'asc' },
     select: {
@@ -30,6 +33,8 @@ const courseDetailSelect = {
       order: true,
       title: true,
       description: true,
+      titleSq: true,
+      descriptionSq: true,
       durationWeeks: true,
       instructor: { select: { id: true, firstName: true, lastName: true } },
     },

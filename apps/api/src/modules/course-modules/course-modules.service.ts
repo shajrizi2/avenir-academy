@@ -33,6 +33,8 @@ const moduleSummarySelect = {
   order: true,
   title: true,
   description: true,
+  titleSq: true,
+  descriptionSq: true,
   durationWeeks: true,
   instructor: instructorSelect,
 } as const satisfies Prisma.ModuleSelect;
@@ -97,6 +99,8 @@ export class CourseModulesService {
           order,
           title: dto.title,
           description: dto.description,
+          titleSq: dto.titleSq ?? null,
+          descriptionSq: dto.descriptionSq ?? null,
           durationWeeks: dto.durationWeeks,
           instructorId: dto.instructorId ?? null,
         },
@@ -144,6 +148,8 @@ export class CourseModulesService {
       data: {
         title: dto.title,
         description: dto.description,
+        titleSq: dto.titleSq,
+        descriptionSq: dto.descriptionSq,
         durationWeeks: dto.durationWeeks,
         instructorId: dto.instructorId,
       },

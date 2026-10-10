@@ -45,6 +45,8 @@ export function ModuleFormDialog({ trigger, title, module, onSubmit }: ModuleFor
     defaultValues: {
       title: module?.title ?? '',
       description: module?.description ?? '',
+      titleSq: module?.titleSq ?? '',
+      descriptionSq: module?.descriptionSq ?? '',
       durationWeeks: module?.durationWeeks ?? MODULE_DEFAULT_DURATION_WEEKS,
       instructorId: module?.instructor?.id ?? '',
     },
@@ -84,6 +86,18 @@ export function ModuleFormDialog({ trigger, title, module, onSubmit }: ModuleFor
             <FormError message={error} />
             <TextField form={form} name="title" label="Title" />
             <TextareaField form={form} name="description" label="Description" rows={4} />
+            <TextField
+              form={form}
+              name="titleSq"
+              label="Title in Albanian (optional)"
+              description="Shown on the /sq landing page; empty shows the English title."
+            />
+            <TextareaField
+              form={form}
+              name="descriptionSq"
+              label="Description in Albanian (optional)"
+              rows={3}
+            />
             <TextField form={form} name="durationWeeks" label="Duration (weeks)" type="number" />
             <SelectField
               form={form}

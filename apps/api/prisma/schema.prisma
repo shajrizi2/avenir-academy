@@ -70,16 +70,20 @@ model User {
 }
 
 model Course {
-  id          String       @id @default(cuid())
-  slug        String       @unique
-  title       String
-  summary     String
-  description String
-  coverUrl    String?
-  startDate   DateTime?
-  isPublished Boolean      @default(false)
-  modules     Module[]
-  enrollments Enrollment[]
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  title         String
+  summary       String
+  description   String
+  /// Albanian versions for the /sq landing page; null falls back to English (PLAN D11).
+  titleSq       String?
+  summarySq     String?
+  descriptionSq String?
+  coverUrl      String?
+  startDate     DateTime?
+  isPublished   Boolean      @default(false)
+  modules       Module[]
+  enrollments   Enrollment[]
 }
 
 model Module {
@@ -89,6 +93,9 @@ model Module {
   order         Int
   title         String
   description   String
+  /// Albanian versions; null falls back to English (PLAN D11).
+  titleSq       String?
+  descriptionSq String?
   durationWeeks Int              @default(4)
   instructorId  String?
   instructor    User?            @relation("ModuleInstructor", fields: [instructorId], references: [id])

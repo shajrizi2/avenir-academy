@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { Logo } from '@/components/logo';
 import { getLandingMessages } from '@/i18n/server';
 import { getSiteSettings, getTracks } from '@/lib/landing-data';
+import { localizeCourse } from '@/lib/localize';
 import { LanguageSwitch } from './language-switch';
 
 const linkClass = 'text-ink-soft hover:text-ink font-medium underline-offset-4 hover:underline';
@@ -98,11 +99,11 @@ function FooterColumn({ title, children }: { title: string; children: React.Reac
 }
 
 async function TrackLinks() {
-  const tracks = await getTracks();
+  const [{ locale }, tracks] = await Promise.all([getLandingMessages(), getTracks()]);
   return tracks?.map((track) => (
     <li key={track.id}>
       <Link href={`/courses/${track.slug}`} className={linkClass}>
-        {track.title}
+        {localizeCourse(track, locale).title}
       </Link>
     </li>
   ));

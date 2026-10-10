@@ -32,6 +32,11 @@ const tracks = [
   {
     slug: 'ai-foundations',
     title: 'AI Foundations',
+    titleSq: 'Themelet e AI-së',
+    summarySq:
+      'Nga prompti i parë deri te puna e përditshme me AI: një program live katërmujor për profesionistë.',
+    descriptionSq:
+      'Një program praktik dhe live në katër module mujore. Fillon me mënyrën si funksionon AI-ja e sotme dhe si ta përdorësh me siguri, e lidh AI-në me mjetet që i përdor tashmë, mëson të ndërtosh me asistentë kodimi dhe përfundon duke i ridizajnuar proceset e punës në profesionin tënd. Çdo modul mbyllet me një test online; kur e kalon, hapet moduli tjetër.',
     summary:
       'From your first prompt to shipping AI-powered work: a four-month live programme for professionals.',
     description:
@@ -40,21 +45,33 @@ const tracks = [
     modules: [
       {
         title: 'AI Basics',
+        titleSq: 'Bazat e AI-së',
+        descriptionSq:
+          'Si funksionojnë modelet e mëdha gjuhësore, ku janë të forta e ku jo, bazat e shkrimit të prompteve dhe përdorimi i përgjegjshëm.',
         description:
           'How large language models work, what they are good and bad at, prompting fundamentals, and responsible use.',
       },
       {
         title: 'AI Integration',
+        titleSq: 'Integrimi i AI-së',
+        descriptionSq:
+          'Lidhja e AI-së me mjetet e përditshme: tabela, dokumente, email, automatizime dhe platforma pa kod.',
         description:
           'Connecting AI to everyday tools: spreadsheets, documents, email, automations and no-code platforms.',
       },
       {
         title: 'AI Coding',
+        titleSq: 'Kodimi me AI',
+        descriptionSq:
+          'Ndërtimi i aplikacioneve dhe skripteve të vogla me asistentë kodimi, nga ideja te një prototip që funksionon.',
         description:
           'Building small apps and scripts with AI coding assistants, from idea to working prototype.',
       },
       {
         title: 'AI in Your Profession',
+        titleSq: 'AI në profesionin tënd',
+        descriptionSq:
+          'Moduli përmbyllës: gjen rastet me vlerë të lartë në fushën tënde dhe ndërton një proces pune me AI që e përsërit lehtë.',
         description:
           'A capstone module: identify high-value use cases in your field and build a repeatable AI workflow.',
       },
@@ -63,6 +80,11 @@ const tracks = [
   {
     slug: 'digital-marketing',
     title: 'Digital Marketing',
+    titleSq: 'Marketingu Digjital',
+    summarySq:
+      'Planifiko, krijo dhe mat fushata që japin rezultat, me AI-në si bashkëpilot marketingu në modulin e fundit.',
+    descriptionSq:
+      'Një program live dhe praktik që mbulon gjithë rrugëtimin e marketingut. Mëson bazat e pozicionimit dhe të audiencave, krijon përmbajtje për rrjetet sociale, drejton dhe mat fushata me pagesë dhe përfundon duke e vënë AI-në në punë në gjithë marketingun tënd. Çdo modul mujor mbyllet me një test online.',
     summary:
       'Plan, create and measure campaigns that work, with AI as your marketing co-pilot in the final module.',
     description:
@@ -71,21 +93,33 @@ const tracks = [
     modules: [
       {
         title: 'Marketing Fundamentals',
+        titleSq: 'Bazat e marketingut',
+        descriptionSq:
+          'Pozicionimi, audiencat, rrugëtimi i klientit dhe vendosja e qëllimeve që mund t’i matësh vërtet.',
         description:
           'Positioning, audiences, the customer journey and setting goals you can actually measure.',
       },
       {
         title: 'Social and Content',
+        titleSq: 'Rrjetet sociale dhe përmbajtja',
+        descriptionSq:
+          'Strategjia e përmbajtjes, kanalet sociale, formatet e tregimit dhe ndërtimi i një kalendari përmbajtjeje.',
         description:
           'Content strategy, social media channels, storytelling formats and building a content calendar.',
       },
       {
         title: 'Ads and Analytics',
+        titleSq: 'Reklamat dhe analitika',
+        descriptionSq:
+          'Fushata reklamash në kërkim dhe në rrjete sociale, matja e konvertimeve dhe leximi i paneleve analitike.',
         description:
           'Running search and social ad campaigns, tracking conversions and reading analytics dashboards.',
       },
       {
         title: 'AI for Marketing',
+        titleSq: 'AI për marketing',
+        descriptionSq:
+          'Përdorimi i AI-së për kërkime, shkrim tekstesh, prodhim kreativ, personalizim dhe raportim.',
         description:
           'Using AI for research, copywriting, creative production, personalisation and reporting.',
       },

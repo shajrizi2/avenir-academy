@@ -10,8 +10,9 @@ import {
   Length,
   Matches,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
-import { trim } from '../../../common/transforms.js';
+import { emptyToNull, trim } from '../../../common/transforms.js';
 
 export class CreateCourseDto {
   @ApiProperty({ example: 'ai-foundations' })
@@ -38,6 +39,27 @@ export class CreateCourseDto {
   @IsString()
   @Length(10, 10_000)
   description: string;
+
+  @ApiPropertyOptional({ description: 'Albanian title; empty or null = not translated' })
+  @Transform(emptyToNull)
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @Length(3, 120)
+  titleSq?: string | null;
+
+  @ApiPropertyOptional({ description: 'Albanian summary' })
+  @Transform(emptyToNull)
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @Length(10, 300)
+  summarySq?: string | null;
+
+  @ApiPropertyOptional({ description: 'Albanian description' })
+  @Transform(emptyToNull)
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @Length(10, 10_000)
+  descriptionSq?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()

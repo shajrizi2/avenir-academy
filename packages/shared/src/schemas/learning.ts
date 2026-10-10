@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalTranslation } from './course.js';
 import {
   ENROLLMENT_NOTE_MAX_LENGTH,
   MATERIAL_TITLE_MAX_LENGTH,
@@ -22,6 +23,8 @@ export type DecideEnrollmentInput = z.infer<typeof decideEnrollmentSchema>;
 export const moduleSchema = z.object({
   title: z.string().trim().min(3).max(MODULE_TITLE_MAX_LENGTH),
   description: z.string().trim().min(10).max(MODULE_DESCRIPTION_MAX_LENGTH),
+  titleSq: optionalTranslation(3, MODULE_TITLE_MAX_LENGTH),
+  descriptionSq: optionalTranslation(10, MODULE_DESCRIPTION_MAX_LENGTH),
   durationWeeks: z.coerce.number().int().min(1).max(MODULE_MAX_DURATION_WEEKS),
   /** Empty string = no instructor. */
   instructorId: z.string().optional(),
