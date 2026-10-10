@@ -1,5 +1,12 @@
 import type { Locale } from './constants.js';
-import type { EnrollmentStatus, MaterialKind, ModuleStatus, Role } from './enums.js';
+import type {
+  AttemptStatus,
+  EnrollmentStatus,
+  MaterialKind,
+  ModuleStatus,
+  QuestionType,
+  Role,
+} from './enums.js';
 
 /** Dates travel over JSON as ISO-8601 UTC strings. */
 export type IsoDateString = string;
@@ -201,6 +208,8 @@ export interface ModuleDetail extends ModuleSummary {
   canManage: boolean;
   sessions: LiveSessionSummary[];
   materials: MaterialSummary[];
+  /** The module's test. Students only see it once it is published. */
+  test: ModuleTest | null;
 }
 
 /** GET /me/courses/:slug: an approved student's view of a course. */
@@ -220,4 +229,169 @@ export interface TeachingModule extends ModuleRef {
 export interface AdminTestimonial extends PublicTestimonial {
   isPublished: boolean;
   createdAt: IsoDateString;
+}
+
+// ---- Sprint 3: tests, attempts, progression, dashboards ----
+
+export interface TestSettings {
+  id: string;
+  title: string;
+  passMark: number;
+  timeLimitMin: number;
+  maxAttempts: number;
+  opensAt: IsoDateString;
+  closesAt: IsoDateString;
+  isPublished: boolean;
+}
+
+/** The test card on a module page. */
+export interface ModuleTest extends TestSettings {
+  questionCount: number;
+}
+
+export interface StaffOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface StaffQuestion {
+  id: string;
+  order: number;
+  type: QuestionType;
+  text: string;
+  points: number;
+  options: StaffOption[];
+}
+
+/** The test builder's view: correct answers included. Staff only. */
+export interface StaffTest extends TestSettings {
+  moduleId: string;
+  questions: StaffQuestion[];
+  /** Questions can't be changed once anyone has started an attempt. */
+  attemptCount: number;
+}
+
+/** GET /modules/:id/test */
+export interface TestBuilderData {
+  test: StaffTest | null;
+  /** The suggested window for a new test: the module's last week. */
+  defaultWindow: { opensAt: IsoDateString; closesAt: IsoDateString };
+}
+
+export interface AttemptSummary {
+  id: string;
+  status: AttemptStatus;
+  startedAt: IsoDateString;
+  /** Start + time limit, but never later than the window's close. */
+  deadline: IsoDateString;
+  submittedAt: IsoDateString | null;
+  scorePct: number | null;
+  passed: boolean | null;
+}
+
+/** GET /tests/:id: a student's overview of a test (no questions). */
+export interface StudentTest extends TestSettings {
+  module: ModuleRef;
+  questionCount: number;
+  totalPoints: number;
+  /** The student's status in the module. */
+  status: ModuleStatus;
+  /** Newest first. */
+  attempts: AttemptSummary[];
+  attemptsLeft: number;
+  activeAttemptId: string | null;
+  /** The next module, once it is open for the student. */
+  nextModule: ModuleRef | null;
+}
+
+/** A question as a student sees it: never with the correct answers. */
+export interface AttemptQuestion {
+  id: string;
+  order: number;
+  type: QuestionType;
+  text: string;
+  points: number;
+  options: { id: string; text: string }[];
+}
+
+/** Question id → chosen option ids. */
+export type AttemptAnswers = Record<string, string[]>;
+
+/** POST /tests/:id/attempts and GET /attempts/:id: an attempt in progress. */
+export interface AttemptSession extends AttemptSummary {
+  testId: string;
+  title: string;
+  questions: AttemptQuestion[];
+  answers: AttemptAnswers;
+}
+
+/** POST /attempts/:id/submit */
+export interface AttemptResult {
+  attempt: AttemptSummary;
+  passMark: number;
+  /** The module's status after grading. */
+  moduleStatus: ModuleStatus;
+  attemptsLeft: number;
+  /** The module this pass unlocked, if any. */
+  nextModule: ModuleRef | null;
+}
+
+export interface TestResultRow {
+  /** The student's progress row, for the admin override (PATCH /progress/:id). */
+  progressId: string | null;
+  user: PersonSummary;
+  status: ModuleStatus;
+  attemptsUsed: number;
+  attemptsLeft: number;
+  bestScore: number | null;
+  lastAttempt: AttemptSummary | null;
+}
+
+/** GET /tests/:id/results */
+export interface TestResults {
+  test: ModuleTest & { module: ModuleRef };
+  rows: TestResultRow[];
+}
+
+export interface ProgressModule {
+  id: string;
+  order: number;
+  title: string;
+  status: ModuleStatus;
+}
+
+/** GET /me/progress: one entry per approved course. */
+export interface CourseProgress {
+  course: CourseRef;
+  totalModules: number;
+  passedModules: number;
+  modules: ProgressModule[];
+  /** The first module that isn't passed and isn't locked, with its published test. */
+  current:
+    (ProgressModule & { test: Pick<TestSettings, 'id' | 'opensAt' | 'closesAt'> | null }) | null;
+}
+
+/** PATCH /progress/:id */
+export interface ProgressRecord {
+  id: string;
+  status: ModuleStatus;
+  unlockedAt: IsoDateString | null;
+  passedAt: IsoDateString | null;
+}
+
+/** GET /admin/stats */
+export interface AdminStats {
+  students: number;
+  instructors: number;
+  publishedCourses: number;
+  pendingEnrollments: number;
+  approvedEnrollments: number;
+  sessionsNext7Days: number;
+  openTests: number;
+  attemptsLast30Days: number;
+  /** Share of finished attempts in the last 30 days that passed; null without attempts. */
+  passRateLast30Days: number | null;
+  /** Students whose module is FAILED (no attempts left), waiting for an admin. */
+  failedModules: number;
 }

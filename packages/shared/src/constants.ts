@@ -65,3 +65,19 @@ export const MATERIAL_FILE_EXTENSIONS = [
 /** Testimonials (admin-managed, real quotes only). */
 export const TESTIMONIAL_QUOTE_MAX_LENGTH = 600;
 export const TESTIMONIAL_ROLE_MAX_LENGTH = 80;
+
+/** Tests and attempts (Sprint 3). Defaults are in TEST_DEFAULTS. */
+export const TEST_TITLE_MAX_LENGTH = 120;
+export const TEST_MIN_TIME_LIMIT_MIN = 5;
+export const TEST_MAX_TIME_LIMIT_MIN = 240;
+export const TEST_MAX_ATTEMPTS = 10;
+export const TEST_MAX_QUESTIONS = 100;
+export const QUESTION_TEXT_MAX_LENGTH = 1000;
+export const QUESTION_MAX_POINTS = 10;
+export const QUESTION_MIN_OPTIONS = 2;
+export const QUESTION_MAX_OPTIONS = 8;
+export const OPTION_TEXT_MAX_LENGTH = 300;
+/** The default test window is the module's last week. */
+export const TEST_WINDOW_DAYS = 7;
+/** Autosaves and submissions are still accepted this long after the deadline (network lag). */
+export const ATTEMPT_GRACE_SEC = 30;
