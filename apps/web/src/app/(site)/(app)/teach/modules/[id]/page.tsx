@@ -3,6 +3,9 @@ import { Suspense } from 'react';
 import { ModuleManager } from '@/components/teach/module-manager';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Client-gated; see (app)/layout.tsx.
+export const instant = false;
+
 export const metadata: Metadata = { title: 'Manage module' };
 
 export default function ManageModulePage() {

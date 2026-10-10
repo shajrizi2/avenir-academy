@@ -11,6 +11,7 @@ import { TextField } from '@/components/form/text-field';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { errorMessage } from '@/lib/api';
+import { useHydrated } from '@/lib/use-hydrated';
 import { useAuth } from '@/lib/auth-context';
 import { homeFor, safeNext } from '@/lib/routes';
 
@@ -19,6 +20,9 @@ export function LoginForm() {
   const router = useRouter();
   const next = safeNext(useSearchParams().get('next'));
   const [error, setError] = useState<string | null>(null);
+  // Until React hydrates, typing is lost and a submit would be a native request, so the
+  // form stays disabled until then.
+  const hydrated = useHydrated();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
@@ -40,29 +44,36 @@ export function LoginForm() {
   });
 
   return (
-    <form onSubmit={(e) => void onSubmit(e)} noValidate>
-      <FieldGroup>
-        <FormError message={error} />
-        <TextField form={form} name="email" label="Email" type="email" autoComplete="email" />
-        <TextField
-          form={form}
-          name="password"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-        />
-        <div className="-mt-2 text-right">
-          <Link
-            href="/forgot-password"
-            className="text-ink text-sm font-semibold underline-offset-4 hover:underline"
+    <form method="post" onSubmit={(e) => void onSubmit(e)} noValidate>
+      <fieldset disabled={!hydrated} className="min-w-0">
+        <FieldGroup>
+          <FormError message={error} />
+          <TextField form={form} name="email" label="Email" type="email" autoComplete="email" />
+          <TextField
+            form={form}
+            name="password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+          />
+          <div className="-mt-2 text-right">
+            <Link
+              href="/forgot-password"
+              className="text-ink text-sm font-semibold underline-offset-4 hover:underline"
+            >
+              Forgot your password?
+            </Link>
+          </div>
+          <Button
+            type="submit"
+            variant="chunky"
+            size="lg"
+            disabled={!hydrated || form.formState.isSubmitting}
           >
-            Forgot your password?
-          </Link>
-        </div>
-        <Button type="submit" variant="chunky" size="lg" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Logging in…' : 'Log in'}
-        </Button>
-      </FieldGroup>
+            {form.formState.isSubmitting ? 'Logging in…' : 'Log in'}
+          </Button>
+        </FieldGroup>
+      </fieldset>
     </form>
   );
 }

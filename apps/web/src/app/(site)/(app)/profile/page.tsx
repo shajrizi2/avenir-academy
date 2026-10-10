@@ -5,6 +5,9 @@ import { ProfileForm } from '@/components/profile-form';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth-context';
 
+// Client-gated; see (app)/layout.tsx.
+export const instant = false;
+
 export default function ProfilePage() {
   const { user } = useAuth();
   if (!user) return null;

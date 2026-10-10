@@ -15,10 +15,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { apiFetch, errorMessage } from '@/lib/api';
+import { useHydrated } from '@/lib/use-hydrated';
 
 export function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<string | null>(null);
+  // Until React hydrates, typing is lost and a submit would be a native request, so the
+  // form stays disabled until then.
+  const hydrated = useHydrated();
   const form = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: '' },
@@ -47,14 +51,21 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={(e) => void onSubmit(e)} noValidate>
-      <FieldGroup>
-        <FormError message={error} />
-        <TextField form={form} name="email" label="Email" type="email" autoComplete="email" />
-        <Button type="submit" variant="chunky" size="lg" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Sending…' : 'Send reset link'}
-        </Button>
-      </FieldGroup>
+    <form method="post" onSubmit={(e) => void onSubmit(e)} noValidate>
+      <fieldset disabled={!hydrated} className="min-w-0">
+        <FieldGroup>
+          <FormError message={error} />
+          <TextField form={form} name="email" label="Email" type="email" autoComplete="email" />
+          <Button
+            type="submit"
+            variant="chunky"
+            size="lg"
+            disabled={!hydrated || form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? 'Sending…' : 'Send reset link'}
+          </Button>
+        </FieldGroup>
+      </fieldset>
     </form>
   );
 }

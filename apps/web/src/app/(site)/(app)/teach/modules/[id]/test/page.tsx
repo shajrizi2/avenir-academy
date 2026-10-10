@@ -3,6 +3,9 @@ import { Suspense } from 'react';
 import { TestBuilder } from '@/components/teach/test-builder';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Client-gated; see (app)/layout.tsx.
+export const instant = false;
+
 export const metadata: Metadata = { title: 'Module test' };
 
 export default function ModuleTestPage() {
