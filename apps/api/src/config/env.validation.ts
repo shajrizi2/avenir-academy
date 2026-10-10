@@ -75,6 +75,21 @@ export class EnvironmentVariables {
   @Min(1)
   RATE_LIMIT_PER_MIN = 120;
 
+  /** Requests per minute per IP for login, register and password resets. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  AUTH_RATE_LIMIT_PER_MIN = 10;
+
+  /** Serve the Swagger UI at /api/docs. Defaults to on, except in production. */
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    value === undefined ? undefined : value === true || value === 'true',
+  )
+  @IsBoolean()
+  SWAGGER_ENABLED?: boolean;
+
   /** Where uploaded materials are stored (relative paths resolve from the API's working dir). */
   @IsString()
   UPLOAD_DIR = 'uploads';

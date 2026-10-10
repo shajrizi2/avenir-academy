@@ -2,6 +2,7 @@ import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import type { EnvironmentVariables } from './config/env.validation.js';
 
 export const API_PREFIX = 'api/v1';
@@ -13,6 +14,9 @@ export function setupApp(app: INestApplication): void {
 
   expressApp.set('trust proxy', config.get('TRUST_PROXY', { infer: true }));
   expressApp.disable('x-powered-by');
+  // Security headers (nosniff, frame and referrer policies, HSTS behind HTTPS, …). The API only
+  // serves JSON and file downloads, so it needs no Content-Security-Policy; the web app sets one.
+  app.use(helmet({ contentSecurityPolicy: false }));
   app.setGlobalPrefix(API_PREFIX);
   app.use(cookieParser());
   app.enableCors({
