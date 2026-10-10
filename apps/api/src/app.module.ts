@@ -14,8 +14,11 @@ import { CoursesModule } from './modules/courses/courses.module.js';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module.js';
 import { MaterialsModule } from './modules/materials/materials.module.js';
 import { SessionsModule } from './modules/sessions/sessions.module.js';
+import { ProgressModule } from './modules/progress/progress.module.js';
 import { SiteSettingsModule } from './modules/site-settings/site-settings.module.js';
+import { StatsModule } from './modules/stats/stats.module.js';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module.js';
+import { TestsModule } from './modules/tests/tests.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 
@@ -37,6 +40,9 @@ import { PrismaModule } from './prisma/prisma.module.js';
     CourseModulesModule,
     SessionsModule,
     MaterialsModule,
+    TestsModule,
+    ProgressModule,
+    StatsModule,
     SiteSettingsModule,
     TestimonialsModule,
   ],

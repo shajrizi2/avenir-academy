@@ -20,3 +20,17 @@ const getServerSnapshot = () => 0;
 export function useNow(): number {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
+
+// ---- A one-second clock for countdowns (the test timer) ----
+
+function subscribeSeconds(onTick: () => void): () => void {
+  const id = setInterval(onTick, 1000);
+  return () => clearInterval(id);
+}
+
+const getSecondsSnapshot = () => Math.floor(Date.now() / 1000) * 1000;
+
+/** Like useNow(), but ticks every second. Use it only where a visible countdown needs it. */
+export function useNowEverySecond(): number {
+  return useSyncExternalStore(subscribeSeconds, getSecondsSnapshot, getServerSnapshot);
+}

@@ -20,6 +20,7 @@ import {
   type SessionView,
   toSessionView,
 } from '../sessions/session.view.js';
+import { type TestSettingsRow, testSettingsSelect } from '../tests/test.view.js';
 import type { CreateModuleDto } from './dto/create-module.dto.js';
 import type { UpdateModuleDto } from './dto/update-module.dto.js';
 import { ModuleAccessService } from './module-access.service.js';
@@ -45,6 +46,7 @@ export interface ModuleDetailRecord extends ModuleSummaryRow {
   canManage: boolean;
   sessions: SessionView[];
   materials: MaterialView[];
+  test: (TestSettingsRow & { questionCount: number }) | null;
 }
 
 export interface TeachingModuleRecord {
@@ -185,15 +187,24 @@ export class CourseModulesService {
         course: courseRefSelect,
         sessions: { orderBy: { startsAt: 'asc' }, select: sessionSelect },
         materials: { orderBy: { title: 'asc' }, select: materialSelect },
+        test: { select: { ...testSettingsSelect, _count: { select: { questions: true } } } },
       },
     });
     const now = new Date();
+    const { test, ...rest } = module;
+    let moduleTest: ModuleDetailRecord['test'] = null;
+    // Students only see a test once it is published.
+    if (test && (isStaff || test.isPublished)) {
+      const { _count, ...settings } = test;
+      moduleTest = { ...settings, questionCount: _count.questions };
+    }
     return {
-      ...module,
+      ...rest,
       status,
       canManage: isStaff,
       sessions: module.sessions.map((s) => toSessionView(s, isStaff, now)),
       materials: module.materials.map(toMaterialView),
+      test: moduleTest,
     };
   }
 

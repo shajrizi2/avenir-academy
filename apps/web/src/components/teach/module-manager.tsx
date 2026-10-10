@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/auth-context';
 import { moduleQuery } from '@/lib/queries';
 import { MaterialsPanel } from './materials-panel';
 import { SessionsPanel } from './sessions-panel';
+import { TestPanel } from './test-panel';
 
 export function ModuleManager() {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,7 @@ export function ModuleManager() {
       <div className="grid gap-8">
         <SessionsPanel moduleId={module.id} />
         <MaterialsPanel moduleId={module.id} materials={module.materials} />
+        <TestPanel moduleId={module.id} test={module.test} />
       </div>
     </>
   );

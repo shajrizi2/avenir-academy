@@ -1,5 +1,8 @@
 import type {
   AdminEnrollment,
+  AdminStats,
+  AttemptSession,
+  CourseProgress,
   AdminTestimonial,
   CourseDetail,
   CourseSummary,
@@ -14,7 +17,10 @@ import type {
   SiteSettings,
   StaffSession,
   StudentSession,
+  StudentTest,
   TeachingModule,
+  TestBuilderData,
+  TestResults,
 } from '@ai-academy/shared';
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import { apiFetch } from './api';
@@ -67,7 +73,48 @@ export const attendanceQuery = (sessionId: string) =>
       apiFetch<SessionAttendance>(`/sessions/${encodeURIComponent(sessionId)}/attendance`),
   });
 
+// ---- Tests and progress ----
+
+export const myProgressQuery = queryOptions({
+  queryKey: ['me', 'progress'],
+  queryFn: () => apiFetch<CourseProgress[]>('/me/progress'),
+});
+
+/** The test builder: the module's test with correct answers (staff only). */
+export const testBuilderQuery = (moduleId: string) =>
+  queryOptions({
+    queryKey: ['modules', moduleId, 'test'],
+    queryFn: () => apiFetch<TestBuilderData>(`/modules/${encodeURIComponent(moduleId)}/test`),
+  });
+
+export const testResultsQuery = (testId: string) =>
+  queryOptions({
+    queryKey: ['tests', testId, 'results'],
+    queryFn: () => apiFetch<TestResults>(`/tests/${encodeURIComponent(testId)}/results`),
+  });
+
+/** A student's overview of a test: rules, their attempts, attempts left. */
+export const studentTestQuery = (testId: string) =>
+  queryOptions({
+    queryKey: ['tests', testId],
+    queryFn: () => apiFetch<StudentTest>(`/tests/${encodeURIComponent(testId)}`),
+  });
+
+/** An attempt in progress. The runner owns the answers, so this is never refetched. */
+export const attemptQuery = (attemptId: string) =>
+  queryOptions({
+    queryKey: ['attempts', attemptId],
+    queryFn: () => apiFetch<AttemptSession>(`/attempts/${encodeURIComponent(attemptId)}`),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+
 // ---- Admin ----
+
+export const adminStatsQuery = queryOptions({
+  queryKey: ['admin', 'stats'],
+  queryFn: () => apiFetch<AdminStats>('/admin/stats'),
+});
 
 export interface UsersQueryParams {
   page: number;

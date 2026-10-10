@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { PendingEnrollments } from '@/components/admin/pending-enrollments';
+import { PlatformStats } from '@/components/admin/platform-stats';
 import { UserStats } from '@/components/admin/user-stats';
 import { PageHeader } from '@/components/page-header';
 
@@ -10,9 +11,10 @@ export default function AdminPage() {
     <>
       <PageHeader
         title="Admin overview"
-        description="What needs your attention, and accounts by role."
+        description="What needs your attention, how the platform is doing, and accounts by role."
       />
       <PendingEnrollments />
+      <PlatformStats />
       <UserStats />
     </>
   );
