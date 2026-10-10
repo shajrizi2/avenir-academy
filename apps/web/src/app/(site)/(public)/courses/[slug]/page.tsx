@@ -1,28 +1,22 @@
 import type { CourseDetail } from '@ai-academy/shared';
-import { ArrowLeft, CalendarDays, Layers, Video } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Clock, Layers, UserRound, Video } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { EnrollButton } from '@/components/course/enroll-button';
-import { ModuleList } from '@/components/course/module-list';
+import { ModulePath } from '@/components/course/module-path';
+import { trackTheme } from '@/components/course/track-theme';
 import { LocalDateTime } from '@/components/local-date-time';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApiError } from '@/lib/api';
 import { serverGet } from '@/lib/server-api';
+import { cn } from '@/lib/utils';
 
 export default function CourseDetailPage({ params }: PageProps<'/courses/[slug]'>) {
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6">
-      <Link
-        href="/courses"
-        className="text-muted-foreground inline-flex items-center gap-1 text-sm hover:text-slate-900"
-      >
-        <ArrowLeft className="size-4" aria-hidden /> All courses
-      </Link>
-      <Suspense fallback={<CourseDetailSkeleton />}>
-        <CourseDetailContent params={params} />
-      </Suspense>
-    </div>
+    <Suspense fallback={<CourseDetailSkeleton />}>
+      <CourseDetailContent params={params} />
+    </Suspense>
   );
 }
 
@@ -35,63 +29,125 @@ async function CourseDetailContent({ params }: Pick<PageProps<'/courses/[slug]'>
     if (error instanceof ApiError && error.status === 404) notFound();
     throw error;
   }
+  const theme = trackTheme(course.slug);
 
   return (
-    <article className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-8">
-        <header className="space-y-3">
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">{course.title}</h1>
-          <p className="text-lg text-slate-600">{course.summary}</p>
-        </header>
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-900">About this course</h2>
-          <p className="whitespace-pre-line text-slate-700">{course.description}</p>
-        </section>
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-slate-900">Modules</h2>
-          <ModuleList modules={course.modules} />
-        </section>
-      </div>
-
-      <aside className="lg:sticky lg:top-24 lg:self-start">
-        <div className="space-y-4 rounded-xl border bg-white p-6">
-          <ul className="space-y-3 text-sm text-slate-700">
-            <li className="flex items-center gap-2">
-              <Layers className="text-muted-foreground size-4" aria-hidden />
-              {course.modules.length} modules, about one month each
-            </li>
-            <li className="flex items-center gap-2">
-              <Video className="text-muted-foreground size-4" aria-hidden />
-              Live classes on Google Meet
-            </li>
-            {course.startDate && (
-              <li className="flex items-center gap-2">
-                <CalendarDays className="text-muted-foreground size-4" aria-hidden />
-                <span>
-                  Starts <LocalDateTime value={course.startDate} options={{ dateStyle: 'long' }} />
-                </span>
-              </li>
-            )}
-          </ul>
-          <EnrollButton courseId={course.id} courseSlug={course.slug} />
-          <p className="text-muted-foreground text-xs">
-            Enrollment is confirmed manually by our team. No payment is taken online.
-          </p>
+    <article>
+      <header className={cn('border-line border-b', theme.tint)}>
+        <div className="mx-auto grid w-full max-w-[1200px] items-center gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1fr_280px] lg:py-16">
+          <div>
+            <BackLink />
+            <span
+              className={cn(
+                'border-ink text-ink mt-6 flex size-14 items-center justify-center rounded-2xl border-2 shadow-[0_3px_0_var(--ink)]',
+                theme.fill,
+              )}
+            >
+              <theme.Icon className="size-7" aria-hidden />
+            </span>
+            <h1 className="text-ink text-heading lg:text-title mt-5 font-extrabold text-balance">
+              {course.title}
+            </h1>
+            <p className="text-ink mt-3 max-w-2xl text-lg">{course.summary}</p>
+          </div>
+          <theme.Illustration className="hidden md:block" />
         </div>
-      </aside>
+      </header>
+
+      <div className="mx-auto grid w-full max-w-[1200px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_340px] lg:py-16">
+        <div className="space-y-12">
+          <section className="space-y-3">
+            <h2 className="text-ink text-subheading font-extrabold">About this course</h2>
+            <p className="text-ink-soft text-lg leading-8 whitespace-pre-line">
+              {course.description}
+            </p>
+          </section>
+          <section className="space-y-6">
+            <h2 className="text-ink text-subheading font-extrabold">Modules</h2>
+            <ModulePath
+              accent={theme.fill}
+              steps={course.modules.map((module, i) => ({
+                ...module,
+                caption: `Module ${module.order} · ${i === 0 ? 'Starts here' : `Unlocks after module ${module.order - 1}`}`,
+                children: (
+                  <div className="mt-1 space-y-2">
+                    <p className="text-ink-soft">{module.description}</p>
+                    <div className="text-ink-soft flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Clock className="size-4" aria-hidden />
+                        {module.durationWeeks} weeks · live on Google Meet · ends with a test
+                      </span>
+                      {module.instructor && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <UserRound className="size-4" aria-hidden />
+                          {module.instructor.firstName} {module.instructor.lastName}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ),
+              }))}
+            />
+          </section>
+        </div>
+
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <div className="border-ink rounded-card bg-background space-y-5 border-2 p-6 shadow-[0_6px_0_var(--ink)]">
+            <ul className="text-ink space-y-3">
+              <li className="flex items-center gap-3">
+                <Layers className="text-ink-soft size-5" aria-hidden />
+                {course.modules.length} modules, about one month each
+              </li>
+              <li className="flex items-center gap-3">
+                <Video className="text-ink-soft size-5" aria-hidden />
+                Live classes on Google Meet
+              </li>
+              {course.startDate && (
+                <li className="flex items-center gap-3">
+                  <CalendarDays className="text-ink-soft size-5" aria-hidden />
+                  <span>
+                    Starts{' '}
+                    <LocalDateTime value={course.startDate} options={{ dateStyle: 'long' }} />
+                  </span>
+                </li>
+              )}
+            </ul>
+            <EnrollButton courseId={course.id} courseSlug={course.slug} />
+            <p className="text-ink-soft text-sm">
+              Enrollment is confirmed manually by our team. No payment is taken online.
+            </p>
+          </div>
+        </aside>
+      </div>
     </article>
+  );
+}
+
+function BackLink() {
+  return (
+    <Link
+      href="/courses"
+      className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
+    >
+      <ArrowLeft className="size-4" aria-hidden /> All courses
+    </Link>
   );
 }
 
 function CourseDetailSkeleton() {
   return (
-    <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-4">
-        <Skeleton className="h-9 w-2/3" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-40 w-full rounded-xl" />
+    <div>
+      <div className="bg-background border-line border-b">
+        <div className="mx-auto w-full max-w-[1200px] space-y-4 px-4 py-10 sm:px-6 lg:py-16">
+          <BackLink />
+          <Skeleton className="h-12 w-2/3" />
+          <Skeleton className="h-6 w-full max-w-xl" />
+        </div>
       </div>
-      <Skeleton className="h-56 rounded-xl" />
+      <div className="mx-auto grid w-full max-w-[1200px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_340px]">
+        <Skeleton className="rounded-card h-80" />
+        <Skeleton className="rounded-card h-64" />
+      </div>
     </div>
   );
 }

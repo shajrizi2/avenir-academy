@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function CoursesPage() {
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-8 px-4 py-12 sm:px-6">
+    <div className="mx-auto w-full max-w-[1200px] space-y-10 px-4 py-12 sm:px-6 lg:py-16">
       <PageHeader
         title="Courses"
         description="Each course has four monthly modules taught live on Google Meet. Pass each module's test to unlock the next."

@@ -1,6 +1,9 @@
+import type { Paginated } from '@ai-academy/shared';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { EnrollmentStatus, type Prisma } from '../../generated/prisma/client.js';
+import { EnrollmentStatus, ModuleStatus, type Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import type { DecideEnrollmentDto } from './dto/decide-enrollment.dto.js';
+import type { ListEnrollmentsQueryDto } from './dto/list-enrollments-query.dto.js';
 
 const enrollmentSelect = {
   id: true,
@@ -12,10 +15,29 @@ const enrollmentSelect = {
 
 export type EnrollmentRecord = Prisma.EnrollmentGetPayload<{ select: typeof enrollmentSelect }>;
 
-/**
- * Student side of enrollment (Sprint 1). Admin approval, which creates the ModuleProgress
- * rows, arrives in Sprint 2.
- */
+const adminEnrollmentSelect = {
+  id: true,
+  status: true,
+  note: true,
+  createdAt: true,
+  decidedAt: true,
+  user: { select: { id: true, firstName: true, lastName: true, email: true } },
+  course: { select: { id: true, slug: true, title: true } },
+} as const satisfies Prisma.EnrollmentSelect;
+
+export type AdminEnrollmentRecord = Prisma.EnrollmentGetPayload<{
+  select: typeof adminEnrollmentSelect;
+}>;
+
+/** Which decisions an admin may make from each status. */
+const ALLOWED_DECISIONS: Record<EnrollmentStatus, EnrollmentStatus[]> = {
+  PENDING: [EnrollmentStatus.APPROVED, EnrollmentStatus.REJECTED],
+  REJECTED: [EnrollmentStatus.APPROVED],
+  APPROVED: [],
+  CANCELLED: [],
+};
+
+/** Students request a place; admins approve (which opens module 1) or reject. */
 @Injectable()
 export class EnrollmentsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -57,6 +79,66 @@ export class EnrollmentsService {
       where: { userId },
       orderBy: { createdAt: 'desc' },
       select: enrollmentSelect,
+    });
+  }
+
+  async listForAdmin(query: ListEnrollmentsQueryDto): Promise<Paginated<AdminEnrollmentRecord>> {
+    const where: Prisma.EnrollmentWhereInput = { status: query.status, courseId: query.courseId };
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.enrollment.findMany({
+        where,
+        // Oldest pending requests first, so the queue is worked in order.
+        orderBy: { createdAt: query.status === EnrollmentStatus.PENDING ? 'asc' : 'desc' },
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+        select: adminEnrollmentSelect,
+      }),
+      this.prisma.enrollment.count({ where }),
+    ]);
+    return { items, total, page: query.page, pageSize: query.pageSize };
+  }
+
+  /**
+   * Approves or rejects a request. Approving creates one ModuleProgress row per module in the
+   * same transaction: module 1 ACTIVE, the rest LOCKED (existing rows are kept).
+   */
+  decide(id: string, dto: DecideEnrollmentDto): Promise<AdminEnrollmentRecord> {
+    return this.prisma.$transaction(async (tx) => {
+      const enrollment = await tx.enrollment.findUnique({
+        where: { id },
+        select: { status: true, userId: true, courseId: true },
+      });
+      if (!enrollment) throw new NotFoundException('Enrollment not found');
+      if (!ALLOWED_DECISIONS[enrollment.status].includes(dto.status)) {
+        throw new ConflictException(
+          `This request is ${enrollment.status.toLowerCase()} and can't be ${dto.status.toLowerCase()}`,
+        );
+      }
+
+      const now = new Date();
+      const updated = await tx.enrollment.update({
+        where: { id },
+        data: { status: dto.status, note: dto.note, decidedAt: now },
+        select: adminEnrollmentSelect,
+      });
+
+      if (dto.status === EnrollmentStatus.APPROVED) {
+        const modules = await tx.module.findMany({
+          where: { courseId: enrollment.courseId },
+          orderBy: { order: 'asc' },
+          select: { id: true },
+        });
+        await tx.moduleProgress.createMany({
+          data: modules.map((module, index) => ({
+            userId: enrollment.userId,
+            moduleId: module.id,
+            status: index === 0 ? ModuleStatus.ACTIVE : ModuleStatus.LOCKED,
+            unlockedAt: index === 0 ? now : null,
+          })),
+          skipDuplicates: true,
+        });
+      }
+      return updated;
     });
   }
 }

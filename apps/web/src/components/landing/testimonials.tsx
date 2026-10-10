@@ -14,25 +14,20 @@ export async function Testimonials() {
   if (testimonials.length === 0) return null;
 
   return (
-    <LandingSection
-      id="testimonials"
-      tone="muted"
-      eyebrow={t.testimonials.eyebrow}
-      title={t.testimonials.title}
-    >
+    <LandingSection id="testimonials" eyebrow={t.testimonials.eyebrow} title={t.testimonials.title}>
       <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {testimonials.map((item) => (
           <li key={item.id}>
-            <figure className="reveal flex h-full flex-col rounded-xl border bg-white p-6">
-              <Quote className="size-6 text-indigo-300" aria-hidden />
-              <blockquote className="mt-3 flex-1 leading-7 text-slate-700">
+            <figure className="reveal border-line rounded-card bg-background flex h-full flex-col border p-6 sm:p-8">
+              <Quote className="text-track-ai size-8" aria-hidden />
+              <blockquote className="text-ink mt-4 flex-1 text-lg leading-8">
                 <p>{item.quote}</p>
               </blockquote>
               <figcaption className="mt-6 flex items-center gap-3">
                 <PersonAvatar name={item.name} src={item.avatarUrl} size={44} />
                 <span>
-                  <span className="block font-semibold text-slate-900">{item.name}</span>
-                  {item.role && <span className="block text-sm text-slate-600">{item.role}</span>}
+                  <span className="text-ink block font-bold">{item.name}</span>
+                  {item.role && <span className="text-ink-soft block text-sm">{item.role}</span>}
                 </span>
               </figcaption>
             </figure>

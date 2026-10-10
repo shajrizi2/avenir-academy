@@ -13,7 +13,7 @@ export async function Audience() {
       <ul className="flex flex-wrap justify-center gap-6">
         {t.audience.items.map((item, i) => (
           <li key={item.title} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc((100%-48px)/3)]">
-            <FeatureCard icon={ICONS[i]} title={item.title} text={item.text} />
+            <FeatureCard icon={ICONS[i]} title={item.title} text={item.text} tone={i} />
           </li>
         ))}
       </ul>

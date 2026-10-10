@@ -13,7 +13,7 @@ export default function AdminUsersPage() {
         title="Users"
         description="Find accounts and change their role. Instructors can manage modules assigned to them."
       />
-      <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+      <Suspense fallback={<Skeleton className="rounded-card h-64 w-full" />}>
         <UserManagement />
       </Suspense>
     </>

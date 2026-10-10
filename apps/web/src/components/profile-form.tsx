@@ -132,7 +132,11 @@ export function ProfileForm({ user }: { user: PublicUser }) {
         )}
 
         <div>
-          <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isDirty}>
+          <Button
+            type="submit"
+            variant="chunky"
+            disabled={form.formState.isSubmitting || !form.formState.isDirty}
+          >
             {form.formState.isSubmitting ? 'Saving…' : 'Save changes'}
           </Button>
         </div>

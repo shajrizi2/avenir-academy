@@ -79,7 +79,7 @@ export function RegisterForm() {
           type="password"
           autoComplete="new-password"
         />
-        <Button type="submit" size="lg" disabled={form.formState.isSubmitting}>
+        <Button type="submit" variant="chunky" size="lg" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Creating account…' : 'Create account'}
         </Button>
       </FieldGroup>

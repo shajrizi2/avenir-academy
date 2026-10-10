@@ -90,26 +90,27 @@ Changes to the data model need the product owner's approval first.
 | auth        | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/forgot-password`, `/auth/reset-password`                                                                                                                                                          |
 | users       | `GET/PATCH /users/me`; `GET /users`, `PATCH /users/:id/role` (admin)                                                                                                                                                                                                            |
 | courses     | `GET /courses`, `GET /courses/:slug` (public); `POST/PATCH/DELETE` (admin)                                                                                                                                                                                                      |
-| modules     | `POST /courses/:id/modules`, `PATCH /modules/:id` (admin); `GET /modules/:id` (enrolled + unlocked)                                                                                                                                                                             |
-| enrollments | `POST /courses/:id/enroll` (student); `GET /enrollments?status=PENDING`, `PATCH /enrollments/:id` approve/reject (admin; approving creates the ModuleProgress rows)                                                                                                             |
-| sessions    | `POST /modules/:id/sessions`, `PATCH /sessions/:id`, `PUT /sessions/:id/attendance` (instructor/admin); `GET /me/sessions/upcoming` (student)                                                                                                                                   |
-| materials   | `POST /modules/:id/materials` (multipart or link), `DELETE /materials/:id`                                                                                                                                                                                                      |
+| modules     | `POST /courses/:id/modules`, `PATCH /modules/:id`, `DELETE /modules/:id` (last module, nobody started; admin); `GET /modules/:id` (enrolled + unlocked, the module's instructor, admins); `GET /me/modules` (instructor/admin); `GET /me/courses/:slug` (approved student)      |
+| enrollments | `POST /courses/:id/enroll`, `GET /me/enrollments` (student); `GET /enrollments?status=&courseId=`, `PATCH /enrollments/:id` approve/reject (admin; approving creates the ModuleProgress rows)                                                                                   |
+| sessions    | `GET/POST /modules/:id/sessions`, `PATCH/DELETE /sessions/:id`, `GET/PUT /sessions/:id/attendance` (instructor of the module/admin); `GET /me/sessions/upcoming` (student)                                                                                                      |
+| materials   | `POST /modules/:id/materials` (JSON link or multipart file), `DELETE /materials/:id` (instructor/admin); `GET /materials/:id/download` (same access as `GET /modules/:id`)                                                                                                      |
 | tests       | `POST /modules/:id/test`, `PUT /tests/:id/questions`, `PATCH /tests/:id/publish`; `POST /tests/:id/attempts` (student, response contains no answers); `PATCH /attempts/:id`; `POST /attempts/:id/submit`; `GET /tests/:id/results`; `PATCH /progress/:id` (manual unlock/reset) |
 | progress    | `GET /me/progress`                                                                                                                                                                                                                                                              |
-| landing     | `GET /instructors`, `GET /testimonials?locale=`, `GET /site-settings` (public); `PATCH /site-settings` (admin)                                                                                                                                                                  |
+| landing     | `GET /instructors`, `GET /testimonials?locale=`, `GET /site-settings` (public); `PATCH /site-settings`, `GET /testimonials?all=true`, `POST/PATCH/DELETE /testimonials/:id`, `PATCH /users/:id/profile` (admin)                                                                 |
 
 ## 6. Pages (Next.js)
 
 - **Public:** `/` (redirects to `/sq` or `/en`), `/[locale]` landing page, `/courses`, `/courses/[slug]`, `/register`, `/login`, `/forgot-password` (+ `/reset-password`)
-- **Student:** `/dashboard`, `/learn/[courseSlug]`, `/learn/[courseSlug]/[moduleId]` (sessions with a "Join on Google Meet" button that becomes active 15 minutes before the start, materials, a test card), `/tests/[testId]`, `/tests/[testId]/result`, `/profile`
-- **Admin:** `/admin`, `/admin/enrollments`, `/admin/courses`, `/admin/courses/[id]`, `/admin/modules/[id]/sessions`, `/admin/modules/[id]/materials`, `/admin/modules/[id]/test`, `/admin/modules/[id]/results`, `/admin/users`
+- **Student:** `/dashboard` (upcoming sessions, my courses), `/learn/[courseSlug]`, `/learn/[courseSlug]/[moduleId]` (sessions with a "Join on Google Meet" button that becomes active 15 minutes before the start, materials, a test card in S3), `/tests/[testId]`, `/tests/[testId]/result`, `/profile`
+- **Instructor (and admin):** `/teach` (my modules), `/teach/modules/[id]` (sessions and materials; the test and results pages join it in S3), `/teach/sessions/[id]` (attendance). See D14.
+- **Admin:** `/admin`, `/admin/enrollments`, `/admin/courses`, `/admin/courses/[id]` (details, modules, instructor assignment), `/admin/users`, `/admin/instructors`, `/admin/testimonials`, `/admin/settings`
 
 ### Design
 
-- Simple and clean. Inter font, one primary colour (indigo-600), slate neutrals.
+- Clean, bright and playful, "learn by doing" (D12). Plus Jakarta Sans; ink (#141414) as the primary colour on white and a warm off-white (#F7F6F3); violet for the AI track and orange for the marketing track. The full system is at `/design` (dev only), and the rules are in CLAUDE.md.
 - Status colours: **green** = passed, **amber** = active, **slate** = locked, **red** = failed.
 - Every module status is shown the same way: a badge, plus a lock icon when the module is locked.
-- Cards have a 12px radius. Spacing follows an 8px grid. Content is at most 1200px wide.
+- Cards have a 16px radius, buttons 14px, pills fully round. Primary buttons and clickable cards are "pressable" (2px outline and a solid bottom shadow). Spacing follows an 8px grid. Content is at most 1200px wide.
 - Mobile-first: every page must be usable at 375px.
 - Times are stored in UTC and shown in the viewer's local time.
 
@@ -117,21 +118,22 @@ Changes to the data model need the product owner's approval first.
 
 The page has one goal: a registration. Its sections, in order, each a component in `apps/web/src/components/landing/`:
 
-1. **Hero:** headline, one-line promise, "next cohort starts <date>" badge, "Register now" (→ `/register`) and "See courses" (→ `#tracks`). Beside them, an HTML/CSS visual of the module path (lock → unlocked).
-2. **Why now:** three points, with no invented statistics.
-3. **How it works:** Register → live classes on Google Meet → monthly test → next module unlocks, then a CTA.
-4. **Tracks** (`#tracks`): the published courses from the API, each with its 4 modules in order, ~1 month per module, a language badge, and "View track".
-5. **Who it's for:** professionals, business owners, marketers, students, career changers.
-6. **Why us:** live instructors, practical projects, taught in Albanian, progress proven by tests, one module at a time, support between classes.
-7. **Instructors:** users with role INSTRUCTOR (photo, name, title, bio). Hidden when there are none.
-8. **Testimonials:** only real, published ones for the current locale; the section is hidden otherwise.
-9. **Next cohort and price:** values from `SiteSettings`, so they change without a deploy. Then "Reserve your seat".
-10. **FAQ:** 8 questions in an accordion.
-11. **Final CTA band** with contact details (email, phone, WhatsApp), then the footer.
+1. **Hero:** centered headline, one-line promise, "next cohort starts <date>" badge, "I want to learn" (→ `/register`) and "See courses" (→ `#tracks`). Below them, topic tabs (AI Basics, AI Coding, Digital Marketing, AI at Work) that switch an interactive demo card: one quiz question with instant feedback and an explanation, then "This is how our monthly tests feel → Start now".
+2. **Proof band:** three big numbers that are true for every cohort (4 modules per track, 100% live classes, 70% to pass). No learner counts or reviews.
+3. **Why now:** three points, with no invented statistics.
+4. **How it works:** Register → live classes on Google Meet → monthly test → next module unlocks, as alternating illustrated rows, then a CTA.
+5. **Tracks** (`#tracks`): the published courses from the API in their track tint, each with its 4 modules as a path (module 1 open, the rest locked), ~1 month per module, a language badge, and "View track".
+6. **Who it's for:** professionals, business owners, marketers, students, career changers.
+7. **Why us:** live instructors, practical projects and taught in Albanian as illustrated rows; progress proven by tests, one module at a time and support between classes as cards.
+8. **Instructors:** users with role INSTRUCTOR (photo, name, title, bio). Hidden when there are none.
+9. **Testimonials:** only real, published ones for the current locale; the section is hidden otherwise.
+10. **Next cohort and price:** values from `SiteSettings`, so they change without a deploy. Then "Reserve your seat".
+11. **FAQ:** 8 questions in an accordion.
+12. **Final CTA band** (black, white chunky button) with contact details (email, phone, WhatsApp), then a footer with Platform / Courses / Company / Contact columns and the language switch.
 
 Other requirements:
 
-- **Header and mobile:** a sticky header with anchors, a language switch, Login and Register. On phones, a sheet menu and a sticky bottom "Register now" bar.
+- **Header and mobile:** a sticky white header with anchors in the middle, a language switch, a "Log in" text link and a chunky "Start now" button. On phones, a sheet menu and a sticky bottom "Register now" bar.
 - **Copy:** in `apps/web/messages/{sq,en}.json` (`landing` namespace). Albanian is written natively, not translated.
 - **SEO:** server-rendered, per-locale metadata, hreflang alternates, Open Graph image, `sitemap.xml`, `robots.txt`, and JSON-LD (EducationalOrganization, Course list, FAQPage).
 - **Analytics:** every CTA calls `track('cta_click', { cta, href, locale })`. It is a no-op until GA or Plausible is chosen.
@@ -156,7 +158,7 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **Profile:** instructors can edit their public profile (title, bio, photo) on `/profile`.
 - **Tests:** Playwright tests for `/sq` and `/en`.
 
-### S2: Enrollment + sessions + materials
+### S2: Enrollment + sessions + materials ✅
 
 - **Enrollments:** the admin approval queue (approving creates ModuleProgress rows) and the student "My courses" view.
 - **Admin course and module management:** CRUD pages and instructor assignment.
@@ -198,3 +200,8 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **D9.** The app has two root layouts: `app/[locale]/layout.tsx` (`<html lang="sq|en">`) and `app/(site)/layout.tsx` (`lang="en"`), plus `global-not-found.tsx` (an experimental flag). Navigating between them is a full page load, which is acceptable for landing → register.
 - **D10.** Landing values that change often (cohort date, schedule, seats, price, contact) live in a `SiteSettings` database row, not a config file, so they change without a deploy. The page renders them per request.
 - **D11.** Course and module titles and descriptions come from the database in English, so on `/sq` the track cards show English course content inside Albanian copy. Localizing that content would need per-locale fields, which is a data-model change for the product owner to decide.
+- **D12.** Design refresh before S2: the indigo/slate look was replaced by a brighter, playful "learn by doing" system (ink primary, warm off-white, violet/orange track accents, pressable buttons and cards, original SVG illustrations, an interactive quiz in the hero). All of it is our own work; nothing is copied from reference sites. Tokens live in `globals.css` and are reviewed at `/design`.
+- **D13.** A course's accent colour is derived from its slug (`marketing` in the slug → orange, otherwise violet) because courses have no category field. Adding one is a schema change for the product owner to decide.
+- **D14.** Module management (sessions, attendance, materials) lives under `/teach/*`, not `/admin/modules/*`: instructors need the same pages for their own modules, and `/admin/*` is admin-only. Admins reach them from the course editor. The API still checks `module.instructorId === user.id` for instructors.
+- **D15.** Uploaded materials are stored on the API server's disk (`UPLOAD_DIR`, default `apps/api/uploads`, gitignored), behind a small `StorageService` so an object store can replace it later. That needs a paid service, so the product owner decides. Files are at most 20 MB, use an allow-list of extensions, and are only downloadable through `GET /materials/:id/download` with the same access rules as the module page (always as an attachment, `nosniff`). A production deploy needs a persistent, backed-up volume for that folder.
+- **D16.** The server, not the browser, enforces the join window: students get a session's Meet link only from 15 minutes before the start until it ends; staff always see it. Pages with Join buttons refetch every 30 seconds.

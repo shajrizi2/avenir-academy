@@ -1,7 +1,6 @@
 import type { Locale } from '@ai-academy/shared';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
-import { Button } from '@/components/ui/button';
 import type { LandingMessages } from '@/i18n/messages';
 import { CtaLink } from './cta-link';
 import { LanguageSwitch } from './language-switch';
@@ -21,32 +20,35 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between gap-4 px-4 sm:px-6">
+    <header className="border-line bg-background/90 sticky top-0 z-40 border-b backdrop-blur-md">
+      <div className="mx-auto grid h-16 w-full max-w-[1200px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 md:h-20 md:grid-cols-[1fr_auto_1fr]">
         <Logo href={`/${locale}`} />
         <nav aria-label={nav.label} className="hidden items-center gap-1 md:flex">
           {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              className="text-ink-soft hover:bg-soft hover:text-ink rounded-full px-4 py-2 text-sm font-semibold"
             >
               {link.label}
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center justify-end gap-1 sm:gap-2">
           <LanguageSwitch
             target={otherLocale}
             label={nav.switchTo}
             srLabel={nav.language}
-            className="hidden md:inline-flex"
+            className="hidden lg:inline-flex"
           />
-          <Button asChild variant="ghost" className="hidden md:inline-flex">
-            <Link href="/login">{nav.login}</Link>
-          </Button>
-          <CtaLink href="/register" cta="header_register" locale={locale}>
-            {nav.register}
+          <Link
+            href="/login"
+            className="text-ink hidden rounded-lg px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline md:inline-flex"
+          >
+            {nav.login}
+          </Link>
+          <CtaLink href="/register" cta="header_register" locale={locale} variant="chunky">
+            {nav.cta}
           </CtaLink>
           <div className="md:hidden">
             <MobileMenu locale={locale} otherLocale={otherLocale} links={links} nav={nav} />

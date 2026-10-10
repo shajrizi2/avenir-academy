@@ -15,8 +15,8 @@ export function AppShell({ role, children }: { role: Role; children: React.React
 
   return (
     <div className="flex min-h-screen flex-1">
-      <aside className="hidden w-64 shrink-0 flex-col gap-6 border-r bg-white p-4 md:flex">
-        <div className="px-2 pt-2">
+      <aside className="border-line bg-background sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-8 border-r p-4 md:flex">
+        <div className="px-3 pt-3">
           <Logo />
         </div>
         <Suspense>
@@ -25,7 +25,7 @@ export function AppShell({ role, children }: { role: Role; children: React.React
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b bg-white/90 px-4 backdrop-blur sm:px-6">
+        <header className="border-line bg-background/90 sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b px-4 backdrop-blur-md sm:px-6">
           <div className="flex items-center gap-2 md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
@@ -52,7 +52,7 @@ export function AppShell({ role, children }: { role: Role; children: React.React
             <UserMenu />
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1200px] flex-1 space-y-8 px-4 py-8 sm:px-6">
+        <main className="mx-auto w-full max-w-[1200px] flex-1 space-y-8 px-4 py-8 sm:px-6 lg:py-12">
           {children}
         </main>
       </div>

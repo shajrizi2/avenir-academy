@@ -29,6 +29,7 @@
       "faq": "Pyetje",
       "login": "Hyr",
       "register": "Regjistrohu",
+      "cta": "Fillo tani",
       "openMenu": "Hap menynë",
       "menuTitle": "Menyja",
       "language": "Gjuha",
@@ -40,23 +41,79 @@
       "subtitle": "Kurse live në Google Meet me instruktorë të vërtetë, teste mujore dhe një rrugë të qartë: nga bazat e AI-së deri te kodimi dhe marketingu digjital.",
       "badgeCohort": "Grupi i ardhshëm nis më {date}",
       "badgeOpen": "Regjistrimet janë të hapura",
-      "ctaPrimary": "Regjistrohu tani",
+      "ctaPrimary": "Dua të mësoj",
       "ctaSecondary": "Shiko kurset",
       "trust": "Regjistrimi është falas. Paguan vetëm pasi të konfirmohet vendi yt.",
-      "path": {
-        "label": "Shembull i rrugës së mësimit, modul pas moduli",
-        "title": "Rruga jote",
-        "course": "AI Foundations",
-        "progress": "1 nga 4 module të kaluara",
-        "moduleLabel": "Moduli {number}",
-        "modules": ["Bazat e AI-së", "Integrimi i AI-së", "Kodimi me AI", "AI në profesionin tënd"],
-        "status": {
-          "passed": "Kaluar",
-          "active": "Aktiv",
-          "locked": "I kyçur"
-        },
-        "footnote": "Kalo testin mujor dhe hapet moduli tjetër."
+      "demo": {
+        "eyebrow": "Provo një pyetje",
+        "tablistLabel": "Zgjidh një temë",
+        "correct": "Saktë!",
+        "incorrect": "Jo tamam.",
+        "tryAgain": "Provo sërish",
+        "outro": "Kështu ndihen testet tona mujore.",
+        "cta": "Fillo tani",
+        "topics": [
+          {
+            "tab": "Bazat e AI-së",
+            "question": "Cili prompt merr përgjigjen më të mirë?",
+            "options": [
+              "Shkruaj diçka për marketingun.",
+              "Shkruaj 3 përshkrime për Instagram për kroasantin e ri të një furre buke, me ton miqësor, nën 20 fjalë secili."
+            ],
+            "answer": 1,
+            "explanation": "Prompt-et specifike, me kontekst, format dhe ton, i japin AI-së atë që i duhet për të ndihmuar."
+          },
+          {
+            "tab": "Kodimi me AI",
+            "question": "Kodi që të dha AI-ja nuk punon. Cili është hapi më i mirë?",
+            "options": [
+              "Ngjit mesazhin e saktë të gabimit dhe kërkoji ta shpjegojë e ta rregullojë.",
+              "Bëj të njëjtën pyetje sërish.",
+              "Hiqe dorë, AI-ja nuk di të kodojë."
+            ],
+            "answer": 0,
+            "explanation": "AI-ja e rregullon kodin më mirë kur e sheh gabimin real. Leximin e gabimeve e praktikojmë në klasë."
+          },
+          {
+            "tab": "Marketingu digjital",
+            "question": "Cili objektiv matet më lehtë?",
+            "options": [
+              "Më shumë ndjekës.",
+              "50 regjistrime nga reklamat në Instagram brenda 30 ditëve."
+            ],
+            "answer": 1,
+            "explanation": "Objektivat specifikë, të matshëm dhe me afat të tregojnë saktë çfarë po funksionon."
+          },
+          {
+            "tab": "AI në punë",
+            "question": "Një mjet AI të jep një statistikë për raportin e klientit. Çfarë bën?",
+            "options": [
+              "E vendos direkt në raport.",
+              "I heq të gjithë numrat.",
+              "E verifikoj fillimisht në një burim të besueshëm."
+            ],
+            "answer": 2,
+            "explanation": "AI-ja mund të tingëllojë e sigurt dhe prapë të gabojë. Verifiko faktet para se t’i ndash."
+          }
+        ]
       }
+    },
+    "proof": {
+      "label": "AI Academy në shifra",
+      "items": [
+        {
+          "value": "4",
+          "label": "module mujore në çdo program"
+        },
+        {
+          "value": "100%",
+          "label": "e klasave janë live, me instruktor të vërtetë"
+        },
+        {
+          "value": "70%",
+          "label": "mjafton për të kaluar testin e çdo moduli"
+        }
+      ]
     },
     "whyNow": {
       "eyebrow": "Pse tani",
@@ -108,7 +165,10 @@
       "perModule": "~1 muaj për modul",
       "modulesLabel": "Modulet e programit",
       "viewTrack": "Shiko programin",
-      "unavailable": "Programet nuk u ngarkuan dot për momentin. Provo sërish pas pak."
+      "unavailable": "Programet nuk u ngarkuan dot për momentin. Provo sërish pas pak.",
+      "moduleLabel": "Moduli {number}",
+      "startHere": "Nis këtu",
+      "lockedUntil": "Hapet pas modulit {number}"
     },
     "audience": {
       "eyebrow": "Për kë është",
@@ -244,7 +304,12 @@
       "tagline": "Kurse live për AI dhe marketing digjital, në shqip.",
       "navLabel": "Lidhje në fund të faqes",
       "courses": "Kurset",
-      "rights": "Të gjitha të drejtat e rezervuara."
+      "rights": "Të gjitha të drejtat e rezervuara.",
+      "platform": "Platforma",
+      "company": "Kompania",
+      "contact": "Kontakt",
+      "allCourses": "Të gjitha kurset",
+      "contactSoon": "Kontaktet publikohen së shpejti."
     },
     "mobileBar": {
       "cta": "Regjistrohu tani"

@@ -9,8 +9,11 @@ import { type EnvironmentVariables, validateEnv } from './config/env.validation.
 import { HealthController } from './health/health.controller.js';
 import { MailModule } from './mail/mail.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { CourseModulesModule } from './modules/course-modules/course-modules.module.js';
 import { CoursesModule } from './modules/courses/courses.module.js';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module.js';
+import { MaterialsModule } from './modules/materials/materials.module.js';
+import { SessionsModule } from './modules/sessions/sessions.module.js';
 import { SiteSettingsModule } from './modules/site-settings/site-settings.module.js';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module.js';
 import { UsersModule } from './modules/users/users.module.js';
@@ -31,6 +34,9 @@ import { PrismaModule } from './prisma/prisma.module.js';
     UsersModule,
     CoursesModule,
     EnrollmentsModule,
+    CourseModulesModule,
+    SessionsModule,
+    MaterialsModule,
     SiteSettingsModule,
     TestimonialsModule,
   ],

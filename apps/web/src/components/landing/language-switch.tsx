@@ -26,7 +26,7 @@ export function LanguageSwitch({ target, label, srLabel, className }: LanguageSw
         document.cookie = `${LOCALE_COOKIE}=${target}; path=/; max-age=31536000; samesite=lax`;
       }}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+        'text-ink-soft hover:bg-soft hover:text-ink inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold',
         className,
       )}
     >

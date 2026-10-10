@@ -1,17 +1,31 @@
 import * as React from 'react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
+
+const cardVariants = {
+  /** Static content: 1px border, no shadow. */
+  default: 'border border-line',
+  /** Clickable card: 2px outline and a solid bottom shadow that lifts on hover. */
+  pressable:
+    'pressable border-line-strong [--press:var(--border-strong)] hover:border-ink hover:[--press:var(--ink)]',
+} as const;
 
 function Card({
   className,
   size = 'default',
+  variant = 'default',
   ...props
-}: React.ComponentProps<'div'> & { size?: 'default' | 'sm' }) {
+}: React.ComponentProps<'div'> & {
+  size?: 'default' | 'sm';
+  variant?: keyof typeof cardVariants;
+}) {
   return (
     <div
       data-slot="card"
       data-size={size}
+      data-variant={variant}
       className={cn(
-        'group/card bg-card text-card-foreground ring-foreground/10 flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl py-(--card-spacing) text-sm ring-1 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
+        'group/card bg-card text-card-foreground rounded-card flex flex-col gap-(--card-spacing) overflow-hidden py-(--card-spacing) text-sm [--card-spacing:--spacing(6)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-card *:[img:last-child]:rounded-b-card',
+        cardVariants[variant],
         className,
       )}
       {...props}
@@ -24,7 +38,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-header"
       className={cn(
-        'group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)',
+        'group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-card px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)',
         className,
       )}
       {...props}
@@ -32,12 +46,17 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
+/** A div by default; pass `as="h2"` (or h3) when the title heads a page section. */
+function CardTitle({
+  className,
+  as: Comp = 'div',
+  ...props
+}: React.ComponentProps<'div'> & { as?: 'div' | 'h2' | 'h3' }) {
   return (
-    <div
+    <Comp
       data-slot="card-title"
       className={cn(
-        'font-heading text-base leading-snug font-medium group-data-[size=sm]/card:text-sm',
+        'font-heading tracking-heading text-lg leading-snug font-bold group-data-[size=sm]/card:text-base',
         className,
       )}
       {...props}
@@ -76,7 +95,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-footer"
       className={cn(
-        'bg-muted/50 flex items-center rounded-b-xl border-t p-(--card-spacing)',
+        'bg-soft flex items-center rounded-b-card border-t p-(--card-spacing)',
         className,
       )}
       {...props}
@@ -84,4 +103,4 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent };
+export { Card, cardVariants, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent };

@@ -66,13 +66,13 @@ export function ResetPasswordForm() {
           type="password"
           autoComplete="new-password"
         />
-        <Button type="submit" size="lg" disabled={form.formState.isSubmitting}>
+        <Button type="submit" variant="chunky" size="lg" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Saving…' : 'Update password'}
         </Button>
         {error && (
           <Link
             href="/forgot-password"
-            className="text-primary text-center text-sm hover:underline"
+            className="text-ink text-center text-sm font-semibold underline-offset-4 hover:underline"
           >
             Request a new reset link
           </Link>

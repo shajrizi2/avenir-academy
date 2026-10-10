@@ -18,9 +18,12 @@ export async function CourseGrid() {
     );
   }
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid gap-6 md:grid-cols-2">
       {courses.map((course) => (
-        <li key={course.id} className="relative">
+        <li
+          key={course.id}
+          className="rounded-card has-focus-visible:ring-ring/50 relative has-focus-visible:ring-3"
+        >
           <CourseCard course={course} />
         </li>
       ))}
@@ -30,9 +33,9 @@ export async function CourseGrid() {
 
 export function CourseGridSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-2">
       {[0, 1].map((i) => (
-        <Skeleton key={i} className="h-56 rounded-xl" />
+        <Skeleton key={i} className="rounded-card h-96" />
       ))}
     </div>
   );

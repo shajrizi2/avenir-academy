@@ -60,6 +60,15 @@ export class CoursesService {
     return course;
   }
 
+  async findById(id: string): Promise<CourseDetailRecord> {
+    const course = await this.prisma.course.findUnique({
+      where: { id },
+      select: courseDetailSelect,
+    });
+    if (!course) throw new NotFoundException('Course not found');
+    return course;
+  }
+
   create(dto: CreateCourseDto): Promise<CourseDetailRecord> {
     return this.prisma.course.create({
       data: { ...dto, startDate: dto.startDate ? new Date(dto.startDate) : undefined },

@@ -71,6 +71,10 @@ export class EnvironmentVariables {
   @IsInt()
   @Min(1)
   RATE_LIMIT_PER_MIN = 120;
+
+  /** Where uploaded materials are stored (relative paths resolve from the API's working dir). */
+  @IsString()
+  UPLOAD_DIR = 'uploads';
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
