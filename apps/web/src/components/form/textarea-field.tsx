@@ -1,7 +1,13 @@
 'use client';
 
 import { useId } from 'react';
-import type { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import {
+  type FieldError as RhfFieldError,
+  type FieldValues,
+  get,
+  type Path,
+  type UseFormReturn,
+} from 'react-hook-form';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -21,7 +27,8 @@ export function TextareaField<T extends FieldValues, TOutput>({
   description,
   rows = 4,
 }: TextareaFieldProps<T, TOutput>) {
-  const error = form.formState.errors[name];
+  // get() also resolves nested paths such as `questions.0.text`.
+  const error = get(form.formState.errors, name) as RhfFieldError | undefined;
   // Unique per instance: two forms on one page may both have a "title" field.
   const id = `${useId()}-${name}`;
   return (

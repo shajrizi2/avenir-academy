@@ -18,16 +18,19 @@ interface ConfirmDialogProps {
   title: string;
   description: string;
   confirmLabel: string;
+  /** Destructive (red, the default) for deletions; `chunky` for confirmations that aren't. */
+  confirmVariant?: 'destructive' | 'chunky';
   /** Resolve to close the dialog; reject to keep it open (the caller shows the error). */
   onConfirm: () => Promise<unknown>;
 }
 
-/** A small "are you sure?" dialog for destructive actions. */
+/** A small "are you sure?" dialog for destructive or consequential actions. */
 export function ConfirmDialog({
   trigger,
   title,
   description,
   confirmLabel,
+  confirmVariant = 'destructive',
   onConfirm,
 }: ConfirmDialogProps) {
   const [open, setOpen] = useState(false);
@@ -57,7 +60,7 @@ export function ConfirmDialog({
           <DialogClose asChild>
             <Button variant="chunky-outline">Cancel</Button>
           </DialogClose>
-          <Button variant="destructive" onClick={() => void confirm()} disabled={pending}>
+          <Button variant={confirmVariant} onClick={() => void confirm()} disabled={pending}>
             {pending ? 'Working…' : confirmLabel}
           </Button>
         </DialogFooter>

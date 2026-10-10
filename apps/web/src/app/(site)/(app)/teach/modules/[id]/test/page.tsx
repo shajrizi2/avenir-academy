@@ -1,0 +1,14 @@
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { TestBuilder } from '@/components/teach/test-builder';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export const metadata: Metadata = { title: 'Module test' };
+
+export default function ModuleTestPage() {
+  return (
+    <Suspense fallback={<Skeleton className="rounded-card h-96 w-full" />}>
+      <TestBuilder />
+    </Suspense>
+  );
+}

@@ -13,29 +13,30 @@ import {
   TEST_TITLE_MAX_LENGTH,
 } from '../constants.js';
 
-export const testSettingsSchema = z
-  .object({
-    title: z.string().trim().min(3).max(TEST_TITLE_MAX_LENGTH),
-    passMark: z.coerce.number().int().min(1).max(100).default(TEST_DEFAULTS.passMark),
-    timeLimitMin: z.coerce
-      .number()
-      .int()
-      .min(TEST_MIN_TIME_LIMIT_MIN)
-      .max(TEST_MAX_TIME_LIMIT_MIN)
-      .default(TEST_DEFAULTS.timeLimitMin),
-    maxAttempts: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(TEST_MAX_ATTEMPTS)
-      .default(TEST_DEFAULTS.maxAttempts),
-    opensAt: z.iso.datetime({ message: 'Pick a date and time' }),
-    closesAt: z.iso.datetime({ message: 'Pick a date and time' }),
-  })
-  .refine((v) => new Date(v.closesAt) > new Date(v.opensAt), {
-    message: 'The window must close after it opens',
-    path: ['closesAt'],
-  });
+/** The fields without the window check, so forms can swap the date inputs (zod can't extend a refined object). */
+export const testSettingsFields = z.object({
+  title: z.string().trim().min(3).max(TEST_TITLE_MAX_LENGTH),
+  passMark: z.coerce.number().int().min(1).max(100).default(TEST_DEFAULTS.passMark),
+  timeLimitMin: z.coerce
+    .number()
+    .int()
+    .min(TEST_MIN_TIME_LIMIT_MIN)
+    .max(TEST_MAX_TIME_LIMIT_MIN)
+    .default(TEST_DEFAULTS.timeLimitMin),
+  maxAttempts: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(TEST_MAX_ATTEMPTS)
+    .default(TEST_DEFAULTS.maxAttempts),
+  opensAt: z.iso.datetime({ message: 'Pick a date and time' }),
+  closesAt: z.iso.datetime({ message: 'Pick a date and time' }),
+});
+
+export const testSettingsSchema = testSettingsFields.refine(
+  (v) => new Date(v.closesAt) > new Date(v.opensAt),
+  { message: 'The window must close after it opens', path: ['closesAt'] },
+);
 export type TestSettingsInput = z.input<typeof testSettingsSchema>;
 
 export const optionSchema = z.object({

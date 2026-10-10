@@ -15,6 +15,7 @@ import { useNow } from '@/lib/use-now';
 import { cn } from '@/lib/utils';
 import { MaterialItem } from './material-item';
 import { SessionCard } from './session-card';
+import { TestCard } from './test-card';
 
 /** A module for an enrolled student: live sessions with Join buttons, and materials. */
 export function LearnModule() {
@@ -64,6 +65,15 @@ export function LearnModule() {
           </p>
         )}
       </header>
+
+      {module.test && (
+        <section aria-labelledby="test-title" className="space-y-4">
+          <h2 id="test-title" className="text-ink text-subheading font-extrabold">
+            Module test
+          </h2>
+          <TestCard test={module.test} status={module.status} />
+        </section>
+      )}
 
       <section aria-labelledby="sessions-title" className="space-y-4">
         <h2 id="sessions-title" className="text-ink text-subheading font-extrabold">

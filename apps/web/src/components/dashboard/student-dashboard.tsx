@@ -12,9 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { errorMessage } from '@/lib/api';
-import { myEnrollmentsQuery } from '@/lib/queries';
-import { UpcomingSessions } from './upcoming-sessions';
+import { myEnrollmentsQuery, myProgressQuery } from '@/lib/queries';
+import { CourseProgressBlock } from './course-progress';
 import { cn } from '@/lib/utils';
+import { UpcomingSessions } from './upcoming-sessions';
 
 export function StudentDashboard() {
   return (
@@ -27,6 +28,8 @@ export function StudentDashboard() {
 
 function MyCourses() {
   const { data, isPending, error } = useQuery(myEnrollmentsQuery);
+  const hasApproved = data?.some((e) => e.status === 'APPROVED') ?? false;
+  const progress = useQuery({ ...myProgressQuery, enabled: hasApproved });
 
   return (
     <section className="space-y-4" aria-labelledby="my-courses">
@@ -50,40 +53,57 @@ function MyCourses() {
         />
       ) : (
         <ul className="grid gap-6 md:grid-cols-2">
-          {data.map((enrollment) => (
-            <li key={enrollment.id}>
-              <Card className="h-full">
-                <CardHeader className="gap-3">
-                  <TrackIcon slug={enrollment.course.slug} />
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle>
-                      <Link href={`/courses/${enrollment.course.slug}`} className="hover:underline">
-                        {enrollment.course.title}
-                      </Link>
-                    </CardTitle>
-                    <EnrollmentStatusBadge status={enrollment.status} />
-                  </div>
-                  <CardDescription>{enrollment.course.summary}</CardDescription>
-                  <p className="text-ink-soft text-sm">
-                    Requested{' '}
-                    <LocalDateTime value={enrollment.createdAt} options={{ dateStyle: 'medium' }} />
-                  </p>
-                  {enrollment.status === 'APPROVED' && (
-                    <Button asChild variant="chunky" className="mt-2 self-start">
-                      <Link href={`/learn/${enrollment.course.slug}`}>
-                        Open course <ArrowRight data-icon="inline-end" />
-                      </Link>
-                    </Button>
-                  )}
-                  {enrollment.status === 'PENDING' && (
-                    <p className="text-active-ink text-sm font-semibold">
-                      We’ll contact you to confirm your seat. Module 1 opens once you’re approved.
-                    </p>
-                  )}
-                </CardHeader>
-              </Card>
-            </li>
-          ))}
+          {data.map((enrollment) => {
+            const courseProgress = progress.data?.find((p) => p.course.id === enrollment.course.id);
+            return (
+              <li key={enrollment.id}>
+                <Card className="h-full">
+                  <CardHeader className="gap-3">
+                    <TrackIcon slug={enrollment.course.slug} />
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle>
+                        <Link
+                          href={`/courses/${enrollment.course.slug}`}
+                          className="hover:underline"
+                        >
+                          {enrollment.course.title}
+                        </Link>
+                      </CardTitle>
+                      <EnrollmentStatusBadge status={enrollment.status} />
+                    </div>
+                    <CardDescription>{enrollment.course.summary}</CardDescription>
+                    {enrollment.status === 'APPROVED' ? (
+                      courseProgress ? (
+                        <CourseProgressBlock progress={courseProgress} />
+                      ) : (
+                        progress.isPending && <Skeleton className="h-16 w-full" />
+                      )
+                    ) : (
+                      <p className="text-ink-soft text-sm">
+                        Requested{' '}
+                        <LocalDateTime
+                          value={enrollment.createdAt}
+                          options={{ dateStyle: 'medium' }}
+                        />
+                      </p>
+                    )}
+                    {enrollment.status === 'APPROVED' && (
+                      <Button asChild variant="chunky" className="mt-2 self-start">
+                        <Link href={`/learn/${enrollment.course.slug}`}>
+                          Open course <ArrowRight data-icon="inline-end" />
+                        </Link>
+                      </Button>
+                    )}
+                    {enrollment.status === 'PENDING' && (
+                      <p className="text-active-ink text-sm font-semibold">
+                        We’ll contact you to confirm your seat. Module 1 opens once you’re approved.
+                      </p>
+                    )}
+                  </CardHeader>
+                </Card>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>
