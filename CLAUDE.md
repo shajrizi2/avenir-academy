@@ -13,21 +13,21 @@ AI Academy is an LMS for live, cohort-based courses on AI and digital marketing.
 
 ## Commands (run from the repo root)
 
-| Command           | What it does                                                  |
-| ----------------- | ------------------------------------------------------------- |
-| `pnpm install`    | Install everything (also generates the Prisma client)         |
-| `pnpm bootstrap`  | First-time setup: env files, Postgres, migrations, seed       |
-| `pnpm db:up`      | Start Postgres (docker compose), waiting until it is healthy  |
-| `pnpm db:migrate` | `prisma migrate dev` + `prisma generate`                      |
-| `pnpm db:seed`    | Seed users, both tracks, a sample session and a sample test   |
-| `pnpm db:reset`   | Drop the database, re-run all migrations, re-seed             |
-| `pnpm dev`        | Run web (:3000), api (:4000), and the shared package watcher  |
-| `pnpm build`      | Build all packages                                            |
-| `pnpm lint`       | ESLint in every package                                       |
-| `pnpm type-check` | `tsc --noEmit` in every package                               |
-| `pnpm test`       | Unit tests (Vitest)                                           |
-| `pnpm test:e2e`   | API e2e (needs Postgres; uses `ai_academy_test`) + Playwright |
-| `pnpm format`     | Prettier write                                                |
+| Command           | What it does                                                                                          |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| `pnpm install`    | Install everything (also generates the Prisma client)                                                 |
+| `pnpm bootstrap`  | First-time setup: env files, Postgres, migrations, seed                                               |
+| `pnpm db:up`      | Start Postgres (docker compose), waiting until it is healthy                                          |
+| `pnpm db:migrate` | `prisma migrate dev` + `prisma generate`                                                              |
+| `pnpm db:seed`    | Seed users, both tracks, a sample session and a sample test                                           |
+| `pnpm db:reset`   | Drop the database, re-run all migrations, re-seed                                                     |
+| `pnpm dev`        | Run web (:3000), api (:4000), and the shared package watcher                                          |
+| `pnpm build`      | Build all packages                                                                                    |
+| `pnpm lint`       | ESLint in every package                                                                               |
+| `pnpm type-check` | `tsc --noEmit` in every package                                                                       |
+| `pnpm test`       | Unit tests (Vitest)                                                                                   |
+| `pnpm test:e2e`   | API e2e (`ai_academy_test`) + Playwright (`ai_academy_e2e`, run `pnpm build` first; stop the dev API) |
+| `pnpm format`     | Prettier write                                                                                        |
 
 To run a single package, use `pnpm --filter @ai-academy/api <script>` (or `@ai-academy/web`, `@ai-academy/shared`).
 
@@ -65,6 +65,8 @@ apps/web/
 packages/shared/src/   enums.ts, schemas/*.ts (zod), types.ts (API DTO shapes)
 scripts/bootstrap.mjs  first-run local setup
 docs/PLAN.md           spec, roadmap, decisions
+docs/DEPLOY.md         production runbook (server, deploy, email, analytics, backups, monitoring)
+deploy/                production Docker Compose stack, Caddyfile, backup script (Dockerfile at the root)
 ```
 
 ## Conventions
@@ -92,7 +94,8 @@ docs/PLAN.md           spec, roadmap, decisions
   - When catching errors around fetches in server components, call `unstable_rethrow(error)` first, so Next's own prerender signals aren't swallowed (see `lib/landing-data.ts`).
   - Don't call `new Date()` in server components.
   - `export const dynamic` is not allowed.
-  - The signed-in area uses `export const instant = false` (client-gated). Pages with a dynamic segment are a small server `page.tsx` that renders a client component inside `<Suspense>`, which reads the id with `useParams()`.
+  - The signed-in area uses `export const instant = false` (client-gated). Every `page.tsx` under `(app)` exports it too (a server component; put client code in a component), or the dev server logs instant-navigation errors. Pages with a dynamic segment are a small server `page.tsx` that renders a client component inside `<Suspense>`, which reads the id with `useParams()`.
+  - Public forms that work before sign-in (login, register, password reset) stay disabled until hydration with `useHydrated()` and use `method="post"` (PLAN D25).
   - Read the clock in client components with `useNow()` (`lib/use-now.ts`, ticks every 15 s; `useNowEverySecond()` only for visible countdowns). Never pass `() => Date.now()` to `useSyncExternalStore`: the snapshot changes on every call and React loops forever.
   - Forms use the helpers in `components/form/` (`TextField`, `TextareaField`, `SelectField`); they generate unique ids, so two forms can share a page, and they show errors for nested paths (`questions.0.text`). Dialogs use `components/ui/dialog.tsx`, and destructive actions use `<ConfirmDialog>` (`confirmVariant="chunky"` for confirmations that aren't destructive).
   - Next keeps pages you navigated away from alive but hidden (`<Activity>`), with their state. Reset local state that must not survive (see `onFinished` in `tests/attempt-runner.tsx`), and in Playwright match visible elements only (`.filter({ visible: true })`) when a hidden page may contain the same text.
@@ -100,7 +103,8 @@ docs/PLAN.md           spec, roadmap, decisions
   - Authenticated pages use TanStack Query through `apiFetch` (`src/lib/api.ts`), which attaches the access token and retries once after `/auth/refresh`.
 - **Landing page (`/[locale]`):** its only goal is registrations.
   - All copy lives in `messages/{sq,en}.json` under `landing`; never hard-code strings. Read it with `const { locale, t } = await getLandingMessages()`. A unit test enforces identical keys and placeholders in both files.
-  - Every CTA is a `<CtaLink cta="…">`, which calls `track('cta_click', …)` (`lib/analytics.ts`, a no-op until GA/Plausible is plugged in).
+  - Every CTA is a `<CtaLink cta="…">`, which calls `track('cta_click', …)` (`lib/analytics.ts`). `track()` sends to Google Analytics only after the visitor accepts the consent banner (PLAN D22); don't load any other third-party script, or the CSP in `next.config.ts` will block it.
+  - Course and module names come from the API in English with optional Albanian fields; render them on the landing page through `localizeCourse(course, locale)` (`lib/localize.ts`).
   - Data (tracks, instructors, testimonials, site settings) loads through `lib/landing-data.ts` inside `<Suspense>`. Loaders fail soft, so the page renders and converts even when the API is down.
   - Cohort date, schedule, seats, price and contact details come from the `SiteSettings` row (admin `PATCH /site-settings`), never from code.
   - Never invent testimonials, statistics or instructor details. The testimonials section renders only real, published entries.
@@ -125,5 +129,7 @@ docs/PLAN.md           spec, roadmap, decisions
   - Approving an enrollment creates every ModuleProgress row: module 1 ACTIVE, the rest LOCKED.
   - Test defaults: 70% pass mark, 45 minutes, 2 attempts, window in the last week of the module.
   - Grading lives in `src/modules/tests/grading.ts` (pure, unit-tested). Progression goes through `src/modules/progress/progression.ts`: `lockProgress()` (row lock) and `passModule()` (PASSED + open the next module). Attempts count only since `unlockedAt` (PLAN D17); deadlines and expiry follow D18. Never select `Option.isCorrect` in anything sent to a student.
+- **Email:** `MailService.send()` (SMTP in production, console in development) never throws; don't `await` it where timing could reveal whether an account exists (PLAN D21).
+- **Tests:** the Playwright journeys (`apps/web/e2e/`) create their own users and courses through the API (`e2e/support.ts`), so they can run in parallel; don't depend on seed users' state beyond logging in. `a11y.spec.ts` must stay at zero axe violations.
 - **Don't** add paid services or change `schema.prisma` without asking the product owner. Don't leave TODO stubs in shipped scope.
 - **Commits:** small, imperative subject lines, one milestone per commit.
