@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { Logo } from '@/components/logo';
 import { getLandingMessages } from '@/i18n/server';
+import { CookieSettingsButton } from '@/components/analytics/analytics';
 import { getSiteSettings, getTracks } from '@/lib/landing-data';
 import { localizeCourse } from '@/lib/localize';
 import { LanguageSwitch } from './language-switch';
@@ -81,9 +82,10 @@ export async function LandingFooter() {
         </FooterColumn>
       </div>
       <div className="border-line border-t">
-        <p className="text-ink-soft mx-auto w-full max-w-[1200px] px-4 py-6 text-sm sm:px-6">
-          © AI Academy. {t.footer.rights}
-        </p>
+        <div className="text-ink-soft mx-auto flex w-full max-w-[1200px] flex-wrap justify-between gap-3 px-4 py-6 text-sm sm:px-6">
+          <p>© AI Academy. {t.footer.rights}</p>
+          <CookieSettingsButton label={t.consent.settings} className={linkClass} />
+        </div>
       </div>
     </footer>
   );

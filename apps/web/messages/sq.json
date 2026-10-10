@@ -313,6 +313,13 @@
     },
     "mobileBar": {
       "cta": "Regjistrohu tani"
+    },
+    "consent": {
+      "label": "Pëlqimi për cookies",
+      "text": "Përdorim cookies të Google Analytics për të kuptuar cilat faqe i ndihmojnë njerëzit të gjejnë kursin e duhur. Asgjë nuk gjurmohet pa pëlqimin tënd.",
+      "accept": "Prano analitikën",
+      "decline": "Jo, faleminderit",
+      "settings": "Cilësimet e cookies"
     }
   }
 }

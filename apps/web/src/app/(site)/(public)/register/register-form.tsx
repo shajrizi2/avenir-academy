@@ -15,6 +15,7 @@ import { FormError } from '@/components/form-error';
 import { TextField } from '@/components/form/text-field';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
+import { track } from '@/lib/analytics';
 import { errorMessage } from '@/lib/api';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useAuth } from '@/lib/auth-context';
@@ -44,6 +45,7 @@ export function RegisterForm() {
     setError(null);
     try {
       await register(values);
+      track('sign_up', { method: 'email' });
       toast.success('Welcome to AI Academy! Pick a course to get started.');
       router.replace('/dashboard');
     } catch (e) {

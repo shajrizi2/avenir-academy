@@ -1,5 +1,7 @@
 import { LOCALES } from '@ai-academy/shared';
 import type { Metadata, Viewport } from 'next';
+import { Analytics } from '@/components/analytics/analytics';
+import { getMessages } from '@/i18n/messages';
 import { getLocale } from '@/i18n/server';
 import { SITE_URL } from '@/lib/site';
 import { jakarta } from '../fonts';
@@ -26,6 +28,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[locale]'
     >
       <body className="bg-background flex min-h-full flex-col" suppressHydrationWarning>
         {children}
+        <Analytics copy={getMessages(locale).landing.consent} />
       </body>
     </html>
   );
