@@ -1,7 +1,8 @@
+import path from 'node:path';
 import type { NextConfig } from 'next';
 
 /** Where the Next.js server reaches the API (server components and the /api/v1 rewrite). */
-const apiUrl = process.env.API_INTERNAL_URL ?? 'http://localhost:4000/api/v1';
+const apiUrl = process.env.API_INTERNAL_URL || 'http://localhost:4000/api/v1';
 
 /**
  * Content-Security-Policy for production builds (Next's dev server needs eval). Next inlines
@@ -38,6 +39,13 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The Docker image (Dockerfile, target `web`) runs the self-contained server; local
+  // `next start` (Playwright, dev previews) keeps the regular build.
+  ...(process.env.BUILD_STANDALONE === '1' && {
+    output: 'standalone',
+    // Trace files from the monorepo root so @ai-academy/shared is included.
+    outputFileTracingRoot: path.resolve(process.cwd(), '../..'),
+  }),
   cacheComponents: true,
   partialPrefetching: true,
   transpilePackages: ['@ai-academy/shared'],

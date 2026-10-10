@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "postinstall": "prisma generate",
     "build": "prisma generate && nest build",
@@ -18,7 +21,8 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force && prisma db seed",
     "db:studio": "prisma studio",
-    "test:e2e:serve": "tsx test/web-e2e-server.ts"
+    "test:e2e:serve": "tsx test/web-e2e-server.ts",
+    "admin:promote": "tsx scripts/promote-admin.ts"
   },
   "dependencies": {
     "@ai-academy/shared": "workspace:*",

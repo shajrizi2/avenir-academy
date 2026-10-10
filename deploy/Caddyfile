@@ -1,0 +1,23 @@
+# HTTPS certificates are issued and renewed automatically for $DOMAIN (Let's Encrypt).
+
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# Uploads are capped at 20 MB by the API; leave room for the multipart envelope.
+	request_body {
+		max_size 25MB
+	}
+
+	# Caddy sets X-Forwarded-For to the real client address (it ignores whatever the client
+	# sent), and Next.js passes it on to the API (PLAN D3).
+	reverse_proxy web:3000
+}

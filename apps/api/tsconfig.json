@@ -25,6 +25,7 @@
     "src",
     "test",
     "prisma",
+    "scripts",
     "prisma.config.ts",
     "vitest.config.ts",
     "vitest.config.e2e.ts"
