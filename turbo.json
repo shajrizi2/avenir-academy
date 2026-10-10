@@ -13,13 +13,21 @@
     "RATE_LIMIT_PER_MIN",
     "API_INTERNAL_URL",
     "SITE_URL",
-    "CI"
+    "CI",
+    "DATABASE_URL_E2E",
+    "AUTH_RATE_LIMIT_PER_MIN",
+    "SWAGGER_ENABLED",
+    "UPLOAD_DIR",
+    "MAIL_TRANSPORT",
+    "MAIL_FROM",
+    "SMTP_*"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "src/generated/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "src/generated/**"],
+      "env": ["NEXT_PUBLIC_*", "BUILD_STANDALONE"]
     },
     "dev": {
       "dependsOn": ["^build"],
@@ -40,7 +48,7 @@
       "cache": false
     },
     "@ai-academy/web#test:e2e": {
-      "dependsOn": ["build"],
+      "dependsOn": ["build", "@ai-academy/api#build"],
       "cache": false
     }
   }

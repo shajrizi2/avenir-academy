@@ -310,6 +310,13 @@
     },
     "mobileBar": {
       "cta": "Register now"
+    },
+    "consent": {
+      "label": "Cookie consent",
+      "text": "We use Google Analytics cookies to learn which pages help people find the right course. Nothing is tracked unless you agree.",
+      "accept": "Accept analytics",
+      "decline": "No thanks",
+      "settings": "Cookie settings"
     }
   }
 }

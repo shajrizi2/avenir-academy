@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "postinstall": "prisma generate",
     "build": "prisma generate && nest build",
@@ -17,7 +20,9 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force && prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:e2e:serve": "tsx test/web-e2e-server.ts",
+    "admin:promote": "tsx scripts/promote-admin.ts"
   },
   "dependencies": {
     "@ai-academy/shared": "workspace:*",
@@ -36,6 +41,8 @@
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^18.0.5",
+    "helmet": "^8.3.0",
+    "nodemailer": "^10.0.16",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.23.1",
@@ -51,6 +58,7 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.1",
+    "@types/nodemailer": "^8.0.2",
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",

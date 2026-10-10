@@ -40,24 +40,25 @@ In development, emails such as password reset links are printed in the API log i
 ### Landing-page content
 
 - **Copy:** `apps/web/messages/sq.json` (Albanian, primary) and `en.json`.
-- **Cohort date, schedule, seats, price and contact details:** the `SiteSettings` row. Change them with `PATCH /api/v1/site-settings` as an admin (see Swagger) or in `pnpm --filter @ai-academy/api db:studio`. No deploy is needed.
-- **Instructor cards:** instructors fill in their title, bio and photo URL on `/profile`.
-- **Testimonials:** only published `Testimonial` rows appear. None are seeded; the admin UI arrives in Sprint 2.
+- **Cohort date, schedule, seats, price and contact details:** admin → Site settings (the `SiteSettings` row). No deploy is needed.
+- **Course and module names on `/sq`:** the Albanian fields in admin → Courses; empty fields fall back to English.
+- **Instructor cards:** instructors fill in their title, bio and photo URL on `/profile` (admins can edit them under Instructors).
+- **Testimonials:** admin → Testimonials. Only published, real quotes appear; none are seeded.
 
 ## Scripts
 
-| Command           | Description                                              |
-| ----------------- | -------------------------------------------------------- |
-| `pnpm dev`        | Run all apps in watch mode                               |
-| `pnpm build`      | Build every package                                      |
-| `pnpm lint`       | ESLint everywhere                                        |
-| `pnpm type-check` | TypeScript checks everywhere                             |
-| `pnpm test`       | Unit tests (Vitest)                                      |
-| `pnpm test:e2e`   | API e2e (`ai_academy_test` DB) + Playwright web e2e      |
-| `pnpm db:migrate` | Create or apply Prisma migrations (`prisma migrate dev`) |
-| `pnpm db:seed`    | Re-run the idempotent seed                               |
-| `pnpm db:reset`   | Drop and recreate the dev database, then seed            |
-| `pnpm format`     | Prettier                                                 |
+| Command           | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| `pnpm dev`        | Run all apps in watch mode                                  |
+| `pnpm build`      | Build every package                                         |
+| `pnpm lint`       | ESLint everywhere                                           |
+| `pnpm type-check` | TypeScript checks everywhere                                |
+| `pnpm test`       | Unit tests (Vitest)                                         |
+| `pnpm test:e2e`   | API e2e (`ai_academy_test`) + Playwright (`ai_academy_e2e`) |
+| `pnpm db:migrate` | Create or apply Prisma migrations (`prisma migrate dev`)    |
+| `pnpm db:seed`    | Re-run the idempotent seed                                  |
+| `pnpm db:reset`   | Drop and recreate the dev database, then seed               |
+| `pnpm format`     | Prettier                                                    |
 
 ## Repository layout
 
@@ -65,7 +66,11 @@ In development, emails such as password reset links are printed in the API log i
 apps/web          Next.js 16 (App Router, Tailwind 4, shadcn/ui, TanStack Query)
 apps/api          NestJS 12 + Prisma 7 + PostgreSQL 16 (REST under /api/v1)
 packages/shared   Enums, zod schemas and API types shared by web and api
+deploy/           Production stack: Docker Compose, Caddy, backups
 docs/PLAN.md      Spec, roadmap, decisions
+docs/DEPLOY.md    Production runbook: server, first deploy, email, analytics, backups, monitoring
 ```
+
+Run `pnpm build` before `pnpm test:e2e`: Playwright starts the built web app and API itself (stop your dev API on :4000 first). Production deployment is described in [docs/DEPLOY.md](docs/DEPLOY.md).
 
 If port 5432 is already taken on your machine, set `POSTGRES_PORT` (for example `POSTGRES_PORT=5433 pnpm bootstrap`) and update the database URLs in `apps/api/.env`.

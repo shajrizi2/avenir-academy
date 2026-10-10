@@ -3,6 +3,9 @@ import { Suspense } from 'react';
 import { CourseEditor } from '@/components/admin/courses/course-editor';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Client-gated; see (app)/layout.tsx.
+export const instant = false;
+
 export const metadata: Metadata = { title: 'Edit course' };
 
 export default function AdminCoursePage() {

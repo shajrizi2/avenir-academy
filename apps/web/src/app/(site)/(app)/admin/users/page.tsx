@@ -4,6 +4,9 @@ import { UserManagement } from '@/components/admin/user-management';
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Client-gated; see (app)/layout.tsx.
+export const instant = false;
+
 export const metadata: Metadata = { title: 'Users' };
 
 export default function AdminUsersPage() {

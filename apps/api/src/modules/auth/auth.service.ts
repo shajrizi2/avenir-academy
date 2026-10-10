@@ -88,7 +88,8 @@ export class AuthService {
       const { token, expiresIn } = await this.tokens.signReset(user);
       const link = new URL('/reset-password', this.config.get('WEB_URL', { infer: true }));
       link.searchParams.set('token', token);
-      await this.mail.send({
+      // Not awaited: the response must take the same time whether or not the account exists.
+      void this.mail.send({
         to: user.email,
         subject: 'Reset your AI Academy password',
         text: [

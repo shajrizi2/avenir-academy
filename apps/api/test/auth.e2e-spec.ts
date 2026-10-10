@@ -49,6 +49,16 @@ describe('Auth flow (e2e)', () => {
     expect(meBody).not.toHaveProperty('passwordHash');
   });
 
+  it('sends security headers and hides the framework', async () => {
+    const res = await request(app.getHttpServer()).get('/api/v1/health').expect(200);
+    expect(res.headers).toMatchObject({
+      'x-content-type-options': 'nosniff',
+      'x-frame-options': 'SAMEORIGIN',
+      'referrer-policy': 'no-referrer',
+    });
+    expect(res.headers).not.toHaveProperty('x-powered-by');
+  });
+
   it('rejects GET /users/me without a token', async () => {
     await request(app.getHttpServer()).get('/api/v1/users/me').expect(401);
   });

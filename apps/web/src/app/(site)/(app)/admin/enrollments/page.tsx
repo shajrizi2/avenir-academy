@@ -4,6 +4,9 @@ import { EnrollmentQueue } from '@/components/admin/enrollments/enrollment-queue
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Client-gated; see (app)/layout.tsx.
+export const instant = false;
+
 export const metadata: Metadata = { title: 'Enrollments' };
 
 export default function AdminEnrollmentsPage() {

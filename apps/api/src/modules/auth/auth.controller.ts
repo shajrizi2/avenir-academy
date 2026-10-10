@@ -13,8 +13,13 @@ import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
 
-/** Tighter limit for credential endpoints: 10 requests per minute per IP. */
-const AUTH_THROTTLE = { default: { limit: 10, ttl: 60_000 } };
+/**
+ * Tighter limit for credential endpoints: AUTH_RATE_LIMIT_PER_MIN (default 10) requests per
+ * minute per IP. Read on each request so the e2e suites can raise it.
+ */
+const AUTH_THROTTLE = {
+  default: { limit: () => Number(process.env.AUTH_RATE_LIMIT_PER_MIN) || 10, ttl: 60_000 },
+};
 
 @ApiTags('auth')
 @Public()

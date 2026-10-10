@@ -39,6 +39,9 @@ export function CourseForm({ course, submitLabel, onSubmit }: CourseFormProps) {
       title: course?.title ?? '',
       summary: course?.summary ?? '',
       description: course?.description ?? '',
+      titleSq: course?.titleSq ?? '',
+      summarySq: course?.summarySq ?? '',
+      descriptionSq: course?.descriptionSq ?? '',
       coverUrl: course?.coverUrl ?? '',
       startDate: isoToLocalInput(course?.startDate),
       isPublished: course?.isPublished ?? false,
@@ -72,6 +75,16 @@ export function CourseForm({ course, submitLabel, onSubmit }: CourseFormProps) {
         />
         <TextareaField form={form} name="summary" label="Summary" rows={2} />
         <TextareaField form={form} name="description" label="Description" rows={6} />
+        <fieldset className="border-line rounded-card space-y-6 border p-4 sm:p-5">
+          <legend className="text-ink px-1 text-sm font-bold">Albanian version (optional)</legend>
+          <p className="text-ink-soft -mt-2 text-sm">
+            Shown on the Albanian landing page (/sq). Leave a field empty to show the English text
+            there.
+          </p>
+          <TextField form={form} name="titleSq" label="Title (Albanian)" />
+          <TextareaField form={form} name="summarySq" label="Summary (Albanian)" rows={2} />
+          <TextareaField form={form} name="descriptionSq" label="Description (Albanian)" rows={4} />
+        </fieldset>
         <TextField
           form={form}
           name="startDate"

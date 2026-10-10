@@ -1,6 +1,8 @@
-import { plainToInstance, Type } from 'class-transformer';
+import { plainToInstance, Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -8,6 +10,7 @@ import {
   Max,
   Min,
   MinLength,
+  ValidateIf,
   validateSync,
 } from 'class-validator';
 
@@ -72,9 +75,54 @@ export class EnvironmentVariables {
   @Min(1)
   RATE_LIMIT_PER_MIN = 120;
 
+  /** Requests per minute per IP for login, register and password resets. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  AUTH_RATE_LIMIT_PER_MIN = 10;
+
+  /** Serve the Swagger UI at /api/docs. Defaults to on, except in production. */
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    value === undefined ? undefined : value === true || value === 'true',
+  )
+  @IsBoolean()
+  SWAGGER_ENABLED?: boolean;
+
   /** Where uploaded materials are stored (relative paths resolve from the API's working dir). */
   @IsString()
   UPLOAD_DIR = 'uploads';
+
+  /** `console` writes emails to the log (development); `smtp` sends them (production). */
+  @IsIn(['console', 'smtp'])
+  MAIL_TRANSPORT: 'console' | 'smtp' = 'console';
+
+  /** Sender shown to recipients, e.g. `AI Academy <no-reply@example.com>`. */
+  @IsString()
+  MAIL_FROM = 'AI Academy <no-reply@localhost>';
+
+  @ValidateIf((env: EnvironmentVariables) => env.MAIL_TRANSPORT === 'smtp')
+  @IsString()
+  @MinLength(1, { message: 'SMTP_HOST is required when MAIL_TRANSPORT=smtp' })
+  SMTP_HOST?: string;
+
+  @Type(() => Number)
+  @IsInt()
+  SMTP_PORT = 587;
+
+  /** true for implicit TLS (port 465); false uses STARTTLS when the server offers it. */
+  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  @IsBoolean()
+  SMTP_SECURE = false;
+
+  @IsOptional()
+  @IsString()
+  SMTP_USER?: string;
+
+  @IsOptional()
+  @IsString()
+  SMTP_PASS?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CookieSettingsButton } from '@/components/analytics/analytics';
 import { Logo } from '@/components/logo';
 
 const linkClass = 'text-ink-soft hover:text-ink font-medium underline-offset-4 hover:underline';
@@ -21,6 +22,7 @@ export function SiteFooter() {
           <Link href="/login" className={linkClass}>
             Log in
           </Link>
+          <CookieSettingsButton label="Cookie settings" className={linkClass} />
         </nav>
       </div>
     </footer>

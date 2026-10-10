@@ -3,6 +3,9 @@ import { Suspense } from 'react';
 import { LearnModule } from '@/components/learn/learn-module';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Client-gated; see (app)/layout.tsx.
+export const instant = false;
+
 export const metadata: Metadata = { title: 'Module' };
 
 export default function LearnModulePage() {

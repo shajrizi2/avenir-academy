@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { track } from '@/lib/analytics';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { myEnrollmentsQuery } from '@/lib/queries';
@@ -27,6 +28,7 @@ export function EnrollButton({ courseId, courseSlug }: EnrollButtonProps) {
     mutationFn: () =>
       apiFetch<EnrollmentSummary>(`/courses/${courseId}/enroll`, { method: 'POST' }),
     onSuccess: () => {
+      track('enroll_request', { course: courseSlug });
       toast.success('Request sent. An admin will review your enrollment shortly.');
       void queryClient.invalidateQueries({ queryKey: myEnrollmentsQuery.queryKey });
     },

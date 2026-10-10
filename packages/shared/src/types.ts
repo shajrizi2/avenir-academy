@@ -53,6 +53,9 @@ export interface ModuleSummary {
   order: number;
   title: string;
   description: string;
+  /** Albanian versions (null = not translated; show the English text). */
+  titleSq: string | null;
+  descriptionSq: string | null;
   durationWeeks: number;
   instructor: InstructorSummary | null;
 }
@@ -62,6 +65,9 @@ export interface CourseSummary {
   slug: string;
   title: string;
   summary: string;
+  /** Albanian versions for the /sq landing page (null = show the English text). */
+  titleSq: string | null;
+  summarySq: string | null;
   coverUrl: string | null;
   startDate: IsoDateString | null;
   isPublished: boolean;
@@ -70,6 +76,7 @@ export interface CourseSummary {
 
 export interface CourseDetail extends Omit<CourseSummary, 'moduleCount'> {
   description: string;
+  descriptionSq: string | null;
   modules: ModuleSummary[];
 }
 

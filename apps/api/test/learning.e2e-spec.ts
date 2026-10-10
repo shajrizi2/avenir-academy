@@ -135,6 +135,33 @@ describe('Learning flow (e2e)', () => {
     expect((byId.body as CourseDetail).modules).toHaveLength(2);
   });
 
+  it('stores Albanian translations, and clears one with an empty string', async () => {
+    const updated = await http()
+      .patch(`/api/v1/courses/${course.id}`)
+      .set(as('admin'))
+      .send({ titleSq: 'Rrjedha e mësimit', summarySq: 'Një kurs i krijuar nga testi e2e.' })
+      .expect(200);
+    expect(updated.body).toMatchObject({ titleSq: 'Rrjedha e mësimit', descriptionSq: null });
+    const module = await http()
+      .patch(`/api/v1/modules/${module1}`)
+      .set(as('admin'))
+      .send({ titleSq: 'Moduli një', descriptionSq: '' })
+      .expect(200);
+    expect(module.body).toMatchObject({ titleSq: 'Moduli një', descriptionSq: null });
+
+    const cleared = await http()
+      .patch(`/api/v1/courses/${course.id}`)
+      .set(as('admin'))
+      .send({ titleSq: '' })
+      .expect(200);
+    expect((cleared.body as CourseDetail).titleSq).toBeNull();
+    await http()
+      .patch(`/api/v1/courses/${course.id}`)
+      .set(as('admin'))
+      .send({ summarySq: 'short' })
+      .expect(400);
+  });
+
   it('keeps a module closed until the enrollment is approved', async () => {
     await http().post(`/api/v1/courses/${course.id}/enroll`).set(as('student')).expect(201);
     await http().get(`/api/v1/modules/${module1}`).set(as('student')).expect(403);

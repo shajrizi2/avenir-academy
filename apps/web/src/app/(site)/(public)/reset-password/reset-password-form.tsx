@@ -17,11 +17,15 @@ import { TextField } from '@/components/form/text-field';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { apiFetch, errorMessage } from '@/lib/api';
+import { useHydrated } from '@/lib/use-hydrated';
 
 export function ResetPasswordForm() {
   const token = useSearchParams().get('token');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  // Until React hydrates, typing is lost and a submit would be a native request, so the
+  // form stays disabled until then.
+  const hydrated = useHydrated();
   const form = useForm<ResetPasswordFormInput>({
     resolver: zodResolver(resetPasswordFormSchema),
     defaultValues: { password: '', confirmPassword: '' },
@@ -48,36 +52,43 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <form onSubmit={(e) => void onSubmit(e)} noValidate>
-      <FieldGroup>
-        <FormError message={error} />
-        <TextField
-          form={form}
-          name="password"
-          label="New password"
-          type="password"
-          autoComplete="new-password"
-          description={`At least ${PASSWORD_MIN_LENGTH} characters, with a letter and a number.`}
-        />
-        <TextField
-          form={form}
-          name="confirmPassword"
-          label="Confirm new password"
-          type="password"
-          autoComplete="new-password"
-        />
-        <Button type="submit" variant="chunky" size="lg" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Saving…' : 'Update password'}
-        </Button>
-        {error && (
-          <Link
-            href="/forgot-password"
-            className="text-ink text-center text-sm font-semibold underline-offset-4 hover:underline"
+    <form method="post" onSubmit={(e) => void onSubmit(e)} noValidate>
+      <fieldset disabled={!hydrated} className="min-w-0">
+        <FieldGroup>
+          <FormError message={error} />
+          <TextField
+            form={form}
+            name="password"
+            label="New password"
+            type="password"
+            autoComplete="new-password"
+            description={`At least ${PASSWORD_MIN_LENGTH} characters, with a letter and a number.`}
+          />
+          <TextField
+            form={form}
+            name="confirmPassword"
+            label="Confirm new password"
+            type="password"
+            autoComplete="new-password"
+          />
+          <Button
+            type="submit"
+            variant="chunky"
+            size="lg"
+            disabled={!hydrated || form.formState.isSubmitting}
           >
-            Request a new reset link
-          </Link>
-        )}
-      </FieldGroup>
+            {form.formState.isSubmitting ? 'Saving…' : 'Update password'}
+          </Button>
+          {error && (
+            <Link
+              href="/forgot-password"
+              className="text-ink text-center text-sm font-semibold underline-offset-4 hover:underline"
+            >
+              Request a new reset link
+            </Link>
+          )}
+        </FieldGroup>
+      </fieldset>
     </form>
   );
 }

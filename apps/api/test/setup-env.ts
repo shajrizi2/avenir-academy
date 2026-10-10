@@ -1,4 +1,4 @@
-import { testDatabaseUrl } from './test-database-url.js';
+import { testDatabaseUrl } from './test-database.js';
 
 // Point the app at the test database before any module reads the config.
 process.env.DATABASE_URL = testDatabaseUrl();

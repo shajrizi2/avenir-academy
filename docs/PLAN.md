@@ -51,24 +51,25 @@ All times are stored in UTC and displayed in the viewer's local time.
 
 ## 3. Tech stack
 
-| Area      | Choice                                                                                                                 |
-| --------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Monorepo  | pnpm workspaces + Turborepo, TypeScript everywhere, ESLint + Prettier                                                  |
-| Web       | Next.js (App Router), Tailwind CSS, shadcn/ui, TanStack Query, react-hook-form + zod                                   |
-| API       | NestJS, Prisma ORM, PostgreSQL, Passport JWT (access + refresh tokens), bcrypt, class-validator DTOs                   |
-| API paths | Global prefix `/api/v1`, Swagger at `/api/docs`                                                                        |
-| Shared    | `packages/shared`: zod schemas, enums, and API types used by both web and api                                          |
-| Local dev | `docker-compose.yml` with PostgreSQL 16, plus a `.env.example` in each app                                             |
-| Tests     | **Vitest** for API unit and e2e tests (see decision D1), Playwright for web (landing page now; main flows in Sprint 4) |
-| CI        | GitHub Actions: install, lint, type-check, test                                                                        |
+| Area      | Choice                                                                                                                |
+| --------- | --------------------------------------------------------------------------------------------------------------------- |
+| Monorepo  | pnpm workspaces + Turborepo, TypeScript everywhere, ESLint + Prettier                                                 |
+| Web       | Next.js (App Router), Tailwind CSS, shadcn/ui, TanStack Query, react-hook-form + zod                                  |
+| API       | NestJS, Prisma ORM, PostgreSQL, Passport JWT (access + refresh tokens), bcrypt, class-validator DTOs                  |
+| API paths | Global prefix `/api/v1`, Swagger at `/api/docs`                                                                       |
+| Shared    | `packages/shared`: zod schemas, enums, and API types used by both web and api                                         |
+| Local dev | `docker-compose.yml` with PostgreSQL 16, plus a `.env.example` in each app                                            |
+| Tests     | **Vitest** for API unit and e2e tests (see decision D1), Playwright for web (landing, main journeys, axe WCAG 2.1 AA) |
+| CI        | GitHub Actions: install, format, lint, type-check, unit tests, build, API e2e, Playwright                             |
+| Hosting   | One server with Docker Compose: Postgres, API, web, Caddy (HTTPS). See docs/DEPLOY.md and D20                         |
 
 ## 4. Data model
 
 `apps/api/prisma/schema.prisma` is the source of truth. Entities:
 
 - `User`: email (unique), passwordHash, firstName, lastName, phone?, role (`STUDENT` | `INSTRUCTOR` | `ADMIN`), plus a public instructor profile: avatarUrl?, title?, bio?
-- `Course`: slug (unique), title, summary, description, coverUrl?, startDate?, isPublished
-- `Module`: course, order (unique per course), title, description, durationWeeks (4), instructor?
+- `Course`: slug (unique), title, summary, description, titleSq?/summarySq?/descriptionSq? (Albanian, D11), coverUrl?, startDate?, isPublished
+- `Module`: course, order (unique per course), title, description, titleSq?/descriptionSq? (Albanian, D11), durationWeeks (4), instructor?
 - `Enrollment`: user + course (unique), status (`PENDING` | `APPROVED` | `REJECTED` | `CANCELLED`), note?, decidedAt?
 - `ModuleProgress`: user + module (unique), status (`LOCKED` | `ACTIVE` | `PASSED` | `FAILED`), unlockedAt?, passedAt?
 - `LiveSession`: module, title, startsAt, durationMin (90), meetUrl
@@ -174,7 +175,7 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - Results pages for instructors and admins, plus manual unlock/reset.
 - Student dashboard with progress per course, admin overview stats, `GET /me/progress`.
 
-### S4: QA + launch
+### S4: QA + launch ✅
 
 - Plug an analytics provider (GA4 or Plausible) into `track()`. Decide whether course and module content needs Albanian versions (see D11).
 - Playwright e2e for the main flows, accessibility and mobile pass, and security review (rate limits, headers, CORS).
@@ -199,7 +200,7 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **D8.** The landing page's i18n is native, not a library: typed JSON messages plus `next/root-params` (`locale()`) in server components, and strings passed as props to the few client components. This avoids compatibility risk with Cache Components; next-intl can be adopted later if the whole app goes bilingual. Browsers ship no Albanian Intl data, so Albanian dates use translated month names.
 - **D9.** The app has two root layouts: `app/[locale]/layout.tsx` (`<html lang="sq|en">`) and `app/(site)/layout.tsx` (`lang="en"`), plus `global-not-found.tsx` (an experimental flag). Navigating between them is a full page load, which is acceptable for landing → register.
 - **D10.** Landing values that change often (cohort date, schedule, seats, price, contact) live in a `SiteSettings` database row, not a config file, so they change without a deploy. The page renders them per request.
-- **D11.** Course and module titles and descriptions come from the database in English, so on `/sq` the track cards show English course content inside Albanian copy. Localizing that content would need per-locale fields, which is a data-model change for the product owner to decide.
+- **D11.** Course and module titles and descriptions come from the database in English, so on `/sq` the track cards showed English course content inside Albanian copy. **Resolved in S4** (product owner approved the schema change): courses have optional `titleSq`, `summarySq` and `descriptionSq`, modules `titleSq` and `descriptionSq`. The `/sq` landing page uses them and falls back to English for empty fields; admins edit them in the course and module forms. The signed-in app and the public catalog stay English.
 - **D12.** Design refresh before S2: the indigo/slate look was replaced by a brighter, playful "learn by doing" system (ink primary, warm off-white, violet/orange track accents, pressable buttons and cards, original SVG illustrations, an interactive quiz in the hero). All of it is our own work; nothing is copied from reference sites. Tokens live in `globals.css` and are reviewed at `/design`.
 - **D13.** A course's accent colour is derived from its slug (`marketing` in the slug → orange, otherwise violet) because courses have no category field. Adding one is a schema change for the product owner to decide.
 - **D14.** Module management (sessions, attendance, materials) lives under `/teach/*`, not `/admin/modules/*`: instructors need the same pages for their own modules, and `/admin/*` is admin-only. Admins reach them from the course editor. The API still checks `module.instructorId === user.id` for instructors.
@@ -208,3 +209,9 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **D17.** Admins can give a FAILED student another try without a schema change: attempts only count against `maxAttempts` when they started after `ModuleProgress.unlockedAt`, and a reset (`PATCH /progress/:id` with `ACTIVE`) sets `unlockedAt` to now. Old attempts stay on record. Resets and manual passes are admin-only (§2); instructors see the results.
 - **D18.** An attempt's deadline is the start plus the time limit, but never later than the window's close. Saves and submissions are accepted for 30 seconds after it (network lag). Overdue attempts are graded as `EXPIRED` with their saved answers when anyone reads them, and by a sweep every 60 seconds, so a module's status is right even if the student never comes back. Start, grade and admin override lock the student's `ModuleProgress` row (`SELECT … FOR UPDATE`), so they can't race.
 - **D19.** Grading: a question earns its points only when the chosen options are exactly the correct ones (multiple choice is all-or-nothing), and the percentage is rounded down. After handing in, students see their score but not which answers were right, because that would give away a retake. Questions can't change once anyone has started an attempt.
+- **D20.** Hosting (product owner, S4): one VPS running `deploy/docker-compose.yml`. Postgres, the API, the web app and a migrate job are built from one `Dockerfile`; Caddy terminates HTTPS with automatic Let's Encrypt certificates, sets HSTS and `X-Forwarded-For`, and the API trusts the private Docker network (`TRUST_PROXY=loopback, uniquelocal`), which satisfies D3. Uploads (D15) live on a named volume. `deploy/backup.sh` dumps the database and archives uploads nightly; copying them off the server is the product owner's choice of storage. Production has no seed data: the first admin registers and is promoted with `scripts/promote-admin.ts`. The runbook is `docs/DEPLOY.md`.
+- **D21.** Email (product owner, S4): any SMTP provider through nodemailer (`MAIL_TRANSPORT=smtp`); console stays the development default. `MailService.send` logs failures instead of throwing, and the password reset doesn't wait for the send, so neither errors nor timing reveal whether an account exists.
+- **D22.** Analytics (product owner, S4): Google Analytics 4, which sets cookies, so it sits behind a consent banner (`components/analytics/analytics.tsx`). Nothing loads before the visitor accepts, declining is as easy as accepting, the choice is kept in `localStorage`, and "Cookie settings" in the footers asks again. Without `NEXT_PUBLIC_GA_ID` there is no banner and no script. Consent Mode sets ad storage and personalization to denied.
+- **D23.** Security headers: the API uses helmet (no CSP; it only serves JSON and attachments) and hides Swagger in production unless `SWAGGER_ENABLED=true`. The web app sends nosniff, `X-Frame-Options: DENY`, a referrer policy and a permissions policy, plus a Content-Security-Policy in production builds. `script-src` keeps `'unsafe-inline'` because Next inlines its RSC payload; nonces would make every page dynamic. Google Analytics is the only third party allowed. HSTS comes from Caddy. `pnpm audit --prod` (S4) reports four findings, all in build or CLI tooling that never runs in the app (mysql2 and deepmerge-ts under the Prisma CLI, braces under shadcn); the fixed versions were too new for pnpm's release-age guard, so re-check them at the next dependency update.
+- **D24.** The Playwright suite runs against production builds of the web app and the API on their own database (`ai_academy_e2e`, created by `apps/api/test/web-e2e-server.ts`), because the API e2e suite empties `ai_academy_test` when it starts and both can run at once. Playwright never reuses an API already on :4000, so a running dev API makes the run fail instead of writing into the dev database.
+- **D25.** Auth forms (login, register, forgot and reset password) stay disabled until React hydrates. Before hydration, typed text was lost, and a submit was a native GET that put the email and password in the URL. The forms also use `method="post"` as a fallback.
