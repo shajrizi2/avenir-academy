@@ -4,9 +4,10 @@ const PORT = 3000;
 const baseURL = `http://localhost:${PORT}`;
 
 /**
- * Web end-to-end tests. Runs against a production build (`next start`); locally an
- * already-running server on :3000 is reused. Uses the system Chrome, so no browser download
- * is needed (GitHub's Ubuntu runners ship Chrome).
+ * Web end-to-end tests against production builds of the web app (`next start`) and the API.
+ * The API runs on its own seeded database, `ai_academy_e2e` (apps/api/test/web-e2e-server.ts),
+ * and is never reused: a dev API already on :4000 makes the run fail instead of writing test
+ * data into the dev database. Run `pnpm build` first. Uses the system Chrome.
  */
 export default defineConfig({
   testDir: './e2e',
@@ -22,10 +23,19 @@ export default defineConfig({
       use: { ...devices['Pixel 7'], channel: 'chrome' },
     },
   ],
-  webServer: {
-    command: `pnpm start`,
-    url: `${baseURL}/sq`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: 'pnpm --filter @ai-academy/api test:e2e:serve',
+      url: 'http://localhost:4000/api/v1/health',
+      reuseExistingServer: false,
+      timeout: 120_000,
+      stdout: 'ignore',
+    },
+    {
+      command: `pnpm start`,
+      url: `${baseURL}/sq`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });

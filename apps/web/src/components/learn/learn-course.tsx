@@ -63,8 +63,9 @@ export function LearnCourse() {
             );
             return (
               <li key={module.id}>
+                {/* Locked: muted by a dashed outline and soft fill, not opacity, so text keeps its contrast. */}
                 {locked ? (
-                  <div className="border-line rounded-card bg-background flex items-start gap-4 border p-5 opacity-80">
+                  <div className="border-line-strong rounded-card bg-soft flex items-start gap-4 border border-dashed p-5">
                     {content}
                   </div>
                 ) : (

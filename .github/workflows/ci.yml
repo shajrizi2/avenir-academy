@@ -68,7 +68,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # API e2e (Postgres service) + web e2e (Playwright on the runner's preinstalled Chrome)
+      # API e2e (ai_academy_test) + web e2e: Playwright on the runner's preinstalled Chrome,
+      # against the built web app and API on their own database (ai_academy_e2e, same server)
       - name: End-to-end tests
         run: pnpm test:e2e
 
