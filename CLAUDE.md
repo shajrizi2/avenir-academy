@@ -93,8 +93,9 @@ docs/PLAN.md           spec, roadmap, decisions
   - Don't call `new Date()` in server components.
   - `export const dynamic` is not allowed.
   - The signed-in area uses `export const instant = false` (client-gated). Pages with a dynamic segment are a small server `page.tsx` that renders a client component inside `<Suspense>`, which reads the id with `useParams()`.
-  - Read the clock in client components with `useNow()` (`lib/use-now.ts`, ticks every 15 s). Never pass `() => Date.now()` to `useSyncExternalStore`: the snapshot changes on every call and React loops forever.
-  - Forms use the helpers in `components/form/` (`TextField`, `TextareaField`, `SelectField`); they generate unique ids, so two forms can share a page. Dialogs use `components/ui/dialog.tsx`, and destructive actions use `<ConfirmDialog>`.
+  - Read the clock in client components with `useNow()` (`lib/use-now.ts`, ticks every 15 s; `useNowEverySecond()` only for visible countdowns). Never pass `() => Date.now()` to `useSyncExternalStore`: the snapshot changes on every call and React loops forever.
+  - Forms use the helpers in `components/form/` (`TextField`, `TextareaField`, `SelectField`); they generate unique ids, so two forms can share a page, and they show errors for nested paths (`questions.0.text`). Dialogs use `components/ui/dialog.tsx`, and destructive actions use `<ConfirmDialog>` (`confirmVariant="chunky"` for confirmations that aren't destructive).
+  - Next keeps pages you navigated away from alive but hidden (`<Activity>`), with their state. Reset local state that must not survive (see `onFinished` in `tests/attempt-runner.tsx`), and in Playwright match visible elements only (`.filter({ visible: true })`) when a hidden page may contain the same text.
   - Section titles inside cards are headings: `<CardTitle as="h2">`.
   - Authenticated pages use TanStack Query through `apiFetch` (`src/lib/api.ts`), which attaches the access token and retries once after `/auth/refresh`.
 - **Landing page (`/[locale]`):** its only goal is registrations.
@@ -123,5 +124,6 @@ docs/PLAN.md           spec, roadmap, decisions
   - A passed attempt sets the module to PASSED and the next module (order + 1) to ACTIVE in one `$transaction`.
   - Approving an enrollment creates every ModuleProgress row: module 1 ACTIVE, the rest LOCKED.
   - Test defaults: 70% pass mark, 45 minutes, 2 attempts, window in the last week of the module.
+  - Grading lives in `src/modules/tests/grading.ts` (pure, unit-tested). Progression goes through `src/modules/progress/progression.ts`: `lockProgress()` (row lock) and `passModule()` (PASSED + open the next module). Attempts count only since `unlockedAt` (PLAN D17); deadlines and expiry follow D18. Never select `Option.isCorrect` in anything sent to a student.
 - **Don't** add paid services or change `schema.prisma` without asking the product owner. Don't leave TODO stubs in shipped scope.
 - **Commits:** small, imperative subject lines, one milestone per commit.
