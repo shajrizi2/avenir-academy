@@ -33,7 +33,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['eslint.config.js'],
+    files: ['eslint.config.js', 'docker/*.mjs'],
     ...tseslint.configs.disableTypeChecked,
   },
   prettier,
