@@ -65,8 +65,9 @@ apps/web/
 packages/shared/src/   enums.ts, schemas/*.ts (zod), types.ts (API DTO shapes)
 scripts/bootstrap.mjs  first-run local setup
 docs/PLAN.md           spec, roadmap, decisions
-docs/DEPLOY.md         production runbook (server, deploy, email, analytics, backups, monitoring)
-deploy/                production Docker Compose stack, Caddyfile, backup script (Dockerfile at the root)
+docs/DEPLOY.md         production runbook (Droplet, DNS, R2, Resend, CI/CD, backups, day-2 operations)
+deploy/                docker-compose.prod.yml, Caddyfile, backup/ container, scripts/ (setup, deploy, rollback, restore)
+apps/*/Dockerfile      one image per app (build from the repo root); .github/workflows/deploy.yml pushes them to GHCR
 ```
 
 ## Conventions
@@ -84,7 +85,7 @@ deploy/                production Docker Compose stack, Caddyfile, backup script
   - The access token is a 15-minute JWT returned in the response body; the web app keeps it in memory.
   - The refresh token is a 7-day JWT in the httpOnly `aa_refresh` cookie (path `/`).
   - Refresh and reset tokens are signed with the secret plus a fingerprint of the password hash (PLAN D2).
-- **Uploads:** materials go to local disk through `StorageService` (`UPLOAD_DIR`, see PLAN D15); never serve that folder statically. Downloads go through `GET /materials/:id/download`, and the web app uses `apiDownload()` (plain links can't carry the in-memory token).
+- **Uploads:** materials go through `StorageService`: local disk (`STORAGE_DRIVER=local`, `UPLOAD_DIR`) in development and tests, a private R2 bucket (`s3`) in production (PLAN D15, D27). Never serve files statically or from public bucket URLs. Downloads go through `GET /materials/:id/download`, and the web app uses `apiDownload()` (plain links can't carry the in-memory token).
 - **Errors:** throw Nest HTTP exceptions with a clear message. Prisma `P2002` maps to 409, `P2025` to 404, and `P2003` to 409 (global filter).
 - **Times:** store UTC and render in the viewer's local time with `<LocalDateTime>` (a client component). Browsers ship **no Albanian Intl data** (`Intl.DateTimeFormat('sq')` silently prints English), so Albanian dates use translated month names from the messages (`<DateTemplate>` on the landing page).
 - **Web data:**
@@ -101,6 +102,7 @@ deploy/                production Docker Compose stack, Caddyfile, backup script
   - Next keeps pages you navigated away from alive but hidden (`<Activity>`), with their state. Reset local state that must not survive (see `onFinished` in `tests/attempt-runner.tsx`), and in Playwright match visible elements only (`.filter({ visible: true })`) when a hidden page may contain the same text.
   - Section titles inside cards are headings: `<CardTitle as="h2">`.
   - Authenticated pages use TanStack Query through `apiFetch` (`src/lib/api.ts`), which attaches the access token and retries once after `/auth/refresh`.
+  - The browser reaches the API at `API_BASE`: `NEXT_PUBLIC_API_URL` in production (`https://api.avenir.academy/api/v1`, cross-origin, so fetches use `credentials: 'include'`), otherwise the same-origin `/api/v1` rewrite (PLAN D26).
 - **Landing page (`/[locale]`):** its only goal is registrations.
   - All copy lives in `messages/{sq,en}.json` under `landing`; never hard-code strings. Read it with `const { locale, t } = await getLandingMessages()`. A unit test enforces identical keys and placeholders in both files.
   - Every CTA is a `<CtaLink cta="…">`, which calls `track('cta_click', …)` (`lib/analytics.ts`). `track()` sends to Google Analytics only after the visitor accepts the consent banner (PLAN D22); don't load any other third-party script, or the CSP in `next.config.ts` will block it.
