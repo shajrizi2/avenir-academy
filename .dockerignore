@@ -1,3 +1,4 @@
+# Default ignore list; each image also has its own <Dockerfile>.dockerignore next to it.
 **/node_modules
 **/.next
 **/dist
@@ -11,6 +12,8 @@
 !**/.env.example
 apps/api/uploads
 apps/api/src/generated
-deploy/.env
-deploy/backups
+apps/web/e2e
+deploy
+docs
 .git
+.github

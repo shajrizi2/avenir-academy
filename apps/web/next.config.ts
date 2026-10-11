@@ -4,6 +4,11 @@ import type { NextConfig } from 'next';
 /** Where the Next.js server reaches the API (server components and the /api/v1 rewrite). */
 const apiUrl = process.env.API_INTERNAL_URL || 'http://localhost:4000/api/v1';
 
+/** Origin the browser calls directly in production (NEXT_PUBLIC_API_URL), for connect-src. */
+const publicApiOrigin = process.env.NEXT_PUBLIC_API_URL
+  ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+  : '';
+
 /**
  * Content-Security-Policy for production builds (Next's dev server needs eval). Next inlines
  * its RSC payload as <script>, so script-src keeps 'unsafe-inline'; nonces would make every
@@ -17,7 +22,7 @@ const contentSecurityPolicy = [
   // Instructor photos and course covers are external https URLs.
   "img-src 'self' data: blob: https:",
   "font-src 'self'",
-  "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
+  `connect-src 'self' ${publicApiOrigin} https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -59,11 +64,11 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  // The browser talks to the API through this same-origin proxy (docs/PLAN.md D3),
-  // so the refresh cookie is first-party and no CORS preflights are needed.
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
+  // Without NEXT_PUBLIC_API_URL the browser talks to the API through this same-origin proxy
+  // (docs/PLAN.md D3). Production calls api.avenir.academy directly (D26).
   async rewrites() {
     return [{ source: '/api/v1/:path*', destination: `${apiUrl}/:path*` }];
   },

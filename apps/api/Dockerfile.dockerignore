@@ -1,0 +1,19 @@
+# Used by BuildKit for apps/api/Dockerfile (the build context is the repository root).
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/coverage
+**/test-results
+**/playwright-report
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+apps/api/uploads
+apps/api/src/generated
+apps/web/e2e
+deploy
+docs
+.git
+.github

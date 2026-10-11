@@ -1,0 +1,26 @@
+# Local test of the production stack (docs/DEPLOY.md, "Test the stack on your laptop").
+# Adds a stand-in for Cloudflare R2: an S3 server (rclone serve s3, from the backup image)
+# with the buckets avenir-materials and avenir-backups. Use with .env.local:
+#   ENV_FILE=deploy/.env.local COMPOSE_OVERRIDE=deploy/docker-compose.local.yml \
+#     deploy/scripts/compose.sh up -d --wait
+
+services:
+  fake-r2:
+    image: avenir-backup:local
+    entrypoint: ['sh', '-c']
+    command:
+      - mkdir -p /data/avenir-materials /data/avenir-backups &&
+        exec rclone serve s3 /data --addr :9000 --auth-key local-key,local-secret-key
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '9000']
+      interval: 5s
+      retries: 20
+    networks: [edge]
+
+  api:
+    depends_on:
+      fake-r2: { condition: service_healthy }
+
+  backup:
+    depends_on:
+      fake-r2: { condition: service_healthy }

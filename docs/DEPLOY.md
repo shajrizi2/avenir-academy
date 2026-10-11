@@ -1,138 +1,441 @@
-# Deploying AI Academy
+# Deploying Avenir Academy
 
-Production runs on **one Linux server with Docker Compose** (PLAN D20). Everything lives in
-`deploy/`:
+Production runs on **one DigitalOcean Droplet with Docker Compose** (PLAN D20, D26–D28).
+Follow sections 1–10 once, in order; section 11 is for every day after launch.
 
 ```
-Internet ──443/80──▶ caddy (HTTPS, certificates, HSTS)
-                       │
-                       ▼
-                     web (Next.js, :3000) ──/api/v1/*──▶ api (NestJS, :4000) ──▶ postgres
-                                                             │
-                                                             └── uploads volume (materials)
+                    ┌──────────────── Droplet (Ubuntu 24.04, FRA1) ─────────────────┐
+ avenir.academy ───▶│ caddy :443 ──▶ web  (Next.js :3000) ──┐                       │
+ www.  (308 → apex) │   HTTPS,       api  (NestJS  :4000) ◀─┘──▶ postgres (internal │
+ api.avenir.academy▶│   HSTS                │                     network only)     │
+                    │                       │                   backup ──┐          │
+                    └───────────────────────│────────────────────────────│──────────┘
+                                            ▼                            ▼
+                         R2 avenir-materials, Resend SMTP      R2 avenir-backups
 ```
 
-- **caddy** gets and renews Let's Encrypt certificates automatically and is the only service
-  reachable from outside.
-- **migrate** applies database migrations on every start, then exits; the API waits for it.
-- **Volumes:** `postgres-data` (database), `uploads` (material files, PLAN D15), and Caddy's
-  certificates. Back up the first two (see below).
+- The browser loads pages from `avenir.academy` and calls the API at `api.avenir.academy`
+  (CORS allows only `https://avenir.academy`; the refresh cookie is
+  `Domain=.avenir.academy; Secure; HttpOnly; SameSite=Lax`).
+- Images are built by GitHub Actions and pulled from GitHub Container Registry
+  (`ghcr.io/<owner>/avenir-web`, `avenir-api`, and `avenir-migrate` = the api image plus the
+  Prisma CLI), tagged with the git SHA.
+- Everything about the stack lives in `deploy/`:
 
-## 1. Server
+| File                        | What it is                                                        |
+| --------------------------- | ----------------------------------------------------------------- |
+| `docker-compose.prod.yml`   | caddy, web, api, migrate (one-off), postgres, backup              |
+| `Caddyfile`                 | HTTPS, www → apex, headers, 25 MB body limit                      |
+| `.env.production.example`   | Every setting, documented. The real file lives only on the server |
+| `backup/`                   | The backup container (pg_dump → gzip → R2, 14 daily + 8 weekly)   |
+| `scripts/server-setup.sh`   | One-time Droplet setup (user, SSH, firewall, Docker, swap)        |
+| `scripts/compose.sh`        | `docker compose` with the right env file and image tag            |
+| `scripts/deploy.sh <tag>`   | Pull, migrate, start, health-check, auto-rollback                 |
+| `scripts/rollback.sh [tag]` | Back to an earlier image tag                                      |
+| `scripts/restore.sh`        | List / test-restore / restore database backups                    |
 
-- A VPS with **2 vCPU and 4 GB RAM** (the web build needs about 2 GB), Ubuntu 24.04 LTS,
-  and about 20 GB of disk. For example Hetzner CX22 or similar, roughly €5–10 a month.
-- Install Docker Engine with the Compose plugin: <https://docs.docker.com/engine/install/ubuntu/>.
-- Firewall: allow only SSH (22), HTTP (80) and HTTPS (443). For example:
-  `ufw allow OpenSSH && ufw allow 80 && ufw allow 443 && ufw enable`.
-- Log in with SSH keys only, and turn on automatic security updates
-  (`apt install unattended-upgrades`).
+Commands below marked **(laptop)** run on your computer, **(server)** in an SSH session as
+`deploy` on the Droplet.
 
-## 2. DNS
+---
 
-Point an `A` record (and `AAAA` for IPv6) for your domain, and for `www.` if you want it, at
-the server. Caddy can only get a certificate once DNS resolves to the server.
+## 1. Create the Droplet
 
-## 3. First deploy
+DigitalOcean → **Create → Droplets**:
+
+| Setting        | Value                                                              |
+| -------------- | ------------------------------------------------------------------ |
+| Region         | **Frankfurt, FRA1**                                                |
+| Image          | **Ubuntu 24.04 (LTS) x64**                                         |
+| Size           | **Basic → Regular → 4 GB RAM / 2 vCPUs / 80 GB SSD**               |
+| Backups        | **Enable automated backups → Weekly**                              |
+| Authentication | **SSH Key** (see below; never a password)                          |
+| Advanced       | **Enable IPv6** (free), **Add improved metrics monitoring** (free) |
+| Hostname       | `avenir-prod`                                                      |
+
+SSH key **(laptop)**, if you don't have one yet:
 
 ```sh
-git clone <repository-url> /opt/ai-academy
-cd /opt/ai-academy/deploy
-cp .env.example .env
-nano .env                 # fill in every value (see the comments in the file)
-docker compose up -d --build
-docker compose ps         # every service "healthy" / "running"; migrate "exited (0)"
+ssh-keygen -t ed25519 -C "you@example.com"     # Enter for the default path; set a passphrase
+cat ~/.ssh/id_ed25519.pub                      # paste this into "New SSH Key"
 ```
 
-Generate the secrets with `openssl rand -hex 32` (database password) and
-`openssl rand -base64 48` (each JWT secret). Keep `deploy/.env` only on the server.
+Write down the Droplet's **IPv4** (and **IPv6**) address from its page.
 
-Then set up the content:
+## 2. DNS at Hostinger
 
-1. Open `https://<your-domain>/register` and create **your own account**.
-2. Make it an admin (production has no seed data or demo users):
-   ```sh
-   docker compose run --rm migrate node_modules/.bin/tsx scripts/promote-admin.ts you@example.com
-   ```
-3. Log out and back in. In the admin area: create the courses and modules (with the Albanian
-   titles and descriptions), give instructors the Instructor role, and fill in **Site
-   settings** (cohort date, price, contact details) and any real testimonials.
+hPanel → **Domains → avenir.academy → DNS / Nameservers → DNS records**.
 
-## 4. Email (password resets)
+1. **Delete** the records that would conflict: any `A` or `AAAA` record for `@`, `www` or
+   `api` (Hostinger's parking page), and a `CNAME` for `www`. Leave `MX` and other `TXT`
+   records alone (they belong to email).
+2. **Add** (TTL 300 while you set up; 3600 later is fine):
 
-Any SMTP provider works (PLAN D21): for example Brevo or Mailjet (free tiers), Google
-Workspace, or Amazon SES. Set `MAIL_TRANSPORT=smtp`, `MAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`,
-`SMTP_SECURE`, `SMTP_USER` and `SMTP_PASS` in `deploy/.env`. Then add the provider's **SPF and
-DKIM** DNS records for the sending domain, so the emails don't land in spam.
+| Type   | Name  | Points to                                                                         |
+| ------ | ----- | --------------------------------------------------------------------------------- |
+| `A`    | `@`   | Droplet IPv4                                                                      |
+| `A`    | `www` | Droplet IPv4                                                                      |
+| `A`    | `api` | Droplet IPv4                                                                      |
+| `AAAA` | `@`   | Droplet IPv6 (only if IPv6 is on)                                                 |
+| `AAAA` | `www` | Droplet IPv6                                                                      |
+| `AAAA` | `api` | Droplet IPv6                                                                      |
+| `CAA`  | `@`   | `0 issue "letsencrypt.org"` (optional: only Let's Encrypt may issue certificates) |
 
-Test it: run "Forgot password" for your own account. A delivery failure is logged as
-`Could not send …` in `docker compose logs api`; the page itself never shows it (so it can't
-reveal which emails have accounts).
-
-## 5. Google Analytics
-
-Create a GA4 property and a web data stream, put the measurement ID (`G-…`) into
-`NEXT_PUBLIC_GA_ID`, and rebuild: `docker compose up -d --build web`. The ID is baked in at
-build time. Visitors see a consent banner, and nothing is sent to Google before they accept
-(PLAN D22). Events: `cta_click`, `demo_answer`, `sign_up`, `enroll_request`, plus GA's own
-page views.
-
-## 6. Updates
+3. Check propagation **(laptop)**. Every line must print the Droplet's address before the
+   first deploy, or Caddy can't get certificates:
 
 ```sh
-cd /opt/ai-academy && git pull
-cd deploy && docker compose up -d --build
+for h in avenir.academy www.avenir.academy api.avenir.academy; do
+  echo "$h: $(dig +short A $h @1.1.1.1) $(dig +short AAAA $h @1.1.1.1)"
+done
 ```
 
-Migrations run automatically before the new API starts. Migrations only go forward, so
-**take a backup before updating** (`./backup.sh`). To roll back, check out the previous
-version and rebuild; if that version's database schema differs, restore the backup you took.
+Or look the names up on <https://dnschecker.org>. It usually takes minutes, sometimes a few
+hours.
 
-## 7. Backups
+## 3. Prepare the server
 
-`deploy/backup.sh` writes a compressed database dump and an archive of the uploaded materials
-to `deploy/backups/`, keeping 14 days (`KEEP_DAYS`). Run it every night with cron
-(`crontab -e`):
-
-```
-15 3 * * * /opt/ai-academy/deploy/backup.sh >> /var/log/ai-academy-backup.log 2>&1
-```
-
-**Copy the backups off the server.** A backup on the same disk doesn't survive losing the
-server. Use your provider's snapshot/backup feature, or sync `deploy/backups` to object
-storage (for example with `rclone`). Either may cost a little, so the product owner decides.
-
-**Restore** (tested in Sprint 4):
+**(laptop)**:
 
 ```sh
-cd /opt/ai-academy/deploy
-docker compose exec -T postgres pg_restore -U academy -d ai_academy --clean --if-exists \
-  --no-owner < backups/db_<date>.dump
-docker run --rm -v ai-academy_uploads:/data/uploads -v "$PWD/backups:/backups" alpine \
-  sh -c 'rm -rf /data/uploads/* && tar -xzf /backups/uploads_<date>.tar.gz -C /data'
-docker compose restart api
+scp deploy/scripts/server-setup.sh root@<droplet-ip>:/root/
+ssh -t root@<droplet-ip> bash /root/server-setup.sh
 ```
 
-## 8. Monitoring
+The script (safe to run again) updates the system; creates the user **`deploy`** (sudo, your
+SSH key, it asks you for a sudo password); turns off root and password logins; allows only
+ports 22, 80 and 443 (ufw); sets up fail2ban, automatic security updates, the
+`Europe/Tirane` timezone and a 2 GB swap file; installs Docker Engine and the Compose plugin
+from Docker's repository; and creates `/opt/avenir`.
 
-- **Health checks:** Docker restarts an unhealthy `api` (`/api/v1/health`, which also checks
-  the database) or `web` container. `docker compose ps` shows their state.
-- **Uptime:** add a free external monitor (for example UptimeRobot or Better Stack) on
-  `https://<your-domain>/api/v1/health`. That one URL goes through Caddy, the web app, the API
-  and the database, and alerts you by email when any of them is down.
-- **Logs:** `docker compose logs -f api` (or `web`, `caddy`). Each container's logs rotate at
-  5 × 10 MB.
-- **Disk:** keep an eye on `df -h` and `docker system df`; prune old images after updates
-  with `docker image prune`.
+**Keep the root session open** and test from a second terminal:
 
-## 9. Security notes
+```sh
+ssh deploy@<droplet-ip>
+docker ps             # works without sudo
+sudo -v               # asks for the password you chose
+```
 
-- Rate limits (120 requests/minute per IP, 10 for login, register and password resets) see the
-  real visitor IP because Caddy sets `X-Forwarded-For` and the API trusts the private Docker
-  network (`TRUST_PROXY=loopback, uniquelocal`; PLAN D3).
-- Swagger (`/api/docs`) is off in production. Set `SWAGGER_ENABLED=true` in `deploy/.env` only
-  to look something up, then turn it off again.
-- Rotating `JWT_REFRESH_SECRET` signs everyone out; rotating `JWT_ACCESS_SECRET` only ends
-  15-minute access tokens.
-- Postgres is not exposed outside the Docker network. To inspect it:
-  `docker compose exec postgres psql -U academy ai_academy`.
+From now on, always log in as `deploy`.
+
+## 4. Cloudflare R2 (files and backups)
+
+1. Create a Cloudflare account, open **R2 Object Storage** and activate it (it asks for a
+   payment method; 10 GB storage and the request volume we need are in the free tier).
+2. **Create two buckets**, both private (public access stays **off**):
+   - `avenir-materials`, location hint **Europe** (or jurisdiction **EU**)
+   - `avenir-backups`, same location
+3. **API tokens:** R2 → **Manage R2 API Tokens → Create API token**, twice:
+   - `avenir-api`: permission **Object Read & Write**, **apply to the bucket
+     `avenir-materials` only**
+   - `avenir-backup`: **Object Read & Write** on **`avenir-backups` only**
+
+   Copy each token's **Access Key ID** and **Secret Access Key** right away (shown once), and
+   the **S3 endpoint** `https://<account-id>.r2.cloudflarestorage.com` (with jurisdiction EU:
+   `https://<account-id>.eu.r2.cloudflarestorage.com`).
+
+4. **CORS:** not needed. The browser never talks to R2: uploads and downloads go through the
+   API (`GET /materials/:id/download`), which checks that the student may open the module and
+   streams the file (PLAN D27). Leave the bucket without a CORS policy and without public
+   access.
+5. Optional safety net on `avenir-backups`: **Settings → Object lifecycle rules → delete
+   objects older than 70 days**. The backup container already deletes old backups; this only
+   catches a misconfiguration.
+
+## 5. Resend (email)
+
+1. Sign up at <https://resend.com>. **Domains → Add Domain** → `avenir.academy`, region
+   **Ireland (eu-west-1)**.
+2. Resend shows the DNS records to add. At Hostinger, add them **exactly as shown** (Hostinger
+   wants the name without `.avenir.academy`). They are typically:
+
+| Type  | Name                | Value                                                        |
+| ----- | ------------------- | ------------------------------------------------------------ |
+| `MX`  | `send`              | `feedback-smtp.eu-west-1.amazonses.com`, priority 10         |
+| `TXT` | `send`              | `v=spf1 include:amazonses.com ~all` (SPF)                    |
+| `TXT` | `resend._domainkey` | `p=MIGfMA0G…` (DKIM, copy the long value from Resend)        |
+| `TXT` | `_dmarc`            | `v=DMARC1; p=none; rua=mailto:you@example.com` (recommended) |
+
+They live on the `send` subdomain, so they don't touch any mailbox you have on
+`avenir.academy`. Click **Verify** in Resend; it turns green once DNS has propagated. 3. **API Keys → Create API key**: name `avenir-prod`, permission **Sending access**, domain
+`avenir.academy`. Copy the key (`re_…`). 4. The app sends through Resend's SMTP (no code change, PLAN D21): host `smtp.resend.com`,
+port `465`, TLS, user `resend`, password = the API key. From address:
+`Avenir Academy <no-reply@avenir.academy>`.
+
+## 6. Create `.env.production` on the server
+
+**(laptop)** copy the template:
+
+```sh
+scp deploy/.env.production.example deploy@<droplet-ip>:/opt/avenir/deploy/.env.production
+```
+
+**(server)** generate the secrets in place, then fill in the rest:
+
+```sh
+cd /opt/avenir/deploy
+chmod 600 .env.production
+sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$(openssl rand -hex 32)|" .env.production
+for k in JWT_ACCESS_SECRET JWT_REFRESH_SECRET JWT_RESET_SECRET; do
+  sed -i "s|^$k=.*|$k=$(openssl rand -base64 48 | tr -d '\n')|" .env.production
+done
+nano .env.production
+```
+
+Fill in: `ACME_EMAIL`, `IMAGE_REGISTRY` (`ghcr.io/<your-github-user-or-org>`, lowercase), the
+`S3_*` values (token `avenir-api`), `SMTP_PASS` (Resend key), the `BACKUP_S3_*` values (token
+`avenir-backup`). Every variable is explained in the file. Check that nothing is left empty:
+
+```sh
+grep -nE '^[A-Z_]+=$|<' .env.production    # prints nothing when complete
+```
+
+Keep a copy of this file in your password manager: without `POSTGRES_PASSWORD` and the R2
+keys you can't restore a backup onto a new server.
+
+## 7. GitHub and the first deploy
+
+**a) A deploy key for GitHub Actions (laptop).** A separate key that can only log in as
+`deploy`:
+
+```sh
+ssh-keygen -t ed25519 -f ~/.ssh/avenir-ci -C "github-actions" -N ""
+ssh-copy-id -i ~/.ssh/avenir-ci.pub deploy@<droplet-ip>
+ssh-keyscan -t ed25519 <droplet-ip>       # compare with the Droplet console (below), then use it
+```
+
+To check the host key, open the Droplet's **Console** in DigitalOcean and run
+`ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`; it must match
+`ssh-keyscan -t ed25519 <droplet-ip> | ssh-keygen -lf -` on your laptop.
+
+**b) Repository secrets** (GitHub → Settings → Secrets and variables → Actions → **Secrets**):
+
+| Secret               | Value                                          |
+| -------------------- | ---------------------------------------------- |
+| `DEPLOY_HOST`        | the Droplet's IPv4 address                     |
+| `DEPLOY_USER`        | `deploy`                                       |
+| `DEPLOY_SSH_KEY`     | the whole private key: `cat ~/.ssh/avenir-ci`  |
+| `DEPLOY_KNOWN_HOSTS` | the `ssh-keyscan -t ed25519 <droplet-ip>` line |
+
+**Variables** (same page, **Variables** tab), baked into the web image at build time:
+
+| Variable              | Value                                                    |
+| --------------------- | -------------------------------------------------------- |
+| `SITE_URL`            | `https://avenir.academy`                                 |
+| `NEXT_PUBLIC_API_URL` | `https://api.avenir.academy/api/v1`                      |
+| `NEXT_PUBLIC_GA_ID`   | `G-…` (optional; empty = no analytics, no cookie banner) |
+| `API_HEALTH_URL`      | `https://api.avenir.academy/api/v1/health`               |
+
+Optional: Settings → **Environments → production** → _Required reviewers_, so each deploy
+waits for your click.
+
+**c) Let the server pull images.** GitHub → your avatar → Settings → Developer settings →
+**Personal access tokens → Tokens (classic) → Generate new token**: scope **`read:packages`**
+only, expiry 1 year (put a reminder in your calendar). **(server)**:
+
+```sh
+docker login ghcr.io -u <github-user>      # paste the token as the password
+```
+
+**d) First deploy.** The workflow `Deploy` (`.github/workflows/deploy.yml`) runs after `CI`
+succeeds on `main`. Merge the `deploy` branch into `main` (a pull request), and watch
+**Actions**: CI, then _Build web image_ / _Build api image_, then _Deploy to the Droplet_.
+Later you can also start it by hand: **Actions → Deploy → Run workflow**.
+
+The deploy job copies `deploy/` to `/opt/avenir/deploy` (your `.env.production` is left
+alone), then runs `deploy/scripts/deploy.sh <sha>`, which pulls the images, runs
+`prisma migrate deploy`, starts everything, waits for every container to be healthy, and
+checks `https://api.avenir.academy/api/v1/health` and `https://avenir.academy` through Caddy.
+If anything fails it switches back to the previous tag (on the very first deploy there is
+none, so it just stops). Finally the runner checks both URLs from the internet.
+
+The first start takes a minute longer: Caddy requests the three certificates. If it can't,
+`deploy/scripts/compose.sh logs caddy` says why (almost always DNS not pointing here yet, or
+port 80/443 blocked).
+
+After the first deploy, the GHCR packages are **private**; leave them that way (the server
+logs in with the token from step c).
+
+## 8. Create the first admin
+
+Production has no seed data. **(server)**:
+
+```sh
+cd /opt/avenir/deploy
+read -r -p "Admin email: " ADMIN_EMAIL
+read -r -s -p "Admin password (8-72 characters): " ADMIN_PASSWORD; echo
+export ADMIN_EMAIL ADMIN_PASSWORD
+scripts/compose.sh run --rm --no-deps -e ADMIN_EMAIL -e ADMIN_PASSWORD \
+  -e ADMIN_FIRST_NAME=Your -e ADMIN_LAST_NAME=Name \
+  api node dist/src/cli/seed-admin.js
+unset ADMIN_PASSWORD
+```
+
+It creates only that admin account, nothing else. Running it again changes nothing (an
+existing account keeps its password and is made an admin). Then log in at
+`https://avenir.academy/login` and set up the content: courses and modules (with Albanian
+titles), instructors (Users → role), **Site settings** (cohort date, price, contact) and real
+testimonials.
+
+## 9. After-deploy checklist
+
+- [ ] `https://avenir.academy` loads with a valid certificate; `https://www.avenir.academy`
+      redirects to it (308); `https://api.avenir.academy/api/v1/health` returns
+      `{"status":"ok","db":"up"}`; `http://` redirects to `https://` on all three.
+- [ ] `curl -sI https://avenir.academy | grep -i strict-transport` shows HSTS.
+- [ ] `https://avenir.academy/sitemap.xml` and `/robots.txt` use `https://avenir.academy`.
+- [ ] Journey (use a second browser or a private window for the student):
+      register a student → request enrollment → as admin, approve it in **Admin →
+      Enrollments** → the student sees module 1 → as admin, add a live session (Meet link) and
+      upload a PDF material to module 1 → the student sees the session (Join opens 15 minutes
+      before) and downloads the PDF.
+- [ ] Log out and back in; reload a signed-in page (the refresh cookie works across
+      `avenir.academy` and `api.avenir.academy`).
+- [ ] Email: "Forgot password" for your own account → the email arrives (check spam), the
+      link works. Resend → **Emails** shows it as delivered.
+- [ ] The uploaded PDF is in R2 → `avenir-materials`.
+- [ ] Backups: run one now and see it in R2 → `avenir-backups/daily/`:
+      `deploy/scripts/compose.sh exec backup avenir-backup backup`
+- [ ] **Test restore** (required before launch) into a scratch database, so production is
+      untouched:
+
+      ```sh
+      deploy/scripts/restore.sh --list
+      deploy/scripts/restore.sh daily/avenir_<date>.dump.gz --into restore_test
+      ```
+
+      It prints the number of users and courses it restored; they must match the live site.
+      Drop the scratch database afterwards (the script prints the command).
+
+- [ ] `deploy/scripts/compose.sh ps`: every service `healthy` (`migrate` exited 0 and is
+      gone).
+
+## 10. Uptime monitoring (free)
+
+At <https://uptimerobot.com> (free plan, 5-minute checks, email alerts) add two **HTTP(s)**
+monitors:
+
+1. `https://avenir.academy` (the site)
+2. `https://api.avenir.academy/api/v1/health`, type **Keyword**, keyword `"ok"` (the API and
+   its database)
+
+Optional: a free check at <https://healthchecks.io> with a daily period and 2-hour grace;
+put its ping URL into `BACKUP_PING_URL` in `.env.production` and run
+`deploy/scripts/compose.sh up -d backup`. You then get an email when a nightly backup did
+**not** succeed.
+
+DigitalOcean's free monitoring (enabled in step 1) can alert on CPU, memory and disk: Droplet
+→ **Monitoring → Create alert policy** (for example disk > 80 %, memory > 90 % for 10 min).
+
+---
+
+## 11. Day-2 operations
+
+All commands **(server)**, from anywhere; `compose.sh` always uses the right env file and the
+deployed image tag.
+
+```sh
+alias avenir=/opt/avenir/deploy/scripts/compose.sh     # put it in ~/.bashrc
+```
+
+**Deploy.** Merge to `main`; CI then Deploy run on their own. By hand: Actions → Deploy → Run
+workflow. On the server: `deploy/scripts/deploy.sh <git-sha>` (the image must exist in GHCR).
+`cat /opt/avenir/deploy/.image-tag` shows what is running.
+
+**Roll back.**
+
+```sh
+/opt/avenir/deploy/scripts/rollback.sh              # to the previous tag
+/opt/avenir/deploy/scripts/rollback.sh <git-sha>    # to any earlier tag
+```
+
+Or from GitHub: Actions → Deploy → Run workflow → `tag` = the SHA. Migrations are not undone
+(they only go forward), so a rollback is safe when the newer migration only added things. If
+it removed or renamed data, restore the backup taken before that deploy instead
+(`restore.sh`, below).
+
+**Logs.** `avenir logs -f api` (or `web`, `caddy`, `backup`, `postgres`); `avenir logs --since
+1h api`. Each container keeps 3 × 10 MB.
+
+**Restart a service.** `avenir restart api`. After editing `.env.production`:
+`avenir up -d` (recreates only the services whose settings changed).
+
+**Status.** `avenir ps`; `docker stats --no-stream` (memory against the limits: postgres 1 GB,
+api 768 MB, web 768 MB).
+
+**Disk space.** `df -h /` and `docker system df`. Old images pile up: `docker image prune -a`
+removes every image no container uses (a rollback just pulls again).
+
+**Database shell.** `avenir exec postgres psql -U avenir avenir`.
+
+**Backups.** `avenir exec backup avenir-backup backup` (now); `deploy/scripts/restore.sh
+--list`. Full restore over the live database (asks you to type `RESTORE PRODUCTION`, takes a
+safety backup first, stops the site while it runs):
+
+```sh
+deploy/scripts/restore.sh daily/avenir_<date>.dump.gz
+```
+
+Material files are in R2 already and aren't part of these backups; R2 stores them
+redundantly, and the app deletes a file only when someone deletes that material.
+
+**Rotate secrets.** Edit `.env.production`, then `avenir up -d`.
+
+| Secret               | Effect / steps                                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_ACCESS_SECRET`  | Access tokens (15 min) end; users are refreshed silently.                                                                   |
+| `JWT_REFRESH_SECRET` | Everyone is signed out.                                                                                                     |
+| `JWT_RESET_SECRET`   | Open password-reset links stop working.                                                                                     |
+| R2 / Resend keys     | Create the new key, put it in, `avenir up -d`, test, then revoke the old one.                                               |
+| `POSTGRES_PASSWORD`  | First `avenir exec postgres psql -U avenir -c "ALTER USER avenir PASSWORD '<new>'"`, then edit the file and `avenir up -d`. |
+| GHCR token           | New token, `docker login ghcr.io` again.                                                                                    |
+| CI deploy key        | New key pair, add the public key to `~deploy/.ssh/authorized_keys`, update `DEPLOY_SSH_KEY`, remove the old line.           |
+
+**Upgrade Postgres.**
+
+- _Minor_ (16.x → 16.y, security fixes): `avenir pull postgres && avenir up -d postgres`.
+- _Major_ (16 → 17): data files aren't compatible, so dump and restore. Plan 15 minutes of
+  downtime: take a backup (`avenir exec backup avenir-backup backup`); in
+  `docker-compose.prod.yml` change `postgres:16-alpine` → `postgres:17-alpine` and the volume
+  `postgres-data` → `postgres17-data` (both places), and in `backup/Dockerfile`
+  `FROM postgres:17-alpine`; commit and deploy. The new, empty database gets the schema from
+  the migrations; then restore the backup into it with `deploy/scripts/restore.sh
+daily/<that backup>`. Keep the old volume until you're sure, then
+  `docker volume rm avenir_postgres-data`.
+
+**Server updates.** Security updates install automatically. Kernel updates need a reboot:
+when `/var/run/reboot-required` exists, `sudo reboot` at a quiet hour (all containers start
+again on their own).
+
+---
+
+## Test the stack on your laptop
+
+The production compose file runs locally with `localhost` names, Caddy's local CA, and a
+stand-in for R2 (`docker-compose.local.yml`). **(laptop, repository root)**:
+
+```sh
+docker build -f apps/api/Dockerfile -t local/avenir-api:dev .
+docker build -f apps/api/Dockerfile --target migrate -t local/avenir-migrate:dev .
+docker build -f apps/web/Dockerfile -t local/avenir-web:dev --build-arg SITE_URL=https://localhost:8443 .
+docker build -t avenir-backup:local deploy/backup
+cp deploy/.env.local.example deploy/.env.local
+export ENV_FILE=deploy/.env.local COMPOSE_OVERRIDE=deploy/docker-compose.local.yml
+deploy/scripts/compose.sh up -d --wait
+curl -k https://localhost:8443/robots.txt --resolve localhost:8443:127.0.0.1
+curl -k https://api.localhost:8443/api/v1/health --resolve api.localhost:8443:127.0.0.1
+deploy/scripts/compose.sh exec backup avenir-backup backup
+deploy/scripts/compose.sh down -v     # stop and delete the test data
+```
+
+The local web image is built without `NEXT_PUBLIC_API_URL`, so the browser uses the
+same-origin `/api/v1` proxy (`https://localhost:8443`, accept the certificate warning).
+
+## Not covered by this setup
+
+- **Material files are not backed up separately** (they live in R2, which is redundant
+  storage). If you want a second copy, an `rclone sync` from `avenir-materials` to another
+  bucket can be added to the backup container.
+- **Zero-downtime deploys:** containers are replaced in place, so a deploy has a few seconds
+  in which requests may fail. Fine for this size; blue/green would need a second set of
+  containers.

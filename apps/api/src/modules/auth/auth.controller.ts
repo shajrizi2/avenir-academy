@@ -86,12 +86,18 @@ export class AuthController {
     return result.body;
   }
 
+  /**
+   * SameSite=Lax works across avenir.academy and api.avenir.academy (same site); the domain
+   * (COOKIE_DOMAIN) lets the web app's proxy.ts see that a session exists.
+   */
   private cookieOptions(): CookieOptions {
+    const domain = this.config.get('COOKIE_DOMAIN', { infer: true }) || undefined;
     return {
       httpOnly: true,
       sameSite: 'lax',
       secure: this.config.get('NODE_ENV', { infer: true }) === NodeEnv.Production,
       path: '/',
+      ...(domain && { domain }),
     };
   }
 }

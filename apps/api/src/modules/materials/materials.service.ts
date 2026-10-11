@@ -1,5 +1,5 @@
 import { extname } from 'node:path';
-import type { ReadStream } from 'node:fs';
+import type { Readable } from 'node:stream';
 import { MATERIAL_FILE_EXTENSIONS } from '@ai-academy/shared';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { AuthUser } from '../../common/auth-user.js';
@@ -22,7 +22,7 @@ export interface UploadedMaterialFile {
 }
 
 export interface MaterialDownload {
-  stream: ReadStream;
+  stream: Readable;
   size: number;
   fileName: string;
   contentType: string;
