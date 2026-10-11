@@ -1,2 +1,5 @@
+.env.production
+.env.local
+.image-tag
+.image-tag.previous
 backups/
-.env
