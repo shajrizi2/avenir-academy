@@ -1,23 +1,53 @@
-# HTTPS certificates are issued and renewed automatically for $DOMAIN (Let's Encrypt).
+# Caddy: HTTPS for {$CADDY_DOMAIN} (avenir.academy), www. and api., with certificates issued
+# and renewed automatically by Let's Encrypt. With CADDY_DOMAIN=localhost (local testing)
+# Caddy uses its own local CA instead.
 
-www.{$DOMAIN} {
-	redir https://{$DOMAIN}{uri} permanent
+{
+	email {$ACME_EMAIL}
 }
 
-{$DOMAIN} {
+# Headers for every host. HSTS covers the subdomains (all of them are HTTPS-only).
+(common) {
 	encode zstd gzip
-
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
 		-Server
+		-X-Powered-By
 	}
-
-	# Uploads are capped at 20 MB by the API; leave room for the multipart envelope.
+	# Uploads are capped at 20 MB by the API (MATERIAL_MAX_BYTES); 25 MB leaves room for the
+	# multipart envelope. Larger bodies are refused here with 413.
 	request_body {
 		max_size 25MB
 	}
+	log {
+		output stdout
+		format console
+	}
+}
 
-	# Caddy sets X-Forwarded-For to the real client address (it ignores whatever the client
-	# sent), and Next.js passes it on to the API (PLAN D3).
+www.{$CADDY_DOMAIN} {
+	redir https://{$CADDY_DOMAIN}{uri} 308
+}
+
+{$CADDY_DOMAIN} {
+	import common
+	# The web app sends its own Content-Security-Policy and frame/permission headers
+	# (apps/web/next.config.ts): its script and connect sources depend on build settings
+	# (the API URL, Google Analytics). This is only the fallback for a response without one.
+	header ?Content-Security-Policy "default-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+	header ?X-Frame-Options "DENY"
+	# Caddy sets X-Forwarded-For to the real client address (whatever the client sent is
+	# ignored), and the API trusts the Docker network (TRUST_PROXY, PLAN D3).
 	reverse_proxy web:3000
+}
+
+api.{$CADDY_DOMAIN} {
+	import common
+	# JSON and file downloads only: nothing may run or be framed. `>` replaces the API's own
+	# (helmet) values instead of adding a second header.
+	header >Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+	header >X-Frame-Options "DENY"
+	reverse_proxy api:4000
 }
