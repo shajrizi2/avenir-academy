@@ -90,9 +90,54 @@ export class EnvironmentVariables {
   @IsBoolean()
   SWAGGER_ENABLED?: boolean;
 
+  /**
+   * Domain attribute of the refresh cookie. Empty = host-only (development, same-origin proxy).
+   * In production `.avenir.academy`, so the web app (proxy.ts) sees the cookie the API sets.
+   */
+  @IsOptional()
+  @IsString()
+  COOKIE_DOMAIN?: string;
+
+  /** `local` stores materials under UPLOAD_DIR; `s3` in an S3-compatible bucket (R2). */
+  @IsIn(['local', 's3'])
+  STORAGE_DRIVER: 'local' | 's3' = 'local';
+
   /** Where uploaded materials are stored (relative paths resolve from the API's working dir). */
   @IsString()
   UPLOAD_DIR = 'uploads';
+
+  /** R2: https://<account-id>.r2.cloudflarestorage.com */
+  @ValidateIf((env: EnvironmentVariables) => env.STORAGE_DRIVER === 's3')
+  @IsUrl({ require_tld: false, require_protocol: true })
+  S3_ENDPOINT?: string;
+
+  /** R2 uses `auto`. */
+  @IsString()
+  S3_REGION = 'auto';
+
+  @ValidateIf((env: EnvironmentVariables) => env.STORAGE_DRIVER === 's3')
+  @IsString()
+  @MinLength(1, { message: 'S3_BUCKET is required when STORAGE_DRIVER=s3' })
+  S3_BUCKET?: string;
+
+  @ValidateIf((env: EnvironmentVariables) => env.STORAGE_DRIVER === 's3')
+  @IsString()
+  @MinLength(1, { message: 'S3_ACCESS_KEY_ID is required when STORAGE_DRIVER=s3' })
+  S3_ACCESS_KEY_ID?: string;
+
+  @ValidateIf((env: EnvironmentVariables) => env.STORAGE_DRIVER === 's3')
+  @IsString()
+  @MinLength(1, { message: 'S3_SECRET_ACCESS_KEY is required when STORAGE_DRIVER=s3' })
+  S3_SECRET_ACCESS_KEY?: string;
+
+  /** Optional key prefix inside the bucket, e.g. `materials/`. */
+  @IsString()
+  S3_PREFIX = '';
+
+  /** Path-style URLs (needed by MinIO for local testing; R2 works either way). */
+  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  @IsBoolean()
+  S3_FORCE_PATH_STYLE = false;
 
   /** `console` writes emails to the log (development); `smtp` sends them (production). */
   @IsIn(['console', 'smtp'])

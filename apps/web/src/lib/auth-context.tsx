@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login: (input) => authenticate('/auth/login', input),
       register: (input) => authenticate('/auth/register', input),
       logout: async () => {
-        await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'same-origin' });
+        await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
         queryClient.clear();
         setSession(null);
       },

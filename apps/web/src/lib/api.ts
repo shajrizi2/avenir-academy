@@ -1,7 +1,11 @@
 import type { ApiErrorBody, AuthResponse } from '@ai-academy/shared';
 
-/** Browser requests go through the Next.js rewrite (same origin, see next.config.ts). */
-export const API_BASE = '/api/v1';
+/**
+ * Where the browser calls the API. Production sets NEXT_PUBLIC_API_URL (build time) to
+ * https://api.avenir.academy/api/v1; unset, requests go through the same-origin Next.js
+ * rewrite (development, Playwright; see next.config.ts).
+ */
+export const API_BASE = (process.env.NEXT_PUBLIC_API_URL || '/api/v1').replace(/\/$/, '');
 
 export class ApiError extends Error {
   constructor(
@@ -13,7 +17,8 @@ export class ApiError extends Error {
   }
 }
 
-// ---- In-memory access token (never persisted; the refresh token is an httpOnly cookie) ----
+// ---- In-memory access token (never persisted; the refresh token is an httpOnly cookie,
+// sent to the API subdomain with credentials: 'include') ----
 
 let accessToken: string | null = null;
 let refreshInFlight: Promise<AuthResponse | null> | null = null;
@@ -33,7 +38,7 @@ export function onSessionChange(listener: (session: AuthResponse | null) => void
 export function refreshSession(): Promise<AuthResponse | null> {
   refreshInFlight ??= fetch(`${API_BASE}/auth/refresh`, {
     method: 'POST',
-    credentials: 'same-origin',
+    credentials: 'include',
   })
     .then(async (res) => (res.ok ? ((await res.json()) as AuthResponse) : null))
     .catch(() => null)
@@ -68,7 +73,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const send = () =>
     fetch(url, {
       ...init,
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: {
         Accept: 'application/json',
         ...(body !== undefined && { 'Content-Type': 'application/json' }),
@@ -90,7 +95,7 @@ export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
   const send = () =>
     fetch(`${API_BASE}${path}`, {
       method: 'POST',
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: {
         Accept: 'application/json',
         ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
@@ -109,7 +114,7 @@ export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
 export async function apiDownload(path: string, fallbackName: string): Promise<void> {
   const send = () =>
     fetch(`${API_BASE}${path}`, {
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
     });
   let res = await send();

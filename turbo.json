@@ -18,6 +18,9 @@
     "AUTH_RATE_LIMIT_PER_MIN",
     "SWAGGER_ENABLED",
     "UPLOAD_DIR",
+    "COOKIE_DOMAIN",
+    "STORAGE_DRIVER",
+    "S3_*",
     "MAIL_TRANSPORT",
     "MAIL_FROM",
     "SMTP_*"

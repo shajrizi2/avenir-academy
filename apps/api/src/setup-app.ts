@@ -26,6 +26,9 @@ export function setupApp(app: INestApplication): void {
       .map((o) => o.trim())
       .filter(Boolean),
     credentials: true,
+    // apiDownload() reads the file name when the web app calls the API cross-origin.
+    exposedHeaders: ['Content-Disposition'],
+    maxAge: 600,
   });
   app.useGlobalPipes(
     new ValidationPipe({
