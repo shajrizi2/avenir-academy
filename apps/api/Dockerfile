@@ -35,14 +35,15 @@ COPY --from=prune /repo/out/full/apps/api/prisma.config.ts ./apps/api/prisma.con
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm install --frozen-lockfile
 COPY --from=prune /repo/out/full/ ./
 RUN pnpm turbo run build --filter=@ai-academy/api
-# A clean production-only node_modules in /prod, from the same lockfile and the store the
-# install above filled (offline). No install scripts: the Prisma client is already compiled
+# A clean production-only node_modules in /prod, from the same lockfile. It reuses the store
+# the install above filled, but may still download: when that install comes from the layer
+# cache, the store mount can be empty (e.g. a fresh CI runner). No install scripts: the Prisma client is already compiled
 # into dist/, and bcrypt ships prebuilt binaries.
 # Then drop what the API never loads (the Prisma CLI peer, other databases' query compilers;
 # see docker/prune-node-modules.mjs).
 COPY --from=prune /repo/out/json/ /prod/
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    cd /prod && pnpm install --prod --frozen-lockfile --offline --ignore-scripts && \
+    cd /prod && pnpm install --prod --frozen-lockfile --prefer-offline --ignore-scripts && \
     node /repo/apps/api/docker/prune-node-modules.mjs /prod /prod/apps/api /prod/packages/shared
 
 FROM node:${NODE_VERSION}-alpine AS api
