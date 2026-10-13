@@ -32,14 +32,16 @@ test.describe('landing /sq', () => {
     ]) {
       await expect(tracks.getByRole('heading', { name: title })).toBeVisible();
     }
-    const cards = tracks.getByRole('article');
-    await expect(cards).toHaveCount(3);
-    await expect(cards.first().getByText('€89', { exact: true })).toBeVisible();
-    await expect(cards.first().getByText('€150')).toBeVisible();
-    await expect(cards.first().getByText('-41%')).toBeVisible();
-    // The seeded group is empty, so all 10 seats are free; the start date is 1 November 2026.
-    await expect(cards.first().getByText('10 vende të lira')).toBeVisible();
-    await expect(cards.first().getByText(/1 nëntor 2026/)).toBeVisible();
+    // Other suites publish their own courses in parallel, so look at the seeded ones only.
+    const vibe = tracks.getByRole('article').filter({ hasText: 'Development & Vibe Coding' });
+    const seo = tracks.getByRole('article').filter({ hasText: 'SEO përmes AI' });
+    await expect(vibe.getByText('€89', { exact: true })).toBeVisible();
+    await expect(vibe.getByText('€150')).toBeVisible();
+    await expect(vibe.getByText('-41%')).toBeVisible();
+    // The seed enrols one student in Vibe Coding (9 seats left) and nobody in SEO.
+    await expect(vibe.getByText('9 vende të lira')).toBeVisible();
+    await expect(seo.getByText('10 vende të lira')).toBeVisible();
+    await expect(vibe.getByText(/1 nëntor 2026/)).toBeVisible();
     await expect(page.getByText('Maksimumi 10 persona për grup').first()).toBeVisible();
   });
 
@@ -94,7 +96,7 @@ test('"/" redirects to the Albanian landing page', async ({ page }) => {
 test('/en and /en/... redirect permanently to /sq', async ({ request }) => {
   for (const [from, to] of [
     ['/en', '/sq'],
-    ['/en/?x=1', '/sq/?x=1'],
+    ['/en/kurse?x=1', '/sq/kurse?x=1'],
   ]) {
     const res = await request.get(from, { maxRedirects: 0 });
     expect(res.status(), from).toBe(301);

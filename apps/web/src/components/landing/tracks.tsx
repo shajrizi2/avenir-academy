@@ -109,7 +109,7 @@ function TrackCard({ track, group, locale, t }: TrackCardProps) {
         </Row>
         <Row icon={Users} label={format(t.maxPerGroup, { count: GROUP_MAX_CAPACITY })}>
           {group ? (
-            <span className={full ? 'text-failed-ink font-bold' : 'text-passed-ink font-bold'}>
+            <span className={full ? 'text-failed-ink font-bold' : 'text-ink font-bold'}>
               {full
                 ? t.full
                 : group.seatsLeft === 1

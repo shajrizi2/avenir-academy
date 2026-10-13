@@ -9,7 +9,14 @@ export const INSTRUCTOR = 'instructor@aiacademy.dev';
 export const STUDENT = 'student1@aiacademy.dev';
 export const MEET = 'https://meet.google.com/abc-defg-hij';
 
-const API = '/api/v1';
+/**
+ * The API as the tests call it. On the default ports the same-origin rewrite proxies it; when
+ * the ports are moved (E2E_API_PORT) the web server's rewrite still points at 4000, so the
+ * tests talk to the API directly, like the browser does with NEXT_PUBLIC_API_URL.
+ */
+const API = process.env.E2E_API_PORT
+  ? `http://localhost:${process.env.E2E_API_PORT}/api/v1`
+  : '/api/v1';
 /** Must match STRIPE_WEBHOOK_SECRET in apps/api/test/web-e2e-server.ts. */
 const STRIPE_WEBHOOK_SECRET = 'whsec_e2e_secret';
 

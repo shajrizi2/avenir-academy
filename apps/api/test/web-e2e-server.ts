@@ -1,7 +1,7 @@
 /**
  * Starts the built API for the web (Playwright) e2e suite: a fresh, seeded `ai_academy_e2e`
  * database, relaxed rate limits and a throwaway upload folder. Playwright runs this as a web
- * server (apps/web/playwright.config.ts); run `pnpm build` first.
+ * server (apps/web/playwright.config.ts), passing PORT and WEB_URL; run `pnpm build` first.
  */
 import { execSync, spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';

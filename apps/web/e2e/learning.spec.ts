@@ -183,7 +183,7 @@ test.describe('a student pays by bank transfer', () => {
       page.getByRole('heading', { name: 'Të dhënat për transfertën bankare' }),
     ).toBeVisible();
     await expect(page.getByText('Në pritje', { exact: true })).toBeVisible();
-    await expect(page.getByText(/^AV-[A-Z2-9]{8}$/)).toBeVisible();
+    await expect(page.getByText(/^AV-[A-Z2-9]{8}$/).first()).toBeVisible();
     await expect(page.getByText(/Vendi yt mbahet deri më/)).toBeVisible();
   });
 

@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 3000;
+/** Ports can be moved (E2E_WEB_PORT, E2E_API_PORT) when a dev server already uses 3000/4000. */
+const PORT = Number(process.env.E2E_WEB_PORT) || 3000;
+const API_PORT = Number(process.env.E2E_API_PORT) || 4000;
 const baseURL = `http://localhost:${PORT}`;
 
 /**
@@ -26,14 +28,19 @@ export default defineConfig({
   webServer: [
     {
       command: 'pnpm --filter @ai-academy/api test:e2e:serve',
-      url: 'http://localhost:4000/api/v1/health',
+      url: `http://localhost:${API_PORT}/api/v1/health`,
+      env: { PORT: String(API_PORT), WEB_URL: baseURL, CORS_ORIGINS: baseURL },
       reuseExistingServer: false,
       timeout: 120_000,
       stdout: 'ignore',
     },
     {
-      command: `pnpm start`,
+      command: `pnpm exec next start --port ${PORT}`,
       url: `${baseURL}/sq`,
+      // The browser reaches the API directly (NEXT_PUBLIC_API_URL baked at build time, as in
+      // production); the server reaches it through API_INTERNAL_URL. Build with
+      // NEXT_PUBLIC_API_URL=http://localhost:<api port>/api/v1 when the ports are moved.
+      env: { API_INTERNAL_URL: `http://localhost:${API_PORT}/api/v1` },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

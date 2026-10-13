@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { AuthCard } from '@/components/auth-card';
 import { SignUpCard } from '@/components/illustrations';
 import { t } from '@/i18n/messages';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { RegisterForm } from './register-form';
 
 export const metadata: Metadata = { title: t.meta.pages.register };
@@ -22,7 +24,9 @@ export default function RegisterPage() {
         </span>
       }
     >
-      <RegisterForm />
+      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+        <RegisterForm />
+      </Suspense>
     </AuthCard>
   );
 }
