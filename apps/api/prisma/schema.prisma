@@ -17,11 +17,60 @@ enum Role {
   ADMIN
 }
 
+/// PENDING: a request waiting for an admin (legacy flow, no payment). PENDING_PAYMENT: a seat is
+/// held until the first month is paid (Stripe: 30 minutes, bank transfer: 48 hours). APPROVED:
+/// enrolled (the first month is paid, or an admin approved by hand). WAITLISTED: the group was
+/// full. EXPIRED: the hold ran out unpaid.
 enum EnrollmentStatus {
   PENDING
+  PENDING_PAYMENT
   APPROVED
   REJECTED
   CANCELLED
+  WAITLISTED
+  EXPIRED
+}
+
+enum GroupStatus {
+  OPEN
+  FULL
+  RUNNING
+  FINISHED
+}
+
+enum PaymentMethod {
+  STRIPE
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REFUNDED
+  EXPIRED
+}
+
+enum EmailType {
+  PASSWORD_RESET
+  REGISTRATION_CONFIRMED
+  LECTURE_REMINDER_24H
+  LECTURE_REMINDER_1H
+  OFFLINE_LEARNING
+  PAYMENT_PENDING
+  PAYMENT_CONFIRMED
+  PAYMENT_FAILED
+  HOLD_EXPIRING
+  HOLD_EXPIRED
+  REFUND_ISSUED
+  WAITLIST_JOINED
+  SEAT_OFFERED
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
 }
 
 enum ModuleStatus {
@@ -50,40 +99,52 @@ enum Locale {
 }
 
 model User {
-  id           String           @id @default(cuid())
-  email        String           @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  phone        String?
-  role         Role             @default(STUDENT)
+  id                   String           @id @default(cuid())
+  email                String           @unique
+  passwordHash         String
+  firstName            String
+  lastName             String
+  phone                String?
+  role                 Role             @default(STUDENT)
   /// Public profile shown on the landing page for instructors.
-  avatarUrl    String?
-  title        String?
-  bio          String?
-  createdAt    DateTime         @default(now())
-  enrollments  Enrollment[]
-  progress     ModuleProgress[]
-  attempts     TestAttempt[]
-  attendance   Attendance[]
-  teaching     Module[]         @relation("ModuleInstructor")
+  avatarUrl            String?
+  title                String?
+  bio                  String?
+  /// Students may opt out of the offline-learning emails only; reminders always go out.
+  offlineEmailsEnabled Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  enrollments          Enrollment[]
+  progress             ModuleProgress[]
+  attempts             TestAttempt[]
+  attendance           Attendance[]
+  teaching             Module[]         @relation("ModuleInstructor")
+  groups               Group[]          @relation("GroupInstructor")
+  lessonProgress       LessonProgress[]
+  emails               EmailLog[]
+  confirmedPayments    Payment[]        @relation("PaymentConfirmedBy")
 }
 
 model Course {
-  id            String       @id @default(cuid())
-  slug          String       @unique
-  title         String
-  summary       String
-  description   String
+  id             String       @id @default(cuid())
+  slug           String       @unique
+  title          String
+  summary        String
+  description    String
   /// Albanian versions for the /sq landing page; null falls back to English (PLAN D11).
-  titleSq       String?
-  summarySq     String?
-  descriptionSq String?
-  coverUrl      String?
-  startDate     DateTime?
-  isPublished   Boolean      @default(false)
-  modules       Module[]
-  enrollments   Enrollment[]
+  titleSq        String?
+  summarySq      String?
+  descriptionSq  String?
+  coverUrl       String?
+  startDate      DateTime?
+  isPublished    Boolean      @default(false)
+  /// Price per month (= per module), in minor units. listPriceCents is the struck-through
+  /// standard price shown next to it (null = no discount shown). Editable in admin.
+  priceCents     Int          @default(8900)
+  listPriceCents Int?         @default(15000)
+  currency       String       @default("EUR")
+  modules        Module[]
+  enrollments    Enrollment[]
+  groups         Group[]
 }
 
 model Module {
@@ -101,24 +162,103 @@ model Module {
   instructor    User?            @relation("ModuleInstructor", fields: [instructorId], references: [id])
   sessions      LiveSession[]
   materials     Material[]
+  lessons       Lesson[]
   test          Test?
   progress      ModuleProgress[]
+  payments      Payment[]
 
   @@unique([courseId, order])
 }
 
+/// A cohort of at most `capacity` students taking a course together on a weekly schedule.
+/// Times are local to `timezone`; sessions are generated from the schedule (12 per module).
+model Group {
+  id               String        @id @default(cuid())
+  courseId         String
+  course           Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name             String
+  startDate        DateTime      @db.Date
+  endDate          DateTime      @db.Date
+  /// Days of the week with a live lecture: 0 = Sunday … 6 = Saturday.
+  weekdays         Int[]
+  /// Local start time, "HH:mm".
+  startTime        String
+  durationMin      Int           @default(120)
+  timezone         String        @default("Europe/Tirane")
+  capacity         Int           @default(10)
+  status           GroupStatus   @default(OPEN)
+  instructorId     String?
+  instructor       User?         @relation("GroupInstructor", fields: [instructorId], references: [id])
+  /// Default Google Meet link copied to generated sessions.
+  meetUrl          String?
+  /// Days on which the offline-learning email may go out when there is no lecture (default: all but Sunday).
+  offlineEmailDays Int[]         @default([1, 2, 3, 4, 5, 6])
+  createdAt        DateTime      @default(now())
+  enrollments      Enrollment[]
+  sessions         LiveSession[]
+
+  @@index([courseId, status])
+}
+
 model Enrollment {
-  id        String           @id @default(cuid())
-  userId    String
-  courseId  String
-  status    EnrollmentStatus @default(PENDING)
-  note      String?
-  createdAt DateTime         @default(now())
-  decidedAt DateTime?
-  user      User             @relation(fields: [userId], references: [id])
-  course    Course           @relation(fields: [courseId], references: [id])
+  id            String           @id @default(cuid())
+  userId        String
+  courseId      String
+  groupId       String?
+  status        EnrollmentStatus @default(PENDING)
+  note          String?
+  /// While PENDING_PAYMENT: the seat is held until then.
+  holdExpiresAt DateTime?
+  createdAt     DateTime         @default(now())
+  decidedAt     DateTime?
+  user          User             @relation(fields: [userId], references: [id])
+  course        Course           @relation(fields: [courseId], references: [id])
+  group         Group?           @relation(fields: [groupId], references: [id])
+  payments      Payment[]
 
   @@unique([userId, courseId])
+  @@index([groupId, status])
+}
+
+/// One payment covers one month (= one module) of one enrollment. A month is paid when a
+/// payment for it is CONFIRMED (Stripe webhook or an admin confirming a bank transfer).
+model Payment {
+  id                    String        @id @default(cuid())
+  enrollmentId          String
+  enrollment            Enrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  moduleId              String
+  module                Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  amountCents           Int
+  currency              String
+  provider              PaymentMethod
+  status                PaymentStatus @default(PENDING)
+  /// Shown to the student; the bank-transfer reference they must quote.
+  reference             String        @unique
+  stripeSessionId       String?       @unique
+  stripePaymentIntentId String?
+  stripeChargeId        String?
+  receiptUrl            String?
+  /// While PENDING: the payment (and, for a first month, the seat) expires then.
+  holdExpiresAt         DateTime?
+  note                  String?
+  confirmedAt           DateTime?
+  confirmedById         String?
+  confirmedBy           User?         @relation("PaymentConfirmedBy", fields: [confirmedById], references: [id])
+  failedAt              DateTime?
+  refundedAt            DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([enrollmentId, moduleId])
+  @@index([status, holdExpiresAt])
+  @@index([provider, status])
+}
+
+/// Stripe webhook events already processed, so a redelivered event is handled once.
+model StripeEvent {
+  id         String   @id
+  type       String
+  receivedAt DateTime @default(now())
 }
 
 model ModuleProgress {
@@ -137,12 +277,18 @@ model ModuleProgress {
 model LiveSession {
   id          String       @id @default(cuid())
   moduleId    String
+  /// The cohort this lecture belongs to (null only for sessions created before groups existed).
+  groupId     String?
   title       String
   startsAt    DateTime
   durationMin Int          @default(90)
   meetUrl     String
   module      Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  group       Group?       @relation(fields: [groupId], references: [id], onDelete: Cascade)
   attendance  Attendance[]
+
+  @@index([groupId, startsAt])
+  @@index([startsAt])
 }
 
 model Attendance {
@@ -156,12 +302,65 @@ model Attendance {
 }
 
 model Material {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   moduleId String
+  /// Optionally attached to one offline lesson of the module.
+  lessonId String?
   title    String
   url      String
   kind     String
-  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module   Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  lesson   Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+}
+
+/// Offline learning between live lectures: Markdown content and an optional video per module.
+model Lesson {
+  id           String           @id @default(cuid())
+  moduleId     String
+  module       Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  order        Int
+  title        String
+  /// Markdown, rendered safely (no raw HTML).
+  content      String
+  /// YouTube or Vimeo page URL; embedded on the lesson page.
+  videoUrl     String?
+  estimatedMin Int?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  materials    Material[]
+  progress     LessonProgress[]
+
+  @@unique([moduleId, order])
+}
+
+model LessonProgress {
+  userId      String
+  lessonId    String
+  completedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@id([userId, lessonId])
+}
+
+/// Every email the platform sends. `uniqueKey` makes sends idempotent: a cron job that runs
+/// twice, or a restart, never emails the same thing twice.
+model EmailLog {
+  id        String      @id @default(cuid())
+  userId    String?
+  user      User?       @relation(fields: [userId], references: [id])
+  to        String
+  type      EmailType
+  uniqueKey String      @unique
+  subject   String
+  status    EmailStatus @default(PENDING)
+  error     String?
+  meta      Json?
+  createdAt DateTime    @default(now())
+  sentAt    DateTime?
+
+  @@index([type, createdAt])
+  @@index([userId, createdAt])
 }
 
 model Test {
@@ -228,19 +427,27 @@ model Testimonial {
 
 /// Singleton row (id = 1) with landing-page values the team can change without a deploy.
 model SiteSettings {
-  id              Int       @id @default(1)
-  nextCohortStart DateTime?
-  scheduleSq      String?
-  scheduleEn      String?
-  seatsTotal      Int?
+  id                  Int       @id @default(1)
+  nextCohortStart     DateTime?
+  scheduleSq          String?
+  scheduleEn          String?
+  seatsTotal          Int?
   /// Whole currency units (e.g. 150 = 150 EUR). Null shows "contact us".
-  priceAmount     Int?
-  priceCurrency   String    @default("EUR")
-  priceNoteSq     String?
-  priceNoteEn     String?
-  contactEmail    String?
-  contactPhone    String?
+  priceAmount         Int?
+  priceCurrency       String    @default("EUR")
+  priceNoteSq         String?
+  priceNoteEn         String?
+  contactEmail        String?
+  contactPhone        String?
   /// International format without "+" or spaces, used for https://wa.me/<number>.
-  whatsappNumber  String?
-  updatedAt       DateTime  @updatedAt
+  whatsappNumber      String?
+  /// Payment methods offered at checkout (Stripe also needs STRIPE_* set on the server).
+  stripeEnabled       Boolean   @default(true)
+  bankTransferEnabled Boolean   @default(true)
+  /// Bank transfer details shown to students (placeholders until the team fills them in).
+  bankBeneficiary     String?
+  bankIban            String?
+  bankName            String?
+  bankSwift           String?
+  updatedAt           DateTime  @updatedAt
 }

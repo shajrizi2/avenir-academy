@@ -1,9 +1,14 @@
 import type { Locale } from './constants.js';
 import type {
   AttemptStatus,
+  EmailStatus,
+  EmailType,
   EnrollmentStatus,
+  GroupStatus,
   MaterialKind,
   ModuleStatus,
+  PaymentMethod,
+  PaymentStatus,
   QuestionType,
   Role,
 } from './enums.js';
@@ -21,6 +26,8 @@ export interface PublicUser {
   avatarUrl: string | null;
   title: string | null;
   bio: string | null;
+  /** Students may switch off the offline-learning emails (never the reminders). */
+  offlineEmailsEnabled: boolean;
   createdAt: IsoDateString;
 }
 
@@ -71,6 +78,11 @@ export interface CourseSummary {
   coverUrl: string | null;
   startDate: IsoDateString | null;
   isPublished: boolean;
+  /** Per month (= per module), minor units. */
+  priceCents: number;
+  /** The struck-through standard price; null = no discount shown. */
+  listPriceCents: number | null;
+  currency: string;
   moduleCount: number;
 }
 
@@ -85,7 +97,17 @@ export interface EnrollmentSummary {
   status: EnrollmentStatus;
   createdAt: IsoDateString;
   decidedAt: IsoDateString | null;
-  course: Pick<CourseSummary, 'id' | 'slug' | 'title' | 'summary'>;
+  /** While PENDING_PAYMENT: when the held seat is released. */
+  holdExpiresAt: IsoDateString | null;
+  course: Pick<
+    CourseSummary,
+    'id' | 'slug' | 'title' | 'summary' | 'priceCents' | 'listPriceCents' | 'currency'
+  >;
+  group: GroupRef | null;
+  /** Modules (months) with a CONFIRMED payment. */
+  paidModuleIds: string[];
+  /** Modules with a payment still PENDING (bank transfer waiting, Stripe in progress). */
+  pendingModuleIds: string[];
 }
 
 export interface ApiErrorBody {
@@ -127,6 +149,12 @@ export interface SiteSettings {
   contactEmail: string | null;
   contactPhone: string | null;
   whatsappNumber: string | null;
+  stripeEnabled: boolean;
+  bankTransferEnabled: boolean;
+  bankBeneficiary: string | null;
+  bankIban: string | null;
+  bankName: string | null;
+  bankSwift: string | null;
 }
 
 // ---- Sprint 2: enrollments, modules, live sessions, materials ----
@@ -151,8 +179,11 @@ export interface AdminEnrollment {
   note: string | null;
   createdAt: IsoDateString;
   decidedAt: IsoDateString | null;
+  holdExpiresAt: IsoDateString | null;
   user: PersonSummary;
   course: CourseRef;
+  group: GroupRef | null;
+  paidModuleIds: string[];
 }
 
 export interface ModuleRef {
@@ -165,6 +196,7 @@ export interface ModuleRef {
 export interface LiveSessionSummary {
   id: string;
   moduleId: string;
+  groupId: string | null;
   title: string;
   startsAt: IsoDateString;
   durationMin: number;
@@ -213,8 +245,10 @@ export interface ModuleDetail extends ModuleSummary {
   status: ModuleStatus | null;
   /** True for the module's instructor and admins. */
   canManage: boolean;
+  /** Students see only their own group's sessions. */
   sessions: LiveSessionSummary[];
   materials: MaterialSummary[];
+  lessons: LessonSummary[];
   /** The module's test. Students only see it once it is published. */
   test: ModuleTest | null;
 }
@@ -222,7 +256,19 @@ export interface ModuleDetail extends ModuleSummary {
 /** GET /me/courses/:slug: an approved student's view of a course. */
 export interface LearnCourse extends CourseRef {
   summary: string;
-  modules: (ModuleSummary & { status: ModuleStatus })[];
+  priceCents: number;
+  currency: string;
+  enrollmentId: string;
+  group: GroupRef | null;
+  modules: (ModuleSummary & {
+    status: ModuleStatus;
+    /** Whether this month is paid (a CONFIRMED payment exists). */
+    paid: boolean;
+    /** A payment is still pending (bank transfer waiting for the admin). */
+    paymentPending: boolean;
+    lessonCount: number;
+    completedLessons: number;
+  })[];
 }
 
 /** GET /me/modules: modules an instructor teaches (all modules for admins). */
@@ -366,6 +412,7 @@ export interface ProgressModule {
   order: number;
   title: string;
   status: ModuleStatus;
+  paid: boolean;
 }
 
 /** GET /me/progress: one entry per approved course. */
@@ -401,4 +448,145 @@ export interface AdminStats {
   passRateLast30Days: number | null;
   /** Students whose module is FAILED (no attempts left), waiting for an admin. */
   failedModules: number;
+  /** Bank transfers waiting for an admin to confirm. */
+  pendingBankTransfers: number;
+  waitlisted: number;
+  openGroups: number;
+}
+
+// ---- Launch: groups, payments, lessons, emails ----
+
+export interface GroupRef {
+  id: string;
+  name: string;
+  startDate: IsoDateString;
+}
+
+/** A cohort as the public site and students see it. */
+export interface GroupSummary {
+  id: string;
+  name: string;
+  course: CourseRef;
+  /** "YYYY-MM-DD" in the group's time zone. */
+  startDate: string;
+  endDate: string;
+  /** 0 = Sunday … 6 = Saturday */
+  weekdays: number[];
+  /** "HH:mm" local time */
+  startTime: string;
+  durationMin: number;
+  timezone: string;
+  capacity: number;
+  /** Seats not taken by an enrolled student or an active hold. */
+  seatsLeft: number;
+  /** FULL is computed from the seats; RUNNING and FINISHED from the dates or the admin. */
+  status: GroupStatus;
+  instructor: InstructorSummary | null;
+}
+
+/** The admin's view: everything editable plus the student counts. */
+export interface AdminGroup extends GroupSummary {
+  meetUrl: string | null;
+  offlineEmailDays: number[];
+  enrolledCount: number;
+  heldCount: number;
+  waitlistedCount: number;
+  sessionCount: number;
+  createdAt: IsoDateString;
+}
+
+export interface GroupStudent {
+  enrollmentId: string;
+  status: EnrollmentStatus;
+  user: PersonSummary;
+  holdExpiresAt: IsoDateString | null;
+  paidModuleIds: string[];
+  createdAt: IsoDateString;
+}
+
+export interface BankInstructions {
+  beneficiary: string | null;
+  iban: string | null;
+  bankName: string | null;
+  swift: string | null;
+  reference: string;
+  amountCents: number;
+  currency: string;
+  /** Pay before then or the seat is released. */
+  payBy: IsoDateString | null;
+}
+
+export interface PaymentSummary {
+  id: string;
+  enrollmentId: string;
+  module: { id: string; order: number; title: string };
+  course: CourseRef;
+  group: GroupRef | null;
+  amountCents: number;
+  currency: string;
+  provider: PaymentMethod;
+  status: PaymentStatus;
+  reference: string;
+  /** Stripe's hosted receipt, once the card payment is confirmed. */
+  receiptUrl: string | null;
+  holdExpiresAt: IsoDateString | null;
+  confirmedAt: IsoDateString | null;
+  createdAt: IsoDateString;
+  /** For pending bank transfers: where to send the money. */
+  bank: BankInstructions | null;
+}
+
+export interface AdminPayment extends PaymentSummary {
+  user: PersonSummary;
+  note: string | null;
+  confirmedBy: InstructorSummary | null;
+  refundedAt: IsoDateString | null;
+  failedAt: IsoDateString | null;
+  stripePaymentIntentId: string | null;
+}
+
+/** POST /checkout and POST /enrollments/:id/payments */
+export type CheckoutResult =
+  | { kind: 'STRIPE'; paymentId: string; url: string; expiresAt: IsoDateString }
+  | { kind: 'BANK_TRANSFER'; paymentId: string; payment: PaymentSummary }
+  | { kind: 'WAITLISTED'; enrollmentId: string; group: GroupRef };
+
+export interface LessonSummary {
+  id: string;
+  moduleId: string;
+  order: number;
+  title: string;
+  estimatedMin: number | null;
+  hasVideo: boolean;
+  /** For the current student; null for staff. */
+  completedAt: IsoDateString | null;
+}
+
+export interface LessonDetail extends LessonSummary {
+  content: string;
+  videoUrl: string | null;
+  materials: MaterialSummary[];
+  module: ModuleRef;
+  previous: { id: string; title: string } | null;
+  next: { id: string; title: string } | null;
+}
+
+/** GET /me/next-lesson: the "continue where you left off" card. */
+export interface NextLesson {
+  lesson: { id: string; title: string; estimatedMin: number | null };
+  module: ModuleRef;
+  completedLessons: number;
+  totalLessons: number;
+}
+
+export interface EmailLogEntry {
+  id: string;
+  to: string;
+  type: EmailType;
+  subject: string;
+  status: EmailStatus;
+  error: string | null;
+  createdAt: IsoDateString;
+  sentAt: IsoDateString | null;
+  user: PersonSummary | null;
 }
