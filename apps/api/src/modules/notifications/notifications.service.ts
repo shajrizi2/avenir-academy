@@ -15,6 +15,11 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 
 const HOUR = 60 * 60_000;
 
+/** Narrows a job to one group (tests; an admin re-run). Cron runs cover every group. */
+export interface JobScope {
+  groupId?: string;
+}
+
 /**
  * Scheduled emails. Every method takes `now`, so tests drive them directly; every send goes
  * through MailService.sendLogged with a unique key, so running a job twice never sends twice.
@@ -38,9 +43,12 @@ export class NotificationsService {
    * sessions starting within 24 hours (but more than an hour away), the 1-hour mail to
    * sessions starting within the hour, so a late restart still catches up.
    */
-  async sendLectureReminders(now = new Date()): Promise<number> {
+  async sendLectureReminders(now = new Date(), scope: JobScope = {}): Promise<number> {
     const sessions = await this.prisma.liveSession.findMany({
-      where: { startsAt: { gt: now, lte: new Date(now.getTime() + 24 * HOUR) } },
+      where: {
+        startsAt: { gt: now, lte: new Date(now.getTime() + 24 * HOUR) },
+        ...(scope.groupId && { groupId: scope.groupId }),
+      },
       select: {
         id: true,
         title: true,
@@ -90,9 +98,12 @@ export class NotificationsService {
    * to students who still receive it and have paid the current month. Links to their next
    * unfinished lesson. One per student, group and day.
    */
-  async sendOfflineLearningEmails(now = new Date()): Promise<number> {
+  async sendOfflineLearningEmails(now = new Date(), scope: JobScope = {}): Promise<number> {
     const groups = await this.prisma.group.findMany({
-      where: { status: { in: [GroupStatus.OPEN, GroupStatus.FULL, GroupStatus.RUNNING] } },
+      where: {
+        status: { in: [GroupStatus.OPEN, GroupStatus.FULL, GroupStatus.RUNNING] },
+        ...(scope.groupId && { id: scope.groupId }),
+      },
       select: {
         id: true,
         timezone: true,
@@ -111,16 +122,6 @@ export class NotificationsService {
       if (today < start || today > end) continue;
       if (!group.offlineEmailDays.includes(zonedParts(now, group.timezone).weekday)) continue;
 
-      const lectureToday = await this.prisma.liveSession.findFirst({
-        where: {
-          groupId: group.id,
-          startsAt: {
-            gte: new Date(now.getTime() - 36 * HOUR),
-            lte: new Date(now.getTime() + 36 * HOUR),
-          },
-        },
-        select: { startsAt: true },
-      });
       const sessionsAround = await this.prisma.liveSession.findMany({
         where: {
           groupId: group.id,
@@ -131,12 +132,7 @@ export class NotificationsService {
         },
         select: { startsAt: true },
       });
-      if (
-        lectureToday &&
-        sessionsAround.some((s) => localDateKey(s.startsAt, group.timezone) === today)
-      ) {
-        continue;
-      }
+      if (sessionsAround.some((s) => localDateKey(s.startsAt, group.timezone) === today)) continue;
 
       const students = await this.prisma.enrollment.findMany({
         where: {
@@ -183,9 +179,9 @@ export class NotificationsService {
   }
 
   /** Groups move to RUNNING on their start date and to FINISHED after their end date. */
-  async refreshGroupStatuses(now = new Date()): Promise<void> {
+  async refreshGroupStatuses(now = new Date(), scope: JobScope = {}): Promise<void> {
     const groups = await this.prisma.group.findMany({
-      where: { status: { not: GroupStatus.FINISHED } },
+      where: { status: { not: GroupStatus.FINISHED }, ...(scope.groupId && { id: scope.groupId }) },
       select: { id: true, status: true, startDate: true, endDate: true, timezone: true },
     });
     for (const g of groups) {
