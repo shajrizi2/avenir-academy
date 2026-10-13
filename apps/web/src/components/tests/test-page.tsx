@@ -8,10 +8,11 @@ import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormError } from '@/components/form-error';
-import { LocalDateTime } from '@/components/local-date-time';
+import { formatDate } from '@/components/local-date-time';
 import { ModuleStatusBadge } from '@/components/module-status-badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { attemptQuery, studentTestQuery } from '@/lib/queries';
 import { AttemptHistory } from './attempt-history';
@@ -43,7 +44,7 @@ export function TestPage() {
       <div className="space-y-4">
         <FormError message={errorMessage(error)} />
         <Link href="/dashboard" className="text-ink font-semibold underline underline-offset-4">
-          Back to your dashboard
+          {t.tests.page.backToDashboard}
         </Link>
       </div>
     );
@@ -91,7 +92,8 @@ function Overview({
         href={moduleHref}
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
-        <ArrowLeft className="size-4" aria-hidden /> Module {test.module.order}: {test.module.title}
+        <ArrowLeft className="size-4" aria-hidden />{' '}
+        {fmt(t.tests.page.moduleLink, { number: test.module.order, title: test.module.title })}
       </Link>
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -100,18 +102,22 @@ function Overview({
         </div>
         <h1 className="text-ink text-heading font-extrabold">{test.title}</h1>
         <p className="text-ink-soft">
-          Open <TestWindow test={test} />
+          {t.tests.page.open} <TestWindow test={test} />
         </p>
       </header>
 
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Rule icon={ListChecks} label="Questions" value={`${test.questionCount}`} />
-        <Rule icon={Clock} label="Time limit" value={`${test.timeLimitMin} minutes`} />
-        <Rule icon={Target} label="To pass" value={`${test.passMark}%`} />
+        <Rule icon={ListChecks} label={t.tests.page.questions} value={`${test.questionCount}`} />
+        <Rule
+          icon={Clock}
+          label={t.tests.page.timeLimit}
+          value={fmt(t.tests.page.minutes, { count: test.timeLimitMin })}
+        />
+        <Rule icon={Target} label={t.tests.page.toPass} value={`${test.passMark}%`} />
         <Rule
           icon={RotateCcw}
-          label="Attempts left"
-          value={`${test.attemptsLeft} of ${test.maxAttempts}`}
+          label={t.tests.page.attemptsLeft}
+          value={fmt(t.tests.page.attemptsOf, { left: test.attemptsLeft, max: test.maxAttempts })}
         />
       </ul>
 
@@ -120,7 +126,7 @@ function Overview({
         className="border-ink rounded-card bg-background space-y-4 border-2 p-6 sm:p-8"
       >
         <h2 id="start-title" className="text-ink text-subheading font-extrabold">
-          {test.activeAttemptId ? 'You have an attempt in progress' : 'Before you start'}
+          {test.activeAttemptId ? t.tests.page.inProgressTitle : t.tests.page.beforeStart}
         </h2>
         <StartArea test={test} state={state} onStart={onStart} starting={starting} />
       </section>
@@ -129,13 +135,13 @@ function Overview({
         <section aria-labelledby="history-title" className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="history-title" className="text-ink text-subheading font-extrabold">
-              Your attempts
+              {t.tests.page.yourAttempts}
             </h2>
             <Link
               href={`/tests/${test.id}/result`}
               className="text-ink text-sm font-semibold underline underline-offset-4"
             >
-              Latest result
+              {t.tests.page.latestResult}
             </Link>
           </div>
           <AttemptHistory attempts={finished} passMark={test.passMark} />
@@ -159,11 +165,9 @@ function StartArea({
   if (test.activeAttemptId) {
     return (
       <>
-        <p className="text-ink">
-          Your answers were saved. The timer kept running while you were away.
-        </p>
+        <p className="text-ink">{t.tests.page.resumeText}</p>
         <Button variant="chunky" size="lg" onClick={onStart} disabled={starting}>
-          <Play data-icon="inline-start" /> {starting ? 'Opening…' : 'Resume the test'}
+          <Play data-icon="inline-start" /> {starting ? t.tests.page.opening : t.tests.page.resume}
         </Button>
       </>
     );
@@ -172,12 +176,15 @@ function StartArea({
     return (
       <>
         <p className="text-ink flex items-center gap-2 font-semibold">
-          <Award className="text-passed-ink size-5" aria-hidden /> You passed this module.
+          <Award className="text-passed-ink size-5" aria-hidden /> {t.tests.page.passedModule}
         </p>
         {test.nextModule && (
           <Button asChild variant="chunky" size="lg">
             <Link href={`/learn/${test.nextModule.course.slug}/${test.nextModule.id}`}>
-              Go to Module {test.nextModule.order}: {test.nextModule.title}
+              {fmt(t.tests.page.goToModule, {
+                number: test.nextModule.order,
+                title: test.nextModule.title,
+              })}
             </Link>
           </Button>
         )}
@@ -185,43 +192,34 @@ function StartArea({
     );
   }
   if (test.status === 'FAILED' || test.attemptsLeft === 0) {
-    return (
-      <p className="text-ink">
-        You have used all your attempts. Your instructor or an admin can give you another try.
-      </p>
-    );
+    return <p className="text-ink">{t.tests.page.noAttemptsLeft}</p>;
   }
   if (state === 'upcoming') {
     return (
       <p className="text-ink">
-        The test opens on <LocalDateTime value={test.opensAt} options={TEST_TIME_FORMAT} />. Come
-        back then.
+        {fmt(t.tests.page.opensOn, { date: formatDate(test.opensAt, TEST_TIME_FORMAT) })}
       </p>
     );
   }
   if (state === 'closed') {
-    return (
-      <p className="text-ink">This test has closed. Contact your instructor if you missed it.</p>
-    );
+    return <p className="text-ink">{t.tests.page.closed}</p>;
   }
 
   return (
     <>
       <ul className="text-ink list-disc space-y-1 pl-5">
-        <li>
-          You have {test.timeLimitMin} minutes once you start, and the timer keeps running if you
-          leave the page.
-        </li>
-        <li>Your answers are saved as you go. Unanswered questions score zero.</li>
-        <li>
-          A question with several correct answers counts only when you pick all of them, and nothing
-          else.
-        </li>
-        <li>When time runs out, the test is handed in with the answers you saved.</li>
+        <li>{fmt(t.tests.page.rule1, { count: test.timeLimitMin })}</li>
+        <li>{t.tests.page.rule2}</li>
+        <li>{t.tests.page.rule3}</li>
+        <li>{t.tests.page.rule4}</li>
       </ul>
       <Button variant="chunky" size="lg" onClick={onStart} disabled={starting || state !== 'open'}>
         <Play data-icon="inline-start" />
-        {starting ? 'Starting…' : test.attempts.length > 0 ? 'Try again' : 'Start the test'}
+        {starting
+          ? t.tests.page.starting
+          : test.attempts.length > 0
+            ? t.tests.page.tryAgain
+            : t.tests.page.start}
       </Button>
     </>
   );

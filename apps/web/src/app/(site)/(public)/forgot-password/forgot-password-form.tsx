@@ -14,12 +14,13 @@ import { TextField } from '@/components/form/text-field';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
+import { t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { useHydrated } from '@/lib/use-hydrated';
 
 export function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
   // Until React hydrates, typing is lost and a submit would be a native request, so the
   // form stays disabled until then.
   const hydrated = useHydrated();
@@ -31,11 +32,8 @@ export function ForgotPasswordForm() {
   const onSubmit = form.handleSubmit(async (values) => {
     setError(null);
     try {
-      const res = await apiFetch<MessageResponse>('/auth/forgot-password', {
-        method: 'POST',
-        body: values,
-      });
-      setSent(res.message);
+      await apiFetch<MessageResponse>('/auth/forgot-password', { method: 'POST', body: values });
+      setSent(true);
     } catch (e) {
       setError(errorMessage(e));
     }
@@ -45,7 +43,7 @@ export function ForgotPasswordForm() {
     return (
       <Alert>
         <MailCheck aria-hidden />
-        <AlertDescription>{sent} Check your inbox (and spam folder).</AlertDescription>
+        <AlertDescription>{t.auth.forgot.sent}</AlertDescription>
       </Alert>
     );
   }
@@ -55,14 +53,20 @@ export function ForgotPasswordForm() {
       <fieldset disabled={!hydrated} className="min-w-0">
         <FieldGroup>
           <FormError message={error} />
-          <TextField form={form} name="email" label="Email" type="email" autoComplete="email" />
+          <TextField
+            form={form}
+            name="email"
+            label={t.auth.fields.email}
+            type="email"
+            autoComplete="email"
+          />
           <Button
             type="submit"
             variant="chunky"
             size="lg"
             disabled={!hydrated || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? 'Sending…' : 'Send reset link'}
+            {form.formState.isSubmitting ? t.auth.forgot.submitting : t.auth.forgot.submit}
           </Button>
         </FieldGroup>
       </fieldset>

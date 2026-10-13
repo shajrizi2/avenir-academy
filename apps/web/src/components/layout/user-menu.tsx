@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { t } from '@/i18n/messages';
 import { useAuth } from '@/lib/auth-context';
 import { homeFor } from '@/lib/routes';
 
@@ -31,7 +32,12 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-lg" className="rounded-full" aria-label="Account menu">
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          className="rounded-full"
+          aria-label={t.nav.accountMenu}
+        >
           <Avatar>
             <AvatarFallback className="bg-accent text-accent-foreground">{initials}</AvatarFallback>
           </Avatar>
@@ -48,19 +54,19 @@ export function UserMenu() {
         <DropdownMenuItem asChild>
           <Link href={homeFor(user.role)}>
             {user.role === 'ADMIN' ? <Shield /> : <LayoutDashboard />}
-            {user.role === 'ADMIN' ? 'Admin' : 'Dashboard'}
+            {user.role === 'ADMIN' ? t.nav.admin : t.nav.dashboard}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/profile">
             <UserRound />
-            Profile
+            {t.nav.profile}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => void handleLogout()}>
           <LogOut />
-          Log out
+          {t.nav.logout}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

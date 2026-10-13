@@ -7,3 +7,5 @@ export { PathUnlock } from './path-unlock';
 export { TestCheck } from './test-check';
 export { HelloBubble } from './hello-bubble';
 export { SignUpCard } from './sign-up-card';
+export { CardPayment } from './card-payment';
+export { MailCalendar } from './mail-calendar';

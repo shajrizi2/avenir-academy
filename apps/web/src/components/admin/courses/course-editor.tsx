@@ -1,6 +1,6 @@
 'use client';
 
-import type { CourseDetail, CourseInput, ModuleSummary, moduleSchema } from '@ai-academy/shared';
+import type { CourseDetail, ModuleSummary, moduleSchema } from '@ai-academy/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ExternalLink, Layers, Pencil, Plus, Settings2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
@@ -16,8 +16,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiFetch, errorMessage } from '@/lib/api';
+import { fmt, t } from '@/i18n/messages';
 import { adminCourseQuery } from '@/lib/queries';
-import { CourseForm } from './course-form';
+import { CourseForm, type CourseFormOutput } from './course-form';
 import { ModuleFormDialog } from './module-form-dialog';
 
 type ModuleValues = z.output<typeof moduleSchema>;
@@ -35,7 +36,7 @@ export function CourseEditor() {
         href="/admin/courses"
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
-        <ArrowLeft className="size-4" aria-hidden /> All courses
+        <ArrowLeft className="size-4" aria-hidden /> {t.admin.courses.allCourses}
       </Link>
       <PageHeader
         title={course.title}
@@ -44,7 +45,7 @@ export function CourseEditor() {
           course.isPublished && (
             <Button asChild variant="chunky-outline">
               <Link href={`/courses/${course.slug}`} target="_blank">
-                View public page <ExternalLink data-icon="inline-end" />
+                {t.admin.courses.viewPublic} <ExternalLink data-icon="inline-end" />
               </Link>
             </Button>
           )
@@ -62,16 +63,16 @@ function DetailsCard({ course }: { course: CourseDetail }) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  async function save(input: CourseInput) {
+  async function save(input: CourseFormOutput) {
     await apiFetch(`/courses/${course.id}`, { method: 'PATCH', body: input });
-    toast.success('Course saved');
+    toast.success(t.admin.courses.saved);
     await queryClient.invalidateQueries({ queryKey: ['courses'] });
   }
 
   async function remove() {
     try {
       await apiFetch(`/courses/${course.id}`, { method: 'DELETE' });
-      toast.success('Course deleted');
+      toast.success(t.admin.courses.deleted);
       void queryClient.invalidateQueries({ queryKey: ['courses'] });
       router.push('/admin/courses');
     } catch (e) {
@@ -84,9 +85,9 @@ function DetailsCard({ course }: { course: CourseDetail }) {
     <Card>
       <CardHeader>
         <CardTitle as="h2" className="flex items-center gap-2">
-          <Settings2 className="size-5" aria-hidden /> Details
+          <Settings2 className="size-5" aria-hidden /> {t.admin.courses.details}
           <Badge variant={course.isPublished ? 'ai' : 'secondary'} className="ml-auto">
-            {course.isPublished ? 'Published' : 'Draft'}
+            {course.isPublished ? t.admin.courses.published : t.admin.courses.draft}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -95,19 +96,19 @@ function DetailsCard({ course }: { course: CourseDetail }) {
         <CourseForm
           key={JSON.stringify(course)}
           course={course}
-          submitLabel="Save changes"
+          submitLabel={t.admin.courses.saveChanges}
           onSubmit={save}
         />
         <div className="border-line border-t pt-6">
           <ConfirmDialog
             trigger={
               <Button variant="destructive">
-                <Trash2 data-icon="inline-start" /> Delete course
+                <Trash2 data-icon="inline-start" /> {t.admin.courses.deleteCourse}
               </Button>
             }
-            title="Delete this course?"
-            description="This removes the course and all its modules, sessions and materials. Courses with enrollments can't be deleted; unpublish them instead."
-            confirmLabel="Delete course"
+            title={t.admin.courses.deleteTitle}
+            description={t.admin.courses.deleteText}
+            confirmLabel={t.admin.courses.deleteCourse}
             onConfirm={remove}
           />
         </div>
@@ -122,7 +123,7 @@ function ModulesCard({ course }: { course: CourseDetail }) {
 
   async function create(values: ModuleValues) {
     await apiFetch(`/courses/${course.id}/modules`, { method: 'POST', body: values });
-    toast.success('Module added');
+    toast.success(t.admin.courses.moduleAdded);
     await refresh();
   }
 
@@ -130,14 +131,14 @@ function ModulesCard({ course }: { course: CourseDetail }) {
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
         <CardTitle as="h2" className="flex items-center gap-2">
-          <Layers className="size-5" aria-hidden /> Modules
+          <Layers className="size-5" aria-hidden /> {t.admin.courses.modulesCard}
         </CardTitle>
         <ModuleFormDialog
-          title="Add a module"
+          title={t.admin.courses.addModuleTitle}
           onSubmit={create}
           trigger={
             <Button variant="chunky" size="sm">
-              <Plus data-icon="inline-start" /> Add module
+              <Plus data-icon="inline-start" /> {t.admin.courses.addModule}
             </Button>
           }
         />
@@ -146,8 +147,8 @@ function ModulesCard({ course }: { course: CourseDetail }) {
         {course.modules.length === 0 ? (
           <EmptyState
             icon={Layers}
-            title="No modules yet"
-            description="Modules run one after another, about a month each. Students unlock the next by passing each test."
+            title={t.admin.courses.noModulesTitle}
+            description={t.admin.courses.noModulesText}
           />
         ) : (
           <ol className="space-y-3">
@@ -177,14 +178,14 @@ function ModuleRow({
 }) {
   async function update(values: ModuleValues) {
     await apiFetch(`/modules/${module.id}`, { method: 'PATCH', body: values });
-    toast.success('Module saved');
+    toast.success(t.admin.courses.moduleSaved);
     await onChanged();
   }
 
   async function remove() {
     try {
       await apiFetch(`/modules/${module.id}`, { method: 'DELETE' });
-      toast.success('Module deleted');
+      toast.success(t.admin.courses.moduleDeleted);
       await onChanged();
     } catch (e) {
       toast.error(errorMessage(e));
@@ -200,22 +201,26 @@ function ModuleRow({
       <div className="min-w-0 flex-1">
         <p className="text-ink font-bold">{module.title}</p>
         <p className="text-ink-soft text-sm">
-          {module.durationWeeks} weeks ·{' '}
+          {fmt(t.admin.courses.weeks, { count: module.durationWeeks })} ·{' '}
           {module.instructor
             ? `${module.instructor.firstName} ${module.instructor.lastName}`
-            : 'No instructor assigned'}
+            : t.admin.courses.noInstructor}
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link href={`/teach/modules/${module.id}`}>Sessions &amp; materials</Link>
+          <Link href={`/teach/modules/${module.id}`}>{t.admin.courses.sessionsMaterials}</Link>
         </Button>
         <ModuleFormDialog
-          title={`Edit module ${module.order}`}
+          title={fmt(t.admin.courses.editModule, { number: module.order })}
           module={module}
           onSubmit={update}
           trigger={
-            <Button variant="ghost" size="icon-sm" aria-label={`Edit ${module.title}`}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={fmt(t.admin.courses.editModuleLabel, { title: module.title })}
+            >
               <Pencil />
             </Button>
           }
@@ -223,13 +228,17 @@ function ModuleRow({
         {isLast && (
           <ConfirmDialog
             trigger={
-              <Button variant="ghost" size="icon-sm" aria-label={`Delete ${module.title}`}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={fmt(t.admin.courses.deleteModuleLabel, { title: module.title })}
+              >
                 <Trash2 />
               </Button>
             }
-            title="Delete this module?"
-            description="Only the last module can be deleted, and only before any student has started it. Its sessions and materials are deleted too."
-            confirmLabel="Delete module"
+            title={t.admin.courses.deleteModuleTitle}
+            description={t.admin.courses.deleteModuleText}
+            confirmLabel={t.admin.courses.deleteModule}
             onConfirm={remove}
           />
         )}

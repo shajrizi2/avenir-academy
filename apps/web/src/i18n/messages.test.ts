@@ -16,30 +16,39 @@ function leaves(value: unknown): string[] {
   return Object.values(value).flatMap(leaves);
 }
 
-describe('landing messages', () => {
-  it('have exactly the same keys in Albanian and English', () => {
-    expect(keyPaths(en).sort()).toEqual(keyPaths(sq).sort());
+function at(value: unknown, path: string): unknown {
+  return path.split('.').reduce<unknown>((v, key) => (v as Record<string, unknown>)?.[key], value);
+}
+
+describe('messages', () => {
+  it('have every English key in Albanian too (Albanian is the source of truth)', () => {
+    const missing = keyPaths(en).filter((path) => at(sq, path) === undefined);
+    expect(missing).toEqual([]);
   });
 
   it('have no empty strings', () => {
     for (const text of [...leaves(sq), ...leaves(en)]) expect(text.trim()).not.toBe('');
   });
 
-  it('use the same placeholders in both languages', () => {
+  it('use the same placeholders in both languages where a key exists in both', () => {
     const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort().join(',');
-    const sqLeaves = leaves(sq);
-    const enLeaves = leaves(en);
-    sqLeaves.forEach((text, i) => expect(placeholders(enLeaves[i])).toBe(placeholders(text)));
+    for (const path of keyPaths(en)) {
+      const english = at(en, path);
+      const albanian = at(sq, path);
+      if (typeof english === 'string' && typeof albanian === 'string') {
+        expect(placeholders(albanian), path).toBe(placeholders(english));
+      }
+    }
   });
 
-  it('keep 8 FAQ entries, 5 audiences, 4 steps and 3 why-now points', () => {
+  it('keep 8 FAQ entries, 5 audiences, 6 steps, 6 benefits and 3 why-now points', () => {
     for (const { landing } of [sq, en]) {
       expect(landing.faq.items).toHaveLength(8);
       expect(landing.audience.items).toHaveLength(5);
-      expect(landing.howItWorks.steps).toHaveLength(4);
+      expect(landing.howItWorks.steps).toHaveLength(6);
+      expect(landing.benefits.items).toHaveLength(6);
       expect(landing.whyNow.points).toHaveLength(3);
       expect(landing.proof.items).toHaveLength(3);
-      expect(landing.dates.months).toHaveLength(12);
     }
   });
 
@@ -52,5 +61,10 @@ describe('landing messages', () => {
       expect(topic.answer).toBeGreaterThanOrEqual(0);
       expect(topic.answer).toBeLessThan(topic.options.length);
     });
+  });
+
+  it('mark placeholder copy the team must fill in', () => {
+    // The refund policy is a placeholder until the product owner writes it.
+    expect(sq.landing.faq.items[1].answer).toMatch(/^\[.*\]$/);
   });
 });

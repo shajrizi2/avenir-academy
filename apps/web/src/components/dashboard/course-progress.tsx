@@ -3,15 +3,16 @@
 import type { CourseProgress } from '@ai-academy/shared';
 import { ClipboardList } from 'lucide-react';
 import Link from 'next/link';
-import { LocalDateTime } from '@/components/local-date-time';
+import { formatDate } from '@/components/local-date-time';
 import { ModuleStatusBadge } from '@/components/module-status-badge';
 import { TEST_TIME_FORMAT, useWindowState } from '@/components/tests/test-window';
+import { fmt, t } from '@/i18n/messages';
 
 /** A student's progress through one course: passed modules, the current one and its test. */
 export function CourseProgressBlock({ progress }: { progress: CourseProgress }) {
   const { passedModules, totalModules, current, course } = progress;
   const pct = totalModules === 0 ? 0 : Math.round((passedModules / totalModules) * 100);
-  const label = `${passedModules} of ${totalModules} modules passed`;
+  const label = fmt(t.dashboard.progress, { passed: passedModules, total: totalModules });
 
   return (
     <div className="space-y-3">
@@ -19,7 +20,7 @@ export function CourseProgressBlock({ progress }: { progress: CourseProgress }) 
         <p className="text-ink text-sm font-semibold">{label}</p>
         <div
           role="progressbar"
-          aria-label={`${course.title} progress`}
+          aria-label={fmt(t.dashboard.progressLabel, { course: course.title })}
           aria-valuemin={0}
           aria-valuemax={totalModules}
           aria-valuenow={passedModules}
@@ -36,7 +37,7 @@ export function CourseProgressBlock({ progress }: { progress: CourseProgress }) 
               href={`/learn/${course.slug}/${current.id}`}
               className="text-ink font-bold hover:underline"
             >
-              Module {current.order}: {current.title}
+              {fmt(t.common.module, { number: current.order })}: {current.title}
             </Link>
             <ModuleStatusBadge status={current.status} />
           </div>
@@ -45,7 +46,7 @@ export function CourseProgressBlock({ progress }: { progress: CourseProgress }) 
       ) : (
         passedModules === totalModules &&
         totalModules > 0 && (
-          <p className="text-passed-ink text-sm font-bold">Course complete. Congratulations!</p>
+          <p className="text-passed-ink text-sm font-bold">{t.dashboard.complete}</p>
         )
       )}
     </div>
@@ -61,9 +62,7 @@ function TestHint({
 }) {
   const state = useWindowState(test);
   if (failed) {
-    return (
-      <p className="text-failed-ink mt-1">Out of attempts: ask your instructor or an admin.</p>
-    );
+    return <p className="text-failed-ink mt-1">{t.dashboard.outOfAttempts}</p>;
   }
   if (state === 'unknown' || state === 'closed') return null;
   return (
@@ -75,14 +74,12 @@ function TestHint({
             href={`/tests/${test.id}`}
             className="text-ink font-bold underline underline-offset-4"
           >
-            Test open
+            {t.dashboard.testOpen}
           </Link>{' '}
-          until <LocalDateTime value={test.closesAt} options={TEST_TIME_FORMAT} />
+          {fmt(t.dashboard.testUntil, { date: formatDate(test.closesAt, TEST_TIME_FORMAT) })}
         </>
       ) : (
-        <>
-          Test opens <LocalDateTime value={test.opensAt} options={TEST_TIME_FORMAT} />
-        </>
+        <>{fmt(t.dashboard.testOpens, { date: formatDate(test.opensAt, TEST_TIME_FORMAT) })}</>
       )}
     </p>
   );

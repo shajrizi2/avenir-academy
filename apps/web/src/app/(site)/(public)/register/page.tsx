@@ -2,21 +2,22 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AuthCard } from '@/components/auth-card';
 import { SignUpCard } from '@/components/illustrations';
+import { t } from '@/i18n/messages';
 import { RegisterForm } from './register-form';
 
-export const metadata: Metadata = { title: 'Create account' };
+export const metadata: Metadata = { title: t.meta.pages.register };
 
 export default function RegisterPage() {
   return (
     <AuthCard
       illustration={SignUpCard}
-      title="Create your account"
-      description="Register for free, then request a place in a course."
+      title={t.auth.register.title}
+      description={t.auth.register.description}
       footer={
         <span>
-          Already have an account?{' '}
+          {t.auth.register.haveAccount}{' '}
           <Link href="/login" className="text-ink font-bold underline underline-offset-4">
-            Log in
+            {t.auth.register.login}
           </Link>
         </span>
       }

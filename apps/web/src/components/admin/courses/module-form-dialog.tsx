@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dialog';
 import { FieldGroup } from '@/components/ui/field';
 import { errorMessage } from '@/lib/api';
+import { t } from '@/i18n/messages';
 import { instructorsQuery } from '@/lib/queries';
 
 interface ModuleFormDialogProps {
@@ -64,7 +65,7 @@ export function ModuleFormDialog({ trigger, title, module, onSubmit }: ModuleFor
   });
 
   const options = [
-    { value: '', label: 'Not assigned yet' },
+    { value: '', label: t.admin.courses.moduleDialog.notAssigned },
     ...(instructors.data ?? []).map((u) => ({
       value: u.id,
       label: `${u.firstName} ${u.lastName}`,
@@ -77,42 +78,50 @@ export function ModuleFormDialog({ trigger, title, module, onSubmit }: ModuleFor
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            The assigned instructor manages this module’s sessions, attendance and materials.
-          </DialogDescription>
+          <DialogDescription>{t.admin.courses.moduleDialog.text}</DialogDescription>
         </DialogHeader>
         <form onSubmit={(e) => void submit(e)} noValidate>
           <FieldGroup>
             <FormError message={error} />
-            <TextField form={form} name="title" label="Title" />
-            <TextareaField form={form} name="description" label="Description" rows={4} />
+            <TextField form={form} name="title" label={t.admin.courses.moduleDialog.titleField} />
+            <TextareaField
+              form={form}
+              name="description"
+              label={t.admin.courses.moduleDialog.descriptionField}
+              rows={4}
+            />
             <TextField
               form={form}
               name="titleSq"
-              label="Title in Albanian (optional)"
-              description="Shown on the /sq landing page; empty shows the English title."
+              label={t.admin.courses.moduleDialog.titleSq}
+              description={t.admin.courses.moduleDialog.titleSqHint}
             />
             <TextareaField
               form={form}
               name="descriptionSq"
-              label="Description in Albanian (optional)"
+              label={t.admin.courses.moduleDialog.descriptionSq}
               rows={3}
             />
-            <TextField form={form} name="durationWeeks" label="Duration (weeks)" type="number" />
+            <TextField
+              form={form}
+              name="durationWeeks"
+              label={t.admin.courses.moduleDialog.duration}
+              type="number"
+            />
             <SelectField
               form={form}
               name="instructorId"
-              label="Instructor"
+              label={t.admin.courses.moduleDialog.instructorField}
               options={options}
               description={
                 instructors.data?.length === 0
-                  ? 'No instructors yet. Give a user the Instructor role on the Users page.'
+                  ? t.admin.courses.moduleDialog.noInstructors
                   : undefined
               }
             />
             <div>
               <Button type="submit" variant="chunky" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Saving…' : 'Save module'}
+                {form.formState.isSubmitting ? t.common.saving : t.admin.courses.moduleDialog.save}
               </Button>
             </div>
           </FieldGroup>

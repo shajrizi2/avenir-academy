@@ -15,9 +15,12 @@ import { PageHeader } from '@/components/page-header';
 import { TestWindow } from '@/components/tests/test-window';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, plural, t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { testBuilderQuery, testResultsQuery } from '@/lib/queries';
+
+const m = t.teach.results;
 
 /** /teach/modules/[id]/results: how every enrolled student did, with admin overrides. */
 export function TestResultsView() {
@@ -31,7 +34,7 @@ export function TestResultsView() {
       href={`/teach/modules/${moduleId}`}
       className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
     >
-      <ArrowLeft className="size-4" aria-hidden /> Back to the module
+      <ArrowLeft className="size-4" aria-hidden /> {m.back}
     </Link>
   );
 
@@ -45,11 +48,11 @@ export function TestResultsView() {
         {back}
         <EmptyState
           icon={ClipboardList}
-          title="This module has no test yet"
-          description="Create the test first; results appear here once students take it."
+          title={m.noTestTitle}
+          description={m.noTestText}
           action={
             <Button asChild variant="chunky">
-              <Link href={`/teach/modules/${moduleId}/test`}>Create the test</Link>
+              <Link href={`/teach/modules/${moduleId}/test`}>{m.createTest}</Link>
             </Button>
           }
         />
@@ -67,26 +70,29 @@ export function TestResultsView() {
     <>
       {back}
       <PageHeader
-        title={`Results: ${test.title}`}
-        description={`${test.module.course.title} · Module ${test.module.order}: ${test.module.title}`}
+        title={fmt(m.title, { title: test.title })}
+        description={fmt(m.description, {
+          course: test.module.course.title,
+          number: test.module.order,
+          module: test.module.title,
+        })}
       />
       <p className="text-ink-soft -mt-4 text-sm">
-        Pass mark {test.passMark}% · {test.maxAttempts} attempt{test.maxAttempts === 1 ? '' : 's'} ·
-        open <TestWindow test={test} />
+        {fmt(m.facts, {
+          passMark: test.passMark,
+          attempts: plural(test.maxAttempts, t.teach.test.attempt, t.teach.test.attempts),
+        })}{' '}
+        <TestWindow test={test} />
       </p>
 
       {rows.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title="No enrolled students yet"
-          description="Students appear here once an admin approves their enrollment in this course."
-        />
+        <EmptyState icon={Users} title={m.emptyTitle} description={m.emptyText} />
       ) : (
         <>
           <ul className="grid grid-cols-3 gap-3 sm:gap-4">
-            <Stat label="Students" value={rows.length} />
-            <Stat label="Passed" value={passed} />
-            <Stat label="Out of attempts" value={failed} />
+            <Stat label={m.students} value={rows.length} />
+            <Stat label={m.passed} value={passed} />
+            <Stat label={m.outOfAttempts} value={failed} />
           </ul>
           <ul className="border-line rounded-card bg-background divide-line divide-y border">
             {rows.map((row) => (
@@ -121,15 +127,15 @@ function ResultRow({ row, testId }: { row: TestResultRow; testId: string }) {
         method: 'PATCH',
         body: { status },
       });
-      toast.success(
-        status === 'PASSED' ? `${name} passed the module` : `${name} can take the test again`,
-      );
+      toast.success(fmt(status === 'PASSED' ? m.passedToast : m.resetToast, { name }));
       await queryClient.invalidateQueries({ queryKey: ['tests', testId, 'results'] });
     } catch (e) {
       toast.error(errorMessage(e));
       throw e;
     }
   }
+
+  const failedStatus = row.status === 'FAILED';
 
   return (
     <li className="flex flex-col gap-3 px-4 py-4 sm:px-5 lg:flex-row lg:items-center">
@@ -140,32 +146,28 @@ function ResultRow({ row, testId }: { row: TestResultRow; testId: string }) {
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
         <ModuleStatusBadge status={row.status} />
         <span className="text-ink">
-          <span className="text-ink-soft">Best </span>
+          <span className="text-ink-soft">{m.best} </span>
           <strong>{row.bestScore === null ? '–' : `${row.bestScore}%`}</strong>
         </span>
         <span className="text-ink">
-          <span className="text-ink-soft">Attempts </span>
+          <span className="text-ink-soft">{m.attemptsUsed} </span>
           <strong>{row.attemptsUsed}</strong>
           {row.status === 'ACTIVE' && (
-            <span className="text-ink-soft"> · {row.attemptsLeft} left</span>
+            <span className="text-ink-soft"> {fmt(m.left, { count: row.attemptsLeft })}</span>
           )}
         </span>
         <span className="text-ink-soft">
           {last ? (
             last.status === 'IN_PROGRESS' ? (
-              <span className="text-active-ink font-semibold">Taking it now</span>
+              <span className="text-active-ink font-semibold">{m.takingNow}</span>
             ) : (
               <>
-                Last{' '}
-                <LocalDateTime
-                  value={last.submittedAt ?? last.startedAt}
-                  options={{ dateStyle: 'medium' }}
-                />
-                {last.status === 'EXPIRED' && ' (time ran out)'}
+                {m.last} <LocalDateTime value={last.submittedAt ?? last.startedAt} style="date" />
+                {last.status === 'EXPIRED' && ` ${m.timeRanOut}`}
               </>
             )
           ) : (
-            'Not taken'
+            m.notTaken
           )}
         </span>
       </div>
@@ -176,12 +178,12 @@ function ResultRow({ row, testId }: { row: TestResultRow; testId: string }) {
               trigger={
                 <Button variant="outline" size="sm">
                   <RotateCcw data-icon="inline-start" />
-                  {row.status === 'FAILED' ? 'Give another try' : 'Unlock'}
+                  {failedStatus ? m.giveAnotherTry : m.unlock}
                 </Button>
               }
-              title={row.status === 'FAILED' ? 'Give another try?' : 'Unlock this module?'}
-              description={`${name} gets a fresh set of ${row.status === 'FAILED' ? 'attempts' : 'attempts and access to the module'}. Earlier attempts stay on record.`}
-              confirmLabel={row.status === 'FAILED' ? 'Reset attempts' : 'Unlock module'}
+              title={failedStatus ? m.anotherTryTitle : m.unlockTitle}
+              description={fmt(failedStatus ? m.anotherTryText : m.unlockText, { name })}
+              confirmLabel={failedStatus ? m.resetConfirm : m.unlockConfirm}
               confirmVariant="chunky"
               onConfirm={() => override('ACTIVE')}
             />
@@ -189,12 +191,12 @@ function ResultRow({ row, testId }: { row: TestResultRow; testId: string }) {
           <ConfirmDialog
             trigger={
               <Button variant="ghost" size="sm">
-                <Trophy data-icon="inline-start" /> Mark passed
+                <Trophy data-icon="inline-start" /> {m.markPassed}
               </Button>
             }
-            title="Mark this module as passed?"
-            description={`${name} passes without the test, and the next module opens for them.`}
-            confirmLabel="Mark passed"
+            title={m.markPassedTitle}
+            description={fmt(m.markPassedText, { name })}
+            confirmLabel={m.markPassedConfirm}
             confirmVariant="chunky"
             onConfirm={() => override('PASSED')}
           />

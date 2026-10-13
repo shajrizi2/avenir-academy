@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog';
 import { FormError } from '@/components/form-error';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, t } from '@/i18n/messages';
 import { ApiError, apiFetch, errorMessage } from '@/lib/api';
 import { attemptQuery } from '@/lib/queries';
 import { useNowEverySecond } from '@/lib/use-now';
@@ -134,7 +135,7 @@ function Runner({
   // Hand in automatically when the time is up.
   useEffect(() => {
     if (remaining === 0 && !handedIn.current) {
-      toast.info('Time is up. Your test has been handed in.');
+      toast.info(t.tests.runner.timeUp);
       handIn().catch(() => undefined);
     }
   });
@@ -145,30 +146,27 @@ function Runner({
   return (
     <>
       <header className="space-y-2">
-        <p className="text-ink-soft text-sm font-bold">Test in progress</p>
+        <p className="text-ink-soft text-sm font-bold">{t.tests.runner.inProgress}</p>
         <h1 className="text-ink text-heading font-extrabold">{session.title}</h1>
       </header>
 
       <div className="border-line bg-background/95 rounded-card sticky top-16 z-20 flex flex-wrap items-center gap-x-6 gap-y-3 border p-4 backdrop-blur-md">
         <Countdown remaining={remaining} />
         <p className="text-ink text-sm font-semibold">
-          {answered} of {session.questions.length} answered
+          {fmt(t.tests.runner.answered, { answered, total: session.questions.length })}
         </p>
         <SaveStatus state={saveState} />
         <div className="ml-auto">
           <ConfirmDialog
             trigger={
               <Button variant="chunky" disabled={submitting}>
-                <Send data-icon="inline-start" /> {submitting ? 'Handing in…' : 'Hand in'}
+                <Send data-icon="inline-start" />{' '}
+                {submitting ? t.tests.runner.handingIn : t.tests.runner.handIn}
               </Button>
             }
-            title="Hand in your test?"
-            description={
-              unanswered > 0
-                ? `${unanswered} question${unanswered === 1 ? ' is' : 's are'} still unanswered and will score zero. You can’t change your answers afterwards.`
-                : 'You can’t change your answers afterwards.'
-            }
-            confirmLabel="Hand in"
+            title={t.tests.runner.confirmTitle}
+            description={unansweredText(unanswered)}
+            confirmLabel={t.tests.runner.confirmLabel}
             confirmVariant="chunky"
             onConfirm={handIn}
           />
@@ -192,22 +190,25 @@ function Runner({
         <ConfirmDialog
           trigger={
             <Button variant="chunky" size="lg" disabled={submitting}>
-              <Send data-icon="inline-start" /> Hand in the test
+              <Send data-icon="inline-start" /> {t.tests.runner.handInTest}
             </Button>
           }
-          title="Hand in your test?"
-          description={
-            unanswered > 0
-              ? `${unanswered} question${unanswered === 1 ? ' is' : 's are'} still unanswered and will score zero.`
-              : 'You can’t change your answers afterwards.'
-          }
-          confirmLabel="Hand in"
+          title={t.tests.runner.confirmTitle}
+          description={unansweredText(unanswered)}
+          confirmLabel={t.tests.runner.confirmLabel}
           confirmVariant="chunky"
           onConfirm={handIn}
         />
       </div>
     </>
   );
+}
+
+/** The hand-in warning: how many questions would score zero. */
+function unansweredText(unanswered: number): string {
+  if (unanswered === 0) return t.tests.runner.confirmFinal;
+  if (unanswered === 1) return t.tests.runner.confirmUnansweredOne;
+  return fmt(t.tests.runner.confirmUnanswered, { count: unanswered });
 }
 
 function QuestionBlock({
@@ -229,8 +230,11 @@ function QuestionBlock({
       <fieldset className="space-y-4" disabled={disabled}>
         <legend className="contents">
           <span className="text-ink-soft block text-sm font-bold">
-            Question {number} · {question.points} point{question.points === 1 ? '' : 's'}
-            {multi && ' · choose all that apply'}
+            {fmt(t.tests.runner.question, { number })} ·{' '}
+            {question.points === 1
+              ? t.tests.runner.pointOne
+              : fmt(t.tests.runner.points, { count: question.points })}
+            {multi && ` · ${t.tests.runner.chooseAll}`}
           </span>
           <span className="text-ink mt-1 block text-lg font-bold">{question.text}</span>
         </legend>
@@ -273,7 +277,11 @@ function Countdown({ remaining }: { remaining: number | null }) {
   const urgent = remaining !== null && remaining <= 60_000;
   const soon = remaining !== null && remaining <= 5 * 60_000;
   // Announced to screen readers only when it changes: at 5 minutes and at 1 minute.
-  const announcement = urgent ? 'One minute left.' : soon ? 'Five minutes left.' : '';
+  const announcement = urgent
+    ? t.tests.runner.oneMinuteLeft
+    : soon
+      ? t.tests.runner.fiveMinutesLeft
+      : '';
 
   return (
     <div
@@ -287,7 +295,7 @@ function Countdown({ remaining }: { remaining: number | null }) {
       )}
     >
       <Clock className="size-5" aria-hidden />
-      <span role="timer" aria-label={`Time left ${label}`}>
+      <span role="timer" aria-label={fmt(t.tests.runner.timeLeft, { label })}>
         {label}
       </span>
       <span className="sr-only" aria-live="assertive">
@@ -308,17 +316,18 @@ function SaveStatus({ state }: { state: SaveState }) {
     >
       {state === 'saved' && (
         <>
-          <Check className="size-4" aria-hidden /> Saved
+          <Check className="size-4" aria-hidden /> {t.tests.runner.saved}
         </>
       )}
       {state === 'pending' && (
         <>
-          <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden /> Saving…
+          <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />{' '}
+          {t.tests.runner.saving}
         </>
       )}
       {state === 'error' && (
         <>
-          <AlertCircle className="size-4" aria-hidden /> Not saved, retrying…
+          <AlertCircle className="size-4" aria-hidden /> {t.tests.runner.notSaved}
         </>
       )}
     </p>

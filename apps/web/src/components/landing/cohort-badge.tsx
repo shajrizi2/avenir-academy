@@ -8,11 +8,7 @@ export async function CohortBadge() {
   const start = settings?.nextCohortStart;
   return (
     <BadgeShell>
-      {start ? (
-        <DateTemplate template={t.hero.badgeCohort} value={start} months={t.dates.months} />
-      ) : (
-        t.hero.badgeOpen
-      )}
+      {start ? <DateTemplate template={t.hero.badgeCohort} value={start} /> : t.hero.badgeOpen}
     </BadgeShell>
   );
 }

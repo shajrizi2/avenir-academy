@@ -8,6 +8,7 @@ import { FormError } from '@/components/form-error';
 import { PathUnlock, TestCheck } from '@/components/illustrations';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 import { studentTestQuery } from '@/lib/queries';
 import { cn } from '@/lib/utils';
@@ -31,7 +32,8 @@ export function TestResult() {
       href={moduleHref}
       className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
     >
-      <ArrowLeft className="size-4" aria-hidden /> Module {test.module.order}: {test.module.title}
+      <ArrowLeft className="size-4" aria-hidden />{' '}
+      {fmt(t.tests.page.moduleLink, { number: test.module.order, title: test.module.title })}
     </Link>
   );
 
@@ -39,9 +41,9 @@ export function TestResult() {
     return (
       <>
         {back}
-        <p className="text-ink">You haven’t handed in this test yet.</p>
+        <p className="text-ink">{t.tests.result.notHandedIn}</p>
         <Button asChild variant="chunky" className="self-start">
-          <Link href={`/tests/${test.id}`}>Go to the test</Link>
+          <Link href={`/tests/${test.id}`}>{t.tests.result.goToTest}</Link>
         </Button>
       </>
     );
@@ -63,16 +65,14 @@ export function TestResult() {
         <div className="space-y-4">
           <p className="text-ink text-sm font-bold">{test.title}</p>
           <h1 id="result-title" className="text-ink text-title font-extrabold">
-            {passed ? 'You passed!' : 'Not this time'}
+            {passed ? t.tests.result.passedTitle : t.tests.result.failedTitle}
           </h1>
           <p className="text-ink text-lg">
-            You scored{' '}
+            {t.tests.result.scored}{' '}
             <strong className="text-heading font-extrabold">{latest.scorePct ?? 0}%</strong>
-            {passed ? '.' : `. You need ${test.passMark}% to pass.`}
+            {passed ? '.' : `. ${fmt(t.tests.result.needs, { passMark: test.passMark })}`}
           </p>
-          {latest.status === 'EXPIRED' && (
-            <p className="text-ink-soft">Time ran out, so the answers you had saved were graded.</p>
-          )}
+          {latest.status === 'EXPIRED' && <p className="text-ink-soft">{t.tests.result.expired}</p>}
           <NextStep
             passed={passed}
             canRetry={canRetry}
@@ -92,7 +92,7 @@ export function TestResult() {
 
       <section aria-labelledby="history-title" className="space-y-4">
         <h2 id="history-title" className="text-ink text-subheading font-extrabold">
-          Your attempts
+          {t.tests.page.yourAttempts}
         </h2>
         <AttemptHistory attempts={finished} passMark={test.passMark} />
       </section>
@@ -121,37 +121,35 @@ function NextStep({
     return nextModule ? (
       <Button asChild variant="chunky" size="lg">
         <Link href={`/learn/${nextModule.course.slug}/${nextModule.id}`}>
-          Module {nextModule.order} is open: {nextModule.title}
+          {fmt(t.tests.result.nextModule, { number: nextModule.order, title: nextModule.title })}
           <ArrowRight data-icon="inline-end" />
         </Link>
       </Button>
     ) : (
-      <p className="text-ink font-semibold">That was the last module of the course. Well done!</p>
+      <p className="text-ink font-semibold">{t.tests.result.lastModule}</p>
     );
   }
   if (canRetry) {
     return (
       <div className="space-y-3">
         <p className="text-ink">
-          You have {attemptsLeft} attempt{attemptsLeft === 1 ? '' : 's'} left. Review the materials,
-          then try again{retryOpen ? '' : ' while the test is open'}.
+          {fmt(attemptsLeft === 1 ? t.tests.result.attemptsLeftOne : t.tests.result.attemptsLeft, {
+            count: attemptsLeft,
+            whileOpen: retryOpen ? '' : t.tests.result.whileOpen,
+          })}
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="chunky" size="lg">
             <Link href={`/tests/${testId}`}>
-              <RotateCcw data-icon="inline-start" /> Try again
+              <RotateCcw data-icon="inline-start" /> {t.tests.result.tryAgain}
             </Link>
           </Button>
           <Button asChild variant="chunky-outline" size="lg">
-            <Link href={moduleHref}>Review the materials</Link>
+            <Link href={moduleHref}>{t.tests.result.reviewMaterials}</Link>
           </Button>
         </div>
       </div>
     );
   }
-  return (
-    <p className="text-ink">
-      You have used all your attempts. Your instructor or an admin can give you another try.
-    </p>
-  );
+  return <p className="text-ink">{t.tests.result.noAttemptsLeft}</p>;
 }

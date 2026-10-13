@@ -1,4 +1,4 @@
-import { LOCALES } from '@ai-academy/shared';
+import { ACTIVE_LOCALES } from '@ai-academy/shared';
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@/components/analytics/analytics';
 import { getMessages } from '@/i18n/messages';
@@ -12,10 +12,10 @@ export const metadata: Metadata = { metadataBase: new URL(SITE_URL) };
 export const viewport: Viewport = { themeColor: '#ffffff' };
 
 export function generateStaticParams() {
-  return LOCALES.map((locale) => ({ locale }));
+  return ACTIVE_LOCALES.map((locale) => ({ locale }));
 }
 
-/** Root layout of the bilingual marketing site (/sq, /en). */
+/** Root layout of the marketing site (/sq; /en redirects there). */
 export default async function LocaleLayout({ children }: LayoutProps<'/[locale]'>) {
   const locale = await getLocale();
   return (
@@ -28,7 +28,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[locale]'
     >
       <body className="bg-background flex min-h-full flex-col" suppressHydrationWarning>
         {children}
-        <Analytics copy={getMessages(locale).landing.consent} />
+        <Analytics copy={getMessages().landing.consent} />
       </body>
     </html>
   );

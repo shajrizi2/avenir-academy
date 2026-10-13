@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Audience } from '@/components/landing/audience';
 import { Benefits } from '@/components/landing/benefits';
-import { Cohort } from '@/components/landing/cohort';
+import { Offer } from '@/components/landing/offer';
 import { Faq } from '@/components/landing/faq';
 import { FinalCta } from '@/components/landing/final-cta';
 import { Hero } from '@/components/landing/hero';
@@ -24,10 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: t.meta.title },
     description: t.meta.description,
-    alternates: {
-      canonical: `/${locale}`,
-      languages: { sq: '/sq', en: '/en', 'x-default': '/sq' },
-    },
+    alternates: { canonical: `/${locale}` },
     openGraph: {
       type: 'website',
       siteName: SITE_NAME,
@@ -35,7 +32,6 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t.meta.description,
       url: `/${locale}`,
       locale: OG_LOCALE[locale],
-      alternateLocale: Object.values(OG_LOCALE).filter((l) => l !== OG_LOCALE[locale]),
     },
     twitter: { card: 'summary_large_image', title: t.meta.title, description: t.meta.description },
   };
@@ -67,7 +63,7 @@ export default async function LandingPage() {
         <Suspense>
           <Testimonials />
         </Suspense>
-        <Cohort />
+        <Offer />
         <Faq />
         <FinalCta />
       </main>

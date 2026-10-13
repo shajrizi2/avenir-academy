@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import { FieldGroup } from '@/components/ui/field';
 import { Label } from '@/components/ui/label';
+import { t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 
 export type TestimonialValues = z.output<typeof testimonialSchema>;
@@ -73,32 +74,34 @@ export function TestimonialFormDialog({
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            Only real quotes, used with the student’s permission. Each one shows on the landing page
-            in its own language.
-          </DialogDescription>
+          <DialogDescription>{t.admin.testimonials.dialogText}</DialogDescription>
         </DialogHeader>
         <form onSubmit={(e) => void submit(e)} noValidate>
           <FieldGroup>
             <FormError message={error} />
-            <TextField form={form} name="name" label="Student’s name" />
+            <TextField form={form} name="name" label={t.admin.testimonials.name} />
             <TextField
               form={form}
               name="role"
-              label="Role or job (optional)"
-              placeholder="Marketing manager"
+              label={t.admin.testimonials.role}
+              placeholder={t.admin.testimonials.rolePlaceholder}
             />
-            <TextareaField form={form} name="quote" label="Quote" rows={4} />
+            <TextareaField form={form} name="quote" label={t.admin.testimonials.quote} rows={4} />
             <SelectField
               form={form}
               name="locale"
-              label="Language"
+              label={t.admin.testimonials.language}
               options={[
-                { value: 'sq', label: 'Albanian (/sq)' },
-                { value: 'en', label: 'English (/en)' },
+                { value: 'sq', label: t.admin.testimonials.languageSq },
+                { value: 'en', label: t.admin.testimonials.languageEn },
               ]}
             />
-            <TextField form={form} name="avatarUrl" label="Photo URL (optional)" type="url" />
+            <TextField
+              form={form}
+              name="avatarUrl"
+              label={t.admin.testimonials.avatarUrl}
+              type="url"
+            />
             <Controller
               control={form.control}
               name="isPublished"
@@ -109,13 +112,15 @@ export function TestimonialFormDialog({
                     checked={field.value}
                     onCheckedChange={(checked) => field.onChange(checked === true)}
                   />
-                  <Label htmlFor="testimonial-published">Show on the landing page</Label>
+                  <Label htmlFor="testimonial-published">
+                    {t.admin.testimonials.showOnLanding}
+                  </Label>
                 </div>
               )}
             />
             <div>
               <Button type="submit" variant="chunky" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Saving…' : 'Save testimonial'}
+                {form.formState.isSubmitting ? t.common.saving : t.admin.testimonials.save}
               </Button>
             </div>
           </FieldGroup>

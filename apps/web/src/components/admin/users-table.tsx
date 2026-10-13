@@ -1,7 +1,7 @@
 'use client';
 
 import type { PublicUser } from '@ai-academy/shared';
-import { LocalDateTime } from '@/components/local-date-time';
+import { formatDate, LocalDateTime } from '@/components/local-date-time';
 import {
   Table,
   TableBody,
@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { fmt, t } from '@/i18n/messages';
 import { RoleSelect } from './role-select';
 
 /** Table on md+ screens, stacked cards on phones. */
@@ -20,11 +21,11 @@ export function UsersTable({ users }: { users: PublicUser[] }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="pl-4">Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Joined</TableHead>
-              <TableHead className="pr-4">Role</TableHead>
+              <TableHead className="pl-4">{t.admin.users.name}</TableHead>
+              <TableHead>{t.admin.users.email}</TableHead>
+              <TableHead>{t.admin.users.phone}</TableHead>
+              <TableHead>{t.admin.users.joined}</TableHead>
+              <TableHead className="pr-4">{t.admin.users.role}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -36,7 +37,7 @@ export function UsersTable({ users }: { users: PublicUser[] }) {
                 <TableCell>{user.email}</TableCell>
                 <TableCell className="text-muted-foreground">{user.phone ?? '–'}</TableCell>
                 <TableCell className="text-muted-foreground">
-                  <LocalDateTime value={user.createdAt} options={{ dateStyle: 'medium' }} />
+                  <LocalDateTime value={user.createdAt} style="date" />
                 </TableCell>
                 <TableCell className="pr-4">
                   <RoleSelect user={user} />
@@ -56,7 +57,7 @@ export function UsersTable({ users }: { users: PublicUser[] }) {
               </p>
               <p className="text-muted-foreground truncate text-sm">{user.email}</p>
               <p className="text-muted-foreground text-xs">
-                Joined <LocalDateTime value={user.createdAt} options={{ dateStyle: 'medium' }} />
+                {fmt(t.admin.users.joinedOn, { date: formatDate(user.createdAt, 'date') })}
               </p>
             </div>
             <RoleSelect user={user} />

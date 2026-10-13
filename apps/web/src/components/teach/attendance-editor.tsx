@@ -14,8 +14,11 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { attendanceQuery } from '@/lib/queries';
+
+const m = t.teach.attendance;
 
 export function AttendanceEditor() {
   const { id } = useParams<{ id: string }>();
@@ -40,7 +43,7 @@ function Roster({ attendance }: { attendance: SessionAttendance }) {
     mutationFn: (body: AttendanceInput) =>
       apiFetch<SessionAttendance>(`/sessions/${session.id}/attendance`, { method: 'PUT', body }),
     onSuccess: (saved) => {
-      toast.success('Attendance saved');
+      toast.success(m.saved);
       queryClient.setQueryData(attendanceQuery(session.id).queryKey, saved);
       void queryClient.invalidateQueries({ queryKey: ['modules', session.moduleId, 'sessions'] });
     },
@@ -58,27 +61,13 @@ function Roster({ attendance }: { attendance: SessionAttendance }) {
       >
         <ArrowLeft className="size-4" aria-hidden /> {session.module.title}
       </Link>
-      <PageHeader title={`Attendance: ${session.title}`} />
+      <PageHeader title={fmt(m.title, { title: session.title })} />
       <p className="text-ink-soft -mt-4">
-        {session.module.course.title} ·{' '}
-        <LocalDateTime
-          value={session.startsAt}
-          options={{
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            hour: '2-digit',
-            minute: '2-digit',
-          }}
-        />
+        {session.module.course.title} · <LocalDateTime value={session.startsAt} style="longTime" />
       </p>
 
       {records.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title="No enrolled students yet"
-          description="Students appear here once an admin approves their enrollment in this course."
-        />
+        <EmptyState icon={Users} title={m.emptyTitle} description={m.emptyText} />
       ) : (
         <form
           className="space-y-6"
@@ -94,17 +83,20 @@ function Roster({ attendance }: { attendance: SessionAttendance }) {
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-ink font-semibold" aria-live="polite">
-              {presentCount} of {records.length} present
+              {fmt(m.summary, { present: presentCount, total: records.length })}
               {unrecorded > 0 && (
-                <span className="text-ink-soft font-normal"> · not saved yet for {unrecorded}</span>
+                <span className="text-ink-soft font-normal">
+                  {' '}
+                  {fmt(m.unsaved, { count: unrecorded })}
+                </span>
               )}
             </p>
             <div className="flex gap-2">
               <Button type="button" variant="outline" size="sm" onClick={() => setAll(true)}>
-                Mark all present
+                {m.markAll}
               </Button>
               <Button type="button" variant="ghost" size="sm" onClick={() => setAll(false)}>
-                Clear
+                {m.clear}
               </Button>
             </div>
           </div>
@@ -131,7 +123,7 @@ function Roster({ attendance }: { attendance: SessionAttendance }) {
             })}
           </ul>
           <Button type="submit" variant="chunky" size="lg" disabled={save.isPending}>
-            {save.isPending ? 'Saving…' : 'Save attendance'}
+            {save.isPending ? t.common.saving : m.save}
           </Button>
         </form>
       )}

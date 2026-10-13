@@ -12,12 +12,7 @@ import {
 } from '@/components/ui/select';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
-
-const LABELS: Record<Role, string> = {
-  STUDENT: 'Student',
-  INSTRUCTOR: 'Instructor',
-  ADMIN: 'Admin',
-};
+import { fmt, t } from '@/i18n/messages';
 
 export function RoleSelect({ user }: { user: PublicUser }) {
   const { user: me } = useAuth();
@@ -28,7 +23,12 @@ export function RoleSelect({ user }: { user: PublicUser }) {
     mutationFn: (role: Role) =>
       apiFetch<PublicUser>(`/users/${user.id}/role`, { method: 'PATCH', body: { role } }),
     onSuccess: (updated) => {
-      toast.success(`${updated.firstName} ${updated.lastName} is now ${LABELS[updated.role]}`);
+      toast.success(
+        fmt(t.admin.users.roleChanged, {
+          name: `${updated.firstName} ${updated.lastName}`,
+          role: t.status.role[updated.role],
+        }),
+      );
       void queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (error) => toast.error(errorMessage(error)),
@@ -42,15 +42,15 @@ export function RoleSelect({ user }: { user: PublicUser }) {
     >
       <SelectTrigger
         className="w-36"
-        aria-label={`Role for ${user.firstName} ${user.lastName}`}
-        title={isSelf ? 'You cannot change your own role' : undefined}
+        aria-label={fmt(t.admin.users.roleFor, { name: `${user.firstName} ${user.lastName}` })}
+        title={isSelf ? t.admin.users.cannotChangeOwnRole : undefined}
       >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {ROLES.map((role) => (
           <SelectItem key={role} value={role}>
-            {LABELS[role]}
+            {t.status.role[role]}
           </SelectItem>
         ))}
       </SelectContent>

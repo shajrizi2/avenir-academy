@@ -6,6 +6,7 @@ import { Suspense, useState } from 'react';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { t } from '@/i18n/messages';
 import { SidebarNav } from './sidebar-nav';
 import { UserMenu } from './user-menu';
 
@@ -29,7 +30,7 @@ export function AppShell({ role, children }: { role: Role; children: React.React
           <div className="flex items-center gap-2 md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Open navigation">
+                <Button variant="ghost" size="icon" aria-label={t.nav.openNavigation}>
                   <Menu />
                 </Button>
               </SheetTrigger>

@@ -6,12 +6,13 @@ import { GraduationCap, Presentation, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { t } from '@/i18n/messages';
 import { usersQuery } from '@/lib/queries';
 
 const ROLE_META: Record<Role, { label: string; icon: typeof Shield }> = {
-  STUDENT: { label: 'Students', icon: GraduationCap },
-  INSTRUCTOR: { label: 'Instructors', icon: Presentation },
-  ADMIN: { label: 'Admins', icon: Shield },
+  STUDENT: { label: t.admin.overview.roleStudents, icon: GraduationCap },
+  INSTRUCTOR: { label: t.admin.overview.roleInstructors, icon: Presentation },
+  ADMIN: { label: t.admin.overview.roleAdmins, icon: Shield },
 };
 
 /** Account totals per role (pageSize 1: we only need `total`). */
@@ -40,7 +41,9 @@ export function UserStats() {
                     {result.data ? result.data.total : <Skeleton className="h-9 w-12" />}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-ink text-sm font-bold">Manage →</CardContent>
+                <CardContent className="text-ink text-sm font-bold">
+                  {t.admin.overview.manage}
+                </CardContent>
               </Card>
             </Link>
           </li>

@@ -9,16 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import type { LandingMessages } from '@/i18n/messages';
 import { CtaLink } from './cta-link';
-import { LanguageSwitch } from './language-switch';
 
 interface MobileMenuProps {
   locale: Locale;
-  otherLocale: Locale;
   links: { href: string; label: string }[];
   nav: LandingMessages['nav'];
 }
 
-export function MobileMenu({ locale, otherLocale, links, nav }: MobileMenuProps) {
+export function MobileMenu({ locale, links, nav }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -53,12 +51,6 @@ export function MobileMenu({ locale, otherLocale, links, nav }: MobileMenuProps)
           <Button asChild variant="chunky-outline" size="lg">
             <Link href="/login">{nav.login}</Link>
           </Button>
-          <LanguageSwitch
-            target={otherLocale}
-            label={nav.switchTo}
-            srLabel={nav.language}
-            className="justify-center py-3"
-          />
         </div>
       </SheetContent>
     </Sheet>

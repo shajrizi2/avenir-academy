@@ -5,6 +5,7 @@ import { ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
+import { t } from '@/i18n/messages';
 import { useAuth } from '@/lib/auth-context';
 import { homeFor } from '@/lib/routes';
 
@@ -16,11 +17,11 @@ export function RoleGate({ roles, children }: { roles: Role[]; children: React.R
   return (
     <EmptyState
       icon={ShieldAlert}
-      title="You don't have access to this page"
-      description="This area is limited to other roles. If you think this is a mistake, contact an administrator."
+      title={t.errors.noAccessTitle}
+      description={t.errors.noAccessText}
       action={
         <Button asChild variant="outline">
-          <Link href={homeFor(user.role)}>Go to your dashboard</Link>
+          <Link href={homeFor(user.role)}>{t.errors.goToDashboard}</Link>
         </Button>
       }
     />

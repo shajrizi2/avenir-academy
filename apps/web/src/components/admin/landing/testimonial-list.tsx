@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiFetch, errorMessage } from '@/lib/api';
+import { fmt, t } from '@/i18n/messages';
 import { adminTestimonialsQuery } from '@/lib/queries';
 import { TestimonialFormDialog, type TestimonialValues } from './testimonial-form-dialog';
 
@@ -21,18 +22,18 @@ export function TestimonialList() {
 
   async function create(values: TestimonialValues) {
     await apiFetch('/testimonials', { method: 'POST', body: values });
-    toast.success('Testimonial saved');
+    toast.success(t.admin.testimonials.saved);
     await refresh();
   }
 
   return (
     <div className="space-y-6">
       <TestimonialFormDialog
-        title="New testimonial"
+        title={t.admin.testimonials.new}
         onSubmit={create}
         trigger={
           <Button variant="chunky">
-            <Plus data-icon="inline-start" /> New testimonial
+            <Plus data-icon="inline-start" /> {t.admin.testimonials.new}
           </Button>
         }
       />
@@ -43,8 +44,8 @@ export function TestimonialList() {
       ) : data.length === 0 ? (
         <EmptyState
           icon={Quote}
-          title="No testimonials yet"
-          description="The landing page hides the testimonials section until at least one is published."
+          title={t.admin.testimonials.emptyTitle}
+          description={t.admin.testimonials.emptyText}
         />
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
@@ -55,9 +56,13 @@ export function TestimonialList() {
             >
               <div className="flex flex-wrap gap-2">
                 <Badge variant={item.isPublished ? 'ai' : 'secondary'}>
-                  {item.isPublished ? 'Published' : 'Draft'}
+                  {item.isPublished ? t.admin.testimonials.published : t.admin.testimonials.draft}
                 </Badge>
-                <Badge variant="outline">{item.locale === 'sq' ? 'Albanian' : 'English'}</Badge>
+                <Badge variant="outline">
+                  {item.locale === 'sq'
+                    ? t.admin.testimonials.albanian
+                    : t.admin.testimonials.english}
+                </Badge>
               </div>
               <blockquote className="text-ink flex-1 leading-7">“{item.quote}”</blockquote>
               <div className="flex items-center gap-3">
@@ -67,18 +72,18 @@ export function TestimonialList() {
                   {item.role && <p className="text-ink-soft text-sm">{item.role}</p>}
                 </div>
                 <TestimonialFormDialog
-                  title="Edit testimonial"
+                  title={t.admin.testimonials.edit}
                   testimonial={item}
                   onSubmit={async (values) => {
                     await apiFetch(`/testimonials/${item.id}`, { method: 'PATCH', body: values });
-                    toast.success('Testimonial saved');
+                    toast.success(t.admin.testimonials.saved);
                     await refresh();
                   }}
                   trigger={
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Edit testimonial from ${item.name}`}
+                      aria-label={fmt(t.admin.testimonials.editFrom, { name: item.name })}
                     >
                       <Pencil />
                     </Button>
@@ -89,18 +94,18 @@ export function TestimonialList() {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Delete testimonial from ${item.name}`}
+                      aria-label={fmt(t.admin.testimonials.deleteFrom, { name: item.name })}
                     >
                       <Trash2 />
                     </Button>
                   }
-                  title="Delete this testimonial?"
-                  description="It disappears from the landing page right away."
-                  confirmLabel="Delete"
+                  title={t.admin.testimonials.deleteTitle}
+                  description={t.admin.testimonials.deleteText}
+                  confirmLabel={t.common.delete}
                   onConfirm={async () => {
                     try {
                       await apiFetch(`/testimonials/${item.id}`, { method: 'DELETE' });
-                      toast.success('Testimonial deleted');
+                      toast.success(t.admin.testimonials.deleted);
                       await refresh();
                     } catch (e) {
                       toast.error(errorMessage(e));

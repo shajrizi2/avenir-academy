@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { t } from '@/i18n/messages';
 
 interface ConfirmDialogProps {
   trigger: React.ReactNode;
@@ -58,10 +59,10 @@ export function ConfirmDialog({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="chunky-outline">Cancel</Button>
+            <Button variant="chunky-outline">{t.common.cancel}</Button>
           </DialogClose>
           <Button variant={confirmVariant} onClick={() => void confirm()} disabled={pending}>
-            {pending ? 'Working…' : confirmLabel}
+            {pending ? t.common.working : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

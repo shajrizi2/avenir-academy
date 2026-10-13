@@ -1,19 +1,17 @@
 import type { Metadata } from 'next';
 import { CourseList } from '@/components/admin/courses/course-list';
 import { PageHeader } from '@/components/page-header';
+import { t } from '@/i18n/messages';
 
 // Client-gated; see (app)/layout.tsx.
 export const instant = false;
 
-export const metadata: Metadata = { title: 'Courses' };
+export const metadata: Metadata = { title: t.meta.pages.courses_admin };
 
 export default function AdminCoursesPage() {
   return (
     <>
-      <PageHeader
-        title="Courses"
-        description="Create courses, add their modules in order and assign an instructor to each module."
-      />
+      <PageHeader title={t.admin.courses.title} description={t.admin.courses.description} />
       <CourseList />
     </>
   );

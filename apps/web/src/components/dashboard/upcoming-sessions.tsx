@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FormError } from '@/components/form-error';
 import { SessionCard } from '@/components/learn/session-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 import { upcomingSessionsQuery } from '@/lib/queries';
 
@@ -19,7 +20,7 @@ export function UpcomingSessions() {
   return (
     <section className="space-y-4" aria-labelledby="upcoming-sessions">
       <h2 id="upcoming-sessions" className="text-ink text-subheading font-extrabold">
-        Upcoming live sessions
+        {t.dashboard.upcoming}
       </h2>
       <ul className="space-y-3">
         {data.map((session) => (
@@ -31,8 +32,11 @@ export function UpcomingSessions() {
                 href={`/learn/${session.module.course.slug}/${session.module.id}`}
                 className="hover:text-ink underline-offset-4 hover:underline"
               >
-                {session.module.course.title} · Module {session.module.order}:{' '}
-                {session.module.title}
+                {fmt(t.learn.session.contextModule, {
+                  course: session.module.course.title,
+                  number: session.module.order,
+                  title: session.module.title,
+                })}
               </Link>
             }
           />

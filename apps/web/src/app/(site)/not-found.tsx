@@ -2,6 +2,7 @@ import { SearchX } from 'lucide-react';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
+import { t } from '@/i18n/messages';
 
 export default function NotFound() {
   return (
@@ -9,11 +10,11 @@ export default function NotFound() {
       <div className="w-full">
         <EmptyState
           icon={SearchX}
-          title="Page not found"
-          description="The page you're looking for doesn't exist or has moved."
+          title={t.errors.notFoundTitle}
+          description={t.errors.notFoundText}
           action={
             <Button asChild>
-              <Link href="/">Go home</Link>
+              <Link href="/">{t.errors.goHome}</Link>
             </Button>
           }
         />

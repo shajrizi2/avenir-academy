@@ -1,10 +1,18 @@
-import { LiveClass, PathUnlock, SignUpCard, TestCheck } from '@/components/illustrations';
+import {
+  CardPayment,
+  LaptopCode,
+  LiveClass,
+  MailCalendar,
+  SignUpCard,
+  TestCheck,
+} from '@/components/illustrations';
 import { getLandingMessages } from '@/i18n/server';
 import { CtaLink } from './cta-link';
 import { FeatureRows } from './feature-rows';
 import { SectionHeading } from './landing-section';
 
-const ILLUSTRATIONS = [SignUpCard, LiveClass, TestCheck, PathUnlock];
+/** One illustration per step: register, pay, email, live, offline, test. */
+const ILLUSTRATIONS = [SignUpCard, CardPayment, MailCalendar, LiveClass, LaptopCode, TestCheck];
 
 export async function HowItWorks() {
   const { locale, t } = await getLandingMessages();
