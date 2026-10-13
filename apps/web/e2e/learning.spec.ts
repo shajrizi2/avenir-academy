@@ -121,7 +121,7 @@ test.describe('a student pays by card and learns', () => {
     await expect(page.getByRole('heading', { name: 'Mësimi i parë offline' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Mirë se vini' })).toBeVisible();
     await page.getByRole('button', { name: 'Shëno si të përfunduar' }).click();
-    await expect(page.getByText('I përfunduar')).toBeVisible();
+    await expect(page.getByText('I përfunduar', { exact: true })).toBeVisible();
   });
 
   test('passing the test opens module 2 only once month 2 is paid', async ({
