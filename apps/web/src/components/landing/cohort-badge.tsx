@@ -1,11 +1,15 @@
 import { getLandingMessages } from '@/i18n/server';
-import { getSiteSettings } from '@/lib/landing-data';
+import { getOpenGroups, getSiteSettings } from '@/lib/landing-data';
 import { DateTemplate } from './date-template';
 
-/** "Next cohort starts <date>" pill; falls back to "Registration is open". */
+/** "The first group starts <date>" pill: the earliest open group, else the site setting. */
 export async function CohortBadge() {
-  const [{ t }, settings] = await Promise.all([getLandingMessages(), getSiteSettings()]);
-  const start = settings?.nextCohortStart;
+  const [{ t }, groups, settings] = await Promise.all([
+    getLandingMessages(),
+    getOpenGroups(),
+    getSiteSettings(),
+  ]);
+  const start = groups.map((g) => g.startDate).sort()[0] ?? settings?.nextCohortStart;
   return (
     <BadgeShell>
       {start ? <DateTemplate template={t.hero.badgeCohort} value={start} /> : t.hero.badgeOpen}

@@ -738,7 +738,7 @@
     "continuePayment": "Vazhdo pagesën",
     "waitlisted": "Je në listën e pritjes. Të njoftojmë sapo lirohet një vend.",
     "expired": "Afati i pagesës skadoi. Mund ta nisësh sërish regjistrimin nga faqja e kursit.",
-    "group": "Grupi: {name}",
+    "group": "{name}",
     "starts": "Fillon më {date}",
     "progress": "{passed} nga {total} module të kaluara",
     "progressLabel": "Progresi në {course}",
@@ -756,7 +756,7 @@
   },
   "learn": {
     "yourCourse": "Kursi yt",
-    "group": "Grupi {name} · fillon më {date}",
+    "group": "{name} · fillon më {date}",
     "modules": "Modulet",
     "moduleHint": "Çdo modul mbyllet me test. Kalo testin dhe paguaj muajin tjetër që të hapet moduli i radhës.",
     "paid": "I paguar",

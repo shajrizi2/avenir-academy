@@ -81,7 +81,7 @@ export function PaymentList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end gap-3 [&_select]:max-w-full">
         <Filter
           label={p.filterProvider}
           value={provider ?? ''}
@@ -112,7 +112,7 @@ export function PaymentList() {
             })),
           ]}
         />
-        <div className="ml-auto flex gap-2">
+        <div className="flex flex-wrap gap-2 sm:ml-auto">
           <ManualPaymentDialog />
           <Button variant="outline" onClick={() => void exportCsv()}>
             <Download data-icon="inline-start" /> {p.export}
@@ -158,12 +158,12 @@ function Filter({
   options: { value: string; label: string }[];
 }) {
   return (
-    <label className="grid gap-1 text-sm">
+    <label className="grid max-w-full min-w-0 gap-1 text-sm">
       <span className="text-ink font-semibold">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 rounded-lg border px-3 outline-none focus-visible:ring-3"
+        className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 max-w-full rounded-lg border px-3 outline-none focus-visible:ring-3"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
