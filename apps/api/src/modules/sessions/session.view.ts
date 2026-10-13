@@ -4,6 +4,7 @@ import type { Prisma } from '../../generated/prisma/client.js';
 export const sessionSelect = {
   id: true,
   moduleId: true,
+  groupId: true,
   title: true,
   startsAt: true,
   durationMin: true,

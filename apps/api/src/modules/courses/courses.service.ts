@@ -20,6 +20,9 @@ const courseFields = {
   coverUrl: true,
   startDate: true,
   isPublished: true,
+  priceCents: true,
+  listPriceCents: true,
+  currency: true,
 } as const satisfies Prisma.CourseSelect;
 
 const courseDetailSelect = {
@@ -60,7 +63,7 @@ export class CoursesService {
       select: courseDetailSelect,
     });
     if (!course || (!course.isPublished && !includeUnpublished)) {
-      throw new NotFoundException('Course not found');
+      throw new NotFoundException('Kursi nuk u gjet');
     }
     return course;
   }
@@ -70,7 +73,7 @@ export class CoursesService {
       where: { id },
       select: courseDetailSelect,
     });
-    if (!course) throw new NotFoundException('Course not found');
+    if (!course) throw new NotFoundException('Kursi nuk u gjet');
     return course;
   }
 
@@ -97,7 +100,7 @@ export class CoursesService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
         throw new ConflictException(
-          'This course has enrollments and cannot be deleted. Unpublish it instead.',
+          'Ky kurs ka regjistrime dhe nuk mund të fshihet. Çpublikoje në vend të kësaj.',
         );
       }
       throw error;
@@ -106,6 +109,6 @@ export class CoursesService {
 
   private async ensureExists(id: string): Promise<void> {
     const found = await this.prisma.course.findUnique({ where: { id }, select: { id: true } });
-    if (!found) throw new NotFoundException('Course not found');
+    if (!found) throw new NotFoundException('Kursi nuk u gjet');
   }
 }

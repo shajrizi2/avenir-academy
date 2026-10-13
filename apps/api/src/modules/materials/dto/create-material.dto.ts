@@ -18,4 +18,10 @@ export class CreateMaterialDto {
   @IsUrl({ protocols: ['https', 'http'], require_protocol: true })
   @MaxLength(URL_MAX_LENGTH)
   url?: string;
+
+  @ApiPropertyOptional({ description: 'Attach to an offline lesson of the module' })
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  lessonId?: string;
 }

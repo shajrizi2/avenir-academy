@@ -1,11 +1,22 @@
-import { type INestApplication, ValidationPipe } from '@nestjs/common';
+import { type INestApplication, type NestApplicationOptions, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
+import express from 'express';
 import helmet from 'helmet';
+import { validationExceptionFactory } from './common/i18n/validation-messages.js';
 import type { EnvironmentVariables } from './config/env.validation.js';
 
 export const API_PREFIX = 'api/v1';
+
+/** Stripe signs the raw request body, so this route gets it untouched (see setupApp). */
+export const STRIPE_WEBHOOK_PATH = `/${API_PREFIX}/payments/stripe/webhook`;
+
+/**
+ * Options for NestFactory.create / createNestApplication: Nest's default JSON parser is
+ * replaced in setupApp so the Stripe webhook can keep its raw body.
+ */
+export const APP_OPTIONS: NestApplicationOptions = { bodyParser: false };
 
 /** App-wide configuration shared by main.ts and the e2e tests. */
 export function setupApp(app: INestApplication): void {
@@ -18,6 +29,11 @@ export function setupApp(app: INestApplication): void {
   // serves JSON and file downloads, so it needs no Content-Security-Policy; the web app sets one.
   app.use(helmet({ contentSecurityPolicy: false }));
   app.setGlobalPrefix(API_PREFIX);
+  // Body parsing: the Stripe webhook alone receives the raw bytes (its signature covers them);
+  // body-parser marks the request as parsed, so the JSON parser below leaves it alone.
+  app.use(STRIPE_WEBHOOK_PATH, express.raw({ type: '*/*', limit: '1mb' }));
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
   app.use(cookieParser());
   app.enableCors({
     origin: config
@@ -35,6 +51,7 @@ export function setupApp(app: INestApplication): void {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      exceptionFactory: validationExceptionFactory,
     }),
   );
   app.enableShutdownHooks();

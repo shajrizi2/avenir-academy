@@ -1,4 +1,4 @@
-import { type ExecutionContext, Injectable } from '@nestjs/common';
+import { type ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator.js';
@@ -37,6 +37,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (this.isPublic(context)) {
       return (user || undefined) as TUser;
     }
-    return super.handleRequest(err, user, info, context);
+    if (err || !user) {
+      throw err instanceof Error && !(err instanceof UnauthorizedException)
+        ? err
+        : new UnauthorizedException('Duhet të hysh për të vazhduar');
+    }
+    return user;
   }
 }

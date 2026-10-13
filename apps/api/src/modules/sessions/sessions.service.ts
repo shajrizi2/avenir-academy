@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { AuthUser } from '../../common/auth-user.js';
-import { EnrollmentStatus, ModuleStatus } from '../../generated/prisma/client.js';
+import { EnrollmentStatus, ModuleStatus, type Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ModuleAccessService } from '../course-modules/module-access.service.js';
 import type { CreateSessionDto } from './dto/create-session.dto.js';
@@ -41,6 +41,22 @@ export interface SessionAttendanceRecord {
 const LOOKBACK_MS = 8 * 60 * 60_000;
 const UPCOMING_LIMIT = 10;
 
+/**
+ * Where a student's sessions are: their group's sessions in the course (plus any session
+ * without a group, from before groups existed).
+ */
+export function studentSessionsWhere(
+  enrollments: { courseId: string; groupId: string | null }[],
+): Prisma.LiveSessionWhereInput {
+  if (enrollments.length === 0) return { id: { in: [] } };
+  return {
+    OR: enrollments.map((e) => ({
+      module: { courseId: e.courseId },
+      OR: [{ groupId: null }, ...(e.groupId ? [{ groupId: e.groupId }] : [])],
+    })),
+  };
+}
+
 @Injectable()
 export class SessionsService {
   constructor(
@@ -62,10 +78,12 @@ export class SessionsService {
   }
 
   async create(user: AuthUser, moduleId: string, dto: CreateSessionDto): Promise<SessionView> {
-    await this.access.assertStaff(user, moduleId);
+    const module = await this.access.assertStaff(user, moduleId);
+    if (dto.groupId) await this.assertGroupOfCourse(dto.groupId, module.courseId);
     const session = await this.prisma.liveSession.create({
       data: {
         moduleId,
+        groupId: dto.groupId ?? null,
         title: dto.title,
         startsAt: new Date(dto.startsAt),
         durationMin: dto.durationMin,
@@ -77,7 +95,8 @@ export class SessionsService {
   }
 
   async update(user: AuthUser, id: string, dto: UpdateSessionDto): Promise<SessionView> {
-    await this.assertSessionStaff(user, id);
+    const { courseId } = await this.assertSessionStaff(user, id);
+    if (dto.groupId) await this.assertGroupOfCourse(dto.groupId, courseId);
     const session = await this.prisma.liveSession.update({
       where: { id },
       data: {
@@ -85,6 +104,7 @@ export class SessionsService {
         startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
         durationMin: dto.durationMin,
         meetUrl: dto.meetUrl,
+        groupId: dto.groupId,
       },
       select: sessionSelect,
     });
@@ -96,20 +116,20 @@ export class SessionsService {
     await this.prisma.liveSession.delete({ where: { id } });
   }
 
-  /** The roster: every approved student of the course, with their attendance (if recorded). */
+  /** The roster: the session's group (or every approved student of the course), with attendance. */
   async getAttendance(user: AuthUser, id: string): Promise<SessionAttendanceRecord> {
     const { courseId } = await this.assertSessionStaff(user, id);
-    const [session, students, attendance] = await Promise.all([
+    const [session, attendance] = await Promise.all([
       this.prisma.liveSession.findUniqueOrThrow({
         where: { id },
         select: { ...sessionSelect, module: moduleRefSelect },
       }),
-      this.rosterOf(courseId),
       this.prisma.attendance.findMany({
         where: { sessionId: id },
         select: { userId: true, present: true },
       }),
     ]);
+    const students = await this.rosterOf(courseId, session.groupId);
     const presentByUser = new Map(attendance.map((a) => [a.userId, a.present]));
     return {
       session: { ...toSessionView(session, true), module: session.module },
@@ -125,12 +145,12 @@ export class SessionsService {
     id: string,
     dto: SaveAttendanceDto,
   ): Promise<SessionAttendanceRecord> {
-    const { courseId } = await this.assertSessionStaff(user, id);
-    const rosterIds = new Set((await this.rosterOf(courseId)).map((s) => s.id));
+    const { courseId, groupId } = await this.assertSessionStaff(user, id);
+    const rosterIds = new Set((await this.rosterOf(courseId, groupId)).map((s) => s.id));
     const outsider = dto.records.find((r) => !rosterIds.has(r.userId));
     if (outsider) {
       throw new BadRequestException(
-        'Attendance can only be recorded for students enrolled in this course',
+        'Prezenca mund të regjistrohet vetëm për studentët e këtij grupi',
       );
     }
     await this.prisma.$transaction(
@@ -145,16 +165,20 @@ export class SessionsService {
     return this.getAttendance(user, id);
   }
 
-  /** The student's next sessions in modules they have unlocked. */
+  /** The student's next sessions, in their group, in modules they have unlocked. */
   async upcomingForStudent(userId: string): Promise<StudentSessionRecord[]> {
     const now = new Date();
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { userId, status: EnrollmentStatus.APPROVED },
+      select: { courseId: true, groupId: true },
+    });
     const sessions = await this.prisma.liveSession.findMany({
       where: {
-        startsAt: { gte: new Date(now.getTime() - LOOKBACK_MS) },
-        module: {
-          course: { enrollments: { some: { userId, status: EnrollmentStatus.APPROVED } } },
-          progress: { some: { userId, status: { not: ModuleStatus.LOCKED } } },
-        },
+        AND: [
+          studentSessionsWhere(enrollments),
+          { startsAt: { gte: new Date(now.getTime() - LOOKBACK_MS) } },
+          { module: { progress: { some: { userId, status: { not: ModuleStatus.LOCKED } } } } },
+        ],
       },
       orderBy: { startsAt: 'asc' },
       take: UPCOMING_LIMIT * 2,
@@ -166,18 +190,36 @@ export class SessionsService {
       .map(({ module, ...s }) => ({ ...toSessionView(s, false, now), module }));
   }
 
-  private async assertSessionStaff(user: AuthUser, sessionId: string) {
+  private async assertSessionStaff(
+    user: AuthUser,
+    sessionId: string,
+  ): Promise<{ courseId: string; groupId: string | null }> {
     const session = await this.prisma.liveSession.findUnique({
       where: { id: sessionId },
-      select: { moduleId: true },
+      select: { moduleId: true, groupId: true },
     });
-    if (!session) throw new NotFoundException('Session not found');
-    return this.access.assertStaff(user, session.moduleId);
+    if (!session) throw new NotFoundException('Leksioni nuk u gjet');
+    const module = await this.access.assertStaff(user, session.moduleId);
+    return { courseId: module.courseId, groupId: session.groupId };
   }
 
-  private rosterOf(courseId: string): Promise<Person[]> {
+  private async assertGroupOfCourse(groupId: string, courseId: string): Promise<void> {
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
+      select: { courseId: true },
+    });
+    if (group?.courseId !== courseId) {
+      throw new BadRequestException('Grupi nuk i përket kursit të këtij moduli');
+    }
+  }
+
+  private rosterOf(courseId: string, groupId: string | null): Promise<Person[]> {
     return this.prisma.user.findMany({
-      where: { enrollments: { some: { courseId, status: EnrollmentStatus.APPROVED } } },
+      where: {
+        enrollments: {
+          some: { courseId, status: EnrollmentStatus.APPROVED, ...(groupId && { groupId }) },
+        },
+      },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
       select: personSelect,
     });

@@ -33,7 +33,7 @@ export class ModuleAccessService {
       where: { id: moduleId },
       select: { id: true, courseId: true, order: true, instructorId: true },
     });
-    if (!module) throw new NotFoundException('Module not found');
+    if (!module) throw new NotFoundException('Moduli nuk u gjet');
     return module;
   }
 
@@ -47,7 +47,9 @@ export class ModuleAccessService {
   async assertStaff(user: AuthUser, moduleId: string): Promise<ModuleAccessRow> {
     const module = await this.getModule(moduleId);
     if (!this.isStaff(user, module)) {
-      throw new ForbiddenException('Only this module’s instructor or an admin can do that');
+      throw new ForbiddenException(
+        'Vetëm instruktori i këtij moduli ose një administrator mund ta bëjë këtë',
+      );
     }
     return module;
   }
@@ -57,7 +59,9 @@ export class ModuleAccessService {
     const module = await this.getModule(moduleId);
     if (this.isStaff(user, module)) return { module, isStaff: true, status: null };
     if (user.role !== Role.STUDENT) {
-      throw new ForbiddenException('Only this module’s instructor or an admin can open it');
+      throw new ForbiddenException(
+        'Vetëm instruktori i këtij moduli ose një administrator mund ta hapë',
+      );
     }
 
     const [enrollment, progress] = await Promise.all([
@@ -71,11 +75,13 @@ export class ModuleAccessService {
       }),
     ]);
     if (enrollment?.status !== EnrollmentStatus.APPROVED) {
-      throw new ForbiddenException('You are not enrolled in this course');
+      throw new ForbiddenException('Nuk je i regjistruar në këtë kurs');
     }
     const status = progress?.status ?? ModuleStatus.LOCKED;
     if (status === ModuleStatus.LOCKED) {
-      throw new ForbiddenException('This module is locked. Pass the previous module’s test first.');
+      throw new ForbiddenException(
+        'Ky modul është i mbyllur. Kalo testin e modulit të mëparshëm dhe paguaj këtë muaj.',
+      );
     }
     return { module, isStaff: false, status };
   }

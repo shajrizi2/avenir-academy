@@ -95,7 +95,7 @@ export class TestsService {
       where: { moduleId },
       select: { id: true },
     });
-    if (existing) throw new ConflictException('This module already has a test');
+    if (existing) throw new ConflictException('Ky modul ka tashmë një test');
 
     const fallback = await this.defaultWindow(moduleId);
     const opensAt = dto.opensAt ? new Date(dto.opensAt) : fallback.opensAt;
@@ -148,14 +148,14 @@ export class TestsService {
     await this.assertTestStaff(user, testId);
     dto.questions.forEach((q, index) => {
       const problem = questionProblem(q.type, q.options);
-      if (problem) throw new BadRequestException(`Question ${index + 1}: ${problem}`);
+      if (problem) throw new BadRequestException(`Pyetja ${index + 1}: ${problem}`);
     });
 
     const test = await this.prisma.$transaction(async (tx) => {
       const started = await tx.testAttempt.count({ where: { testId } });
       if (started > 0) {
         throw new ConflictException(
-          'Students have already taken this test, so its questions can’t change',
+          'Studentët e kanë bërë tashmë këtë test, ndaj pyetjet nuk mund të ndryshojnë',
         );
       }
       await tx.question.deleteMany({ where: { testId } });
@@ -181,7 +181,7 @@ export class TestsService {
     await this.assertTestStaff(user, testId);
     if (isPublished) {
       const questions = await this.prisma.question.count({ where: { testId } });
-      if (questions === 0) throw new ConflictException('Add questions before publishing the test');
+      if (questions === 0) throw new ConflictException('Shto pyetje para se ta publikosh testin');
     }
     const test = await this.prisma.test.update({
       where: { id: testId },
@@ -195,7 +195,9 @@ export class TestsService {
     await this.assertTestStaff(user, testId);
     const started = await this.prisma.testAttempt.count({ where: { testId } });
     if (started > 0) {
-      throw new ConflictException('Students have already taken this test, so it can’t be deleted');
+      throw new ConflictException(
+        'Studentët e kanë bërë tashmë këtë test, ndaj nuk mund të fshihet',
+      );
     }
     await this.prisma.test.delete({ where: { id: testId } });
   }
@@ -261,7 +263,7 @@ export class TestsService {
       where: { id: testId },
       select: { moduleId: true, opensAt: true, closesAt: true },
     });
-    if (!test) throw new NotFoundException('Test not found');
+    if (!test) throw new NotFoundException('Testi nuk u gjet');
     await this.access.assertStaff(user, test.moduleId);
     return test;
   }
@@ -284,5 +286,5 @@ export class TestsService {
 }
 
 function assertWindow(opensAt: Date, closesAt: Date): void {
-  if (closesAt <= opensAt) throw new BadRequestException('The window must close after it opens');
+  if (closesAt <= opensAt) throw new BadRequestException('Testi duhet të mbyllet pasi hapet');
 }

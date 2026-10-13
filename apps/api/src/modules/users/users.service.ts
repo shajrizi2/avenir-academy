@@ -17,7 +17,7 @@ export class UsersService {
 
   async findById(id: string): Promise<PublicUserRecord> {
     const user = await this.prisma.user.findUnique({ where: { id }, select: publicUserSelect });
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('Përdoruesi nuk u gjet');
     return user;
   }
 
@@ -31,6 +31,7 @@ export class UsersService {
         title: dto.title,
         bio: dto.bio,
         avatarUrl: dto.avatarUrl,
+        offlineEmailsEnabled: dto.offlineEmailsEnabled,
       },
       select: publicUserSelect,
     });
@@ -71,7 +72,7 @@ export class UsersService {
 
   async updateRole(actorId: string, userId: string, role: Role): Promise<PublicUserRecord> {
     if (actorId === userId && role !== Role.ADMIN) {
-      throw new BadRequestException('You cannot remove your own admin role');
+      throw new BadRequestException('Nuk mund ta heqësh rolin tënd të administratorit');
     }
     await this.findById(userId);
     return this.prisma.user.update({

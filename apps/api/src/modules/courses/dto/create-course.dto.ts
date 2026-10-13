@@ -1,15 +1,18 @@
-import { SLUG_PATTERN } from '@ai-academy/shared';
+import { MAX_PRICE_CENTS, SLUG_PATTERN } from '@ai-academy/shared';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
+  IsInt,
   IsISO8601,
   IsOptional,
   IsString,
   IsUrl,
   Length,
   Matches,
+  Max,
   MaxLength,
+  Min,
   ValidateIf,
 } from 'class-validator';
 import { emptyToNull, trim } from '../../../common/transforms.js';
@@ -19,7 +22,9 @@ export class CreateCourseDto {
   @Transform(trim)
   @IsString()
   @Length(3, 80)
-  @Matches(SLUG_PATTERN, { message: 'slug may contain lowercase letters, numbers and dashes' })
+  @Matches(SLUG_PATTERN, {
+    message: 'Adresa (slug) mund të ketë vetëm shkronja të vogla, numra dhe viza',
+  })
   slug: string;
 
   @ApiProperty()
@@ -76,4 +81,29 @@ export class CreateCourseDto {
   @IsOptional()
   @IsBoolean()
   isPublished?: boolean;
+
+  @ApiPropertyOptional({ description: 'Per month (= per module), in cents', example: 8900 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(MAX_PRICE_CENTS)
+  priceCents?: number;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Struck-through standard price in cents; null = none',
+  })
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => (value === '' ? null : value))
+  @ValidateIf((_o, v) => v !== null)
+  @IsInt()
+  @Min(0)
+  @Max(MAX_PRICE_CENTS)
+  listPriceCents?: number | null;
+
+  @ApiPropertyOptional({ example: 'EUR' })
+  @IsOptional()
+  @Transform(trim)
+  @Matches(/^[A-Z]{3}$/, { message: 'Monedha duhet të jetë një kod ISO 4217, p.sh. EUR' })
+  currency?: string;
 }

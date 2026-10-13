@@ -31,6 +31,12 @@ export class CreateSessionDto {
   @ApiProperty({ example: 'https://meet.google.com/abc-defg-hij' })
   @Transform(trim)
   @IsString()
-  @Matches(MEET_URL_PATTERN, { message: 'meetUrl must be a Google Meet link' })
+  @Matches(MEET_URL_PATTERN, { message: 'Lidhja duhet të jetë një lidhje Google Meet' })
   meetUrl: string;
+
+  @ApiPropertyOptional({ description: 'The cohort this lecture is for' })
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  groupId?: string;
 }

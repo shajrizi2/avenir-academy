@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { EnrollmentStatus, ModuleStatus } from '../../generated/prisma/client.js';
+import { EnrollmentStatus, ModuleStatus, PaymentStatus } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { lockProgress, passModule } from './progression.js';
 
@@ -8,6 +8,7 @@ export interface ProgressModuleRow {
   order: number;
   title: string;
   status: ModuleStatus;
+  paid: boolean;
 }
 
 export interface CourseProgressRecord {
@@ -38,6 +39,7 @@ export class ProgressService {
       where: { userId, status: EnrollmentStatus.APPROVED },
       orderBy: { decidedAt: 'asc' },
       select: {
+        payments: { where: { status: PaymentStatus.CONFIRMED }, select: { moduleId: true } },
         course: {
           select: {
             id: true,
@@ -60,10 +62,12 @@ export class ProgressService {
       },
     });
 
-    return enrollments.map(({ course: { modules, ...course } }) => {
+    return enrollments.map(({ payments, course: { modules, ...course } }) => {
+      const paid = new Set(payments.map((p) => p.moduleId));
       const rows = modules.map(({ progress, test, ...m }) => ({
         ...m,
         status: progress[0]?.status ?? ModuleStatus.LOCKED,
+        paid: paid.has(m.id),
         test: test?.isPublished
           ? { id: test.id, opensAt: test.opensAt, closesAt: test.closesAt }
           : null,
@@ -94,13 +98,13 @@ export class ProgressService {
       where: { id },
       select: { userId: true, moduleId: true },
     });
-    if (!row) throw new NotFoundException('Progress not found');
+    if (!row) throw new NotFoundException('Progresi nuk u gjet');
 
     return this.prisma.$transaction(async (tx) => {
       const progress = await lockProgress(tx, row.userId, row.moduleId);
-      if (!progress) throw new NotFoundException('Progress not found');
+      if (!progress) throw new NotFoundException('Progresi nuk u gjet');
       if (progress.status === ModuleStatus.PASSED) {
-        throw new ConflictException('The student has already passed this module');
+        throw new ConflictException('Studenti e ka kaluar tashmë këtë modul');
       }
       const now = new Date();
       if (status === ModuleStatus.PASSED) {

@@ -9,12 +9,12 @@ import type { Response } from 'express';
 import { Prisma } from '../../generated/prisma/client.js';
 
 const STATUS_BY_CODE: Record<string, { status: HttpStatus; message: string }> = {
-  P2002: { status: HttpStatus.CONFLICT, message: 'A record with this value already exists' },
+  P2002: { status: HttpStatus.CONFLICT, message: 'Ekziston tashmë një e dhënë me këtë vlerë' },
   P2003: {
     status: HttpStatus.CONFLICT,
-    message: 'This record is still referenced by other data',
+    message: 'Kjo e dhënë përdoret ende nga të dhëna të tjera',
   },
-  P2025: { status: HttpStatus.NOT_FOUND, message: 'Record not found' },
+  P2025: { status: HttpStatus.NOT_FOUND, message: 'E dhëna nuk u gjet' },
 };
 
 /** Maps well-known Prisma errors to HTTP responses; anything else becomes a 500. */
@@ -29,7 +29,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       this.logger.error(exception.message, exception.stack);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Internal server error',
+        message: 'Gabim i brendshëm i serverit',
       });
       return;
     }

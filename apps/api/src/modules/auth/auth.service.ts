@@ -5,7 +5,8 @@ import bcrypt from 'bcrypt';
 import type { EnvironmentVariables } from '../../config/env.validation.js';
 import { MailService } from '../../mail/mail.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import type { Prisma } from '../../generated/prisma/client.js';
+import { EmailType, type Prisma } from '../../generated/prisma/client.js';
+import { passwordReset } from '../../mail/templates.js';
 import { publicUserSelect, type PublicUserRecord } from '../users/user.select.js';
 import type { ForgotPasswordDto } from './dto/forgot-password.dto.js';
 import type { LoginDto } from './dto/login.dto.js';
@@ -40,7 +41,7 @@ export class AuthService {
       where: { email: dto.email },
       select: { id: true },
     });
-    if (existing) throw new ConflictException('An account with this email already exists');
+    if (existing) throw new ConflictException('Ekziston tashmë një llogari me këtë email');
 
     const user = await this.prisma.user.create({
       data: {
@@ -63,17 +64,17 @@ export class AuthService {
     });
     const hash = user?.passwordHash ?? (await this.getDummyHash());
     const valid = await bcrypt.compare(dto.password, hash);
-    if (!user || !valid) throw new UnauthorizedException('Invalid email or password');
+    if (!user || !valid) throw new UnauthorizedException('Email-i ose fjalëkalimi është i gabuar');
     return this.issue(user);
   }
 
   async refresh(refreshToken: string | undefined): Promise<AuthResult> {
-    if (!refreshToken) throw new UnauthorizedException('Session expired');
+    if (!refreshToken) throw new UnauthorizedException('Sesioni ka skaduar');
     const user = await this.prisma.user.findUnique({
       where: { id: this.tokens.peekSubject(refreshToken) },
       select: userWithHashSelect,
     });
-    if (!user) throw new UnauthorizedException('Session expired');
+    if (!user) throw new UnauthorizedException('Sesioni ka skaduar');
     await this.tokens.verify(refreshToken, 'refresh', user.passwordHash);
     return this.issue(user);
   }
@@ -89,21 +90,23 @@ export class AuthService {
       const link = new URL('/reset-password', this.config.get('WEB_URL', { infer: true }));
       link.searchParams.set('token', token);
       // Not awaited: the response must take the same time whether or not the account exists.
-      void this.mail.send({
+      const rendered = passwordReset({
+        firstName: user.firstName,
+        link: link.toString(),
+        minutes: Math.round(expiresIn / 60),
+      });
+      void this.mail.sendLogged({
         to: user.email,
-        subject: 'Reset your AI Academy password',
-        text: [
-          `Hi ${user.firstName},`,
-          '',
-          'We received a request to reset your password. Open this link to choose a new one:',
-          link.toString(),
-          '',
-          `The link expires in ${Math.round(expiresIn / 60)} minutes and can be used once.`,
-          "If you didn't ask for this, you can ignore this email.",
-        ].join('\n'),
+        ...rendered,
+        type: EmailType.PASSWORD_RESET,
+        uniqueKey: `reset:${user.id}:${Date.now()}`,
+        userId: user.id,
       });
     }
-    return { message: 'If an account exists for that email, we have sent a reset link.' };
+    return {
+      message:
+        'Nëse ekziston një llogari me këtë email, sapo të dërguam një lidhje për rivendosjen.',
+    };
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<MessageResponse> {
@@ -111,13 +114,13 @@ export class AuthService {
       where: { id: this.tokens.peekSubject(dto.token) },
       select: { id: true, passwordHash: true },
     });
-    if (!user) throw new UnauthorizedException('This reset link is invalid or has expired');
+    if (!user) throw new UnauthorizedException('Kjo lidhje nuk është e vlefshme ose ka skaduar');
     await this.tokens.verify(dto.token, 'reset', user.passwordHash);
     await this.prisma.user.update({
       where: { id: user.id },
       data: { passwordHash: await this.hash(dto.password) },
     });
-    return { message: 'Your password has been updated. You can now log in.' };
+    return { message: 'Fjalëkalimi u ndryshua. Tani mund të hysh.' };
   }
 
   private async issue(user: UserWithHash): Promise<AuthResult> {

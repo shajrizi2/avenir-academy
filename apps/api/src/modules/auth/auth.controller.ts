@@ -61,7 +61,7 @@ export class AuthController {
   @ApiOkResponse({ description: 'Clears the refresh cookie' })
   logout(@Res({ passthrough: true }) res: Response): MessageResponse {
     res.clearCookie(REFRESH_COOKIE, this.cookieOptions());
-    return { message: 'Logged out' };
+    return { message: 'Dole nga llogaria' };
   }
 
   @Throttle(AUTH_THROTTLE)

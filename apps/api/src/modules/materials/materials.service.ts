@@ -60,24 +60,40 @@ export class MaterialsService {
     file?: UploadedMaterialFile,
   ): Promise<MaterialView> {
     await this.access.assertStaff(user, moduleId);
-    if (file && dto.url) throw new BadRequestException('Send either a file or a url, not both');
-    if (!file && !dto.url) throw new BadRequestException('Add a link or choose a file to upload');
+    if (file && dto.url)
+      throw new BadRequestException('Dërgo ose një skedar, ose një lidhje, jo të dyja');
+    if (!file && !dto.url)
+      throw new BadRequestException('Shto një lidhje ose zgjidh një skedar për ta ngarkuar');
+    if (dto.lessonId) {
+      const lesson = await this.prisma.lesson.findUnique({
+        where: { id: dto.lessonId },
+        select: { moduleId: true },
+      });
+      if (lesson?.moduleId !== moduleId)
+        throw new BadRequestException('Mësimi nuk i përket këtij moduli');
+    }
 
     let url = dto.url ?? '';
     if (file) {
       const extension = extname(file.originalname).slice(1).toLowerCase();
       if (!ALLOWED.has(extension)) {
         throw new BadRequestException(
-          `Unsupported file type. Allowed: ${MATERIAL_FILE_EXTENSIONS.join(', ')}`,
+          `Lloji i skedarit nuk lejohet. Lejohen: ${MATERIAL_FILE_EXTENSIONS.join(', ')}`,
         );
       }
-      if (file.size === 0) throw new BadRequestException('The file is empty');
+      if (file.size === 0) throw new BadRequestException('Skedari është bosh');
       url = FILE_URL_PREFIX + (await this.storage.save(file.buffer, extension));
     }
 
     try {
       const material = await this.prisma.material.create({
-        data: { moduleId, title: dto.title, url, kind: file ? 'FILE' : 'LINK' },
+        data: {
+          moduleId,
+          title: dto.title,
+          url,
+          kind: file ? 'FILE' : 'LINK',
+          lessonId: dto.lessonId ?? null,
+        },
         select: materialSelect,
       });
       return toMaterialView(material);
@@ -101,7 +117,7 @@ export class MaterialsService {
     const material = await this.find(id);
     await this.access.assertCanView(user, material.moduleId);
     const key = storageKeyOf(material);
-    if (!key) throw new BadRequestException('This material is a link, not a file');
+    if (!key) throw new BadRequestException('Ky material është një lidhje, jo një skedar');
     const extension = key.split('.').pop() ?? '';
     const { stream, size } = await this.storage.open(key);
     return {
@@ -117,7 +133,7 @@ export class MaterialsService {
       where: { id },
       select: { ...materialSelect, moduleId: true },
     });
-    if (!material) throw new NotFoundException('Material not found');
+    if (!material) throw new NotFoundException('Materiali nuk u gjet');
     return material;
   }
 }

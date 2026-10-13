@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter.js';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
@@ -12,6 +13,10 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { CourseModulesModule } from './modules/course-modules/course-modules.module.js';
 import { CoursesModule } from './modules/courses/courses.module.js';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module.js';
+import { GroupsModule } from './modules/groups/groups.module.js';
+import { LessonsModule } from './modules/lessons/lessons.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { PaymentsModule } from './modules/payments/payments.module.js';
 import { MaterialsModule } from './modules/materials/materials.module.js';
 import { SessionsModule } from './modules/sessions/sessions.module.js';
 import { ProgressModule } from './modules/progress/progress.module.js';
@@ -27,16 +32,28 @@ import { PrismaModule } from './prisma/prisma.module.js';
     ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateEnv }),
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService<EnvironmentVariables, true>) => [
-        { name: 'default', ttl: 60_000, limit: config.get('RATE_LIMIT_PER_MIN', { infer: true }) },
-      ],
+      useFactory: (config: ConfigService<EnvironmentVariables, true>) => ({
+        throttlers: [
+          {
+            name: 'default',
+            ttl: 60_000,
+            limit: config.get('RATE_LIMIT_PER_MIN', { infer: true }),
+          },
+        ],
+        errorMessage: 'Shumë kërkesa. Prit një minutë dhe provo sërish.',
+      }),
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     MailModule,
     AuthModule,
     UsersModule,
     CoursesModule,
+    GroupsModule,
+    PaymentsModule,
     EnrollmentsModule,
+    LessonsModule,
+    NotificationsModule,
     CourseModulesModule,
     SessionsModule,
     MaterialsModule,

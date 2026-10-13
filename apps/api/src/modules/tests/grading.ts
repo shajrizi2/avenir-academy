@@ -50,17 +50,18 @@ export function cleanAnswers(
   const clean: AttemptAnswers = {};
   for (const [questionId, optionIds] of Object.entries(answers) as [string, unknown][]) {
     if (!Array.isArray(optionIds) || optionIds.some((id) => typeof id !== 'string')) {
-      throw new BadRequestException('Each answer must be a list of option ids');
+      throw new BadRequestException('Çdo përgjigje duhet të jetë një listë opsionesh');
     }
     const question = byId.get(questionId);
-    if (!question) throw new BadRequestException('An answer refers to an unknown question');
+    if (!question)
+      throw new BadRequestException('Një përgjigje i referohet një pyetjeje të panjohur');
     const valid = new Set(question.options.map((o) => o.id));
     const unique = [...new Set(optionIds as string[])];
     if (unique.some((id) => !valid.has(id))) {
-      throw new BadRequestException('An answer refers to an unknown option');
+      throw new BadRequestException('Një përgjigje i referohet një opsioni të panjohur');
     }
     if (question.type !== QuestionType.MULTI_CHOICE && unique.length > 1) {
-      throw new BadRequestException('Choose only one answer for this question');
+      throw new BadRequestException('Zgjidh vetëm një përgjigje për këtë pyetje');
     }
     if (unique.length > 0) clean[questionId] = unique;
   }
