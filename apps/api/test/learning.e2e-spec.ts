@@ -206,7 +206,7 @@ describe('Learning flow (e2e)', () => {
     const detail = await http().get(`/api/v1/modules/${module1}`).set(as('student')).expect(200);
     expect(detail.body).toMatchObject({ status: 'ACTIVE', canManage: false });
     const locked = await http().get(`/api/v1/modules/${module2}`).set(as('student')).expect(403);
-    expect(JSON.stringify(locked.body)).toContain('locked');
+    expect(JSON.stringify(locked.body)).toContain('mbyllur');
     await http().get(`/api/v1/modules/${module1}`).set(as('outsider')).expect(403);
   });
 

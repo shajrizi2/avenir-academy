@@ -913,6 +913,15 @@ export class PaymentsService {
     return this.toAdminRecord(await this.adminPayment(payment.id));
   }
 
+  async stripeSessionOf(id: string): Promise<{ sessionId: string | null }> {
+    const row = await this.prisma.payment.findUnique({
+      where: { id },
+      select: { stripeSessionId: true },
+    });
+    if (!row) throw new NotFoundException('Pagesa nuk u gjet');
+    return { sessionId: row.stripeSessionId };
+  }
+
   private async adminPayment(id: string): Promise<PaymentRow> {
     const row = await this.prisma.payment.findUnique({ where: { id }, select: paymentSelect });
     if (!row) throw new NotFoundException('Pagesa nuk u gjet');

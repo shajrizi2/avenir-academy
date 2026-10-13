@@ -25,6 +25,9 @@ const api = spawn(process.execPath, ['dist/src/main.js'], {
     RATE_LIMIT_PER_MIN: '100000',
     AUTH_RATE_LIMIT_PER_MIN: '100000',
     MAIL_TRANSPORT: 'console',
+    STRIPE_FAKE: 'true',
+    STRIPE_WEBHOOK_SECRET: 'whsec_e2e_secret',
+    CRON_ENABLED: 'false',
     UPLOAD_DIR: `${tmpdir()}/ai-academy-web-e2e-uploads`,
   },
 });

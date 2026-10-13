@@ -81,7 +81,7 @@ describe('Auth flow (e2e)', () => {
         role: 'ADMIN',
       })
       .expect(400);
-    expect(JSON.stringify(res.body)).toContain('property role should not exist');
+    expect(JSON.stringify(res.body)).toContain('Fusha Roli nuk pritej');
   });
 
   it('refreshes the session from the cookie and logs out', async () => {

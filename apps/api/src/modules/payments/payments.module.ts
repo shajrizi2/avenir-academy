@@ -6,7 +6,12 @@ import { SiteSettingsModule } from '../site-settings/site-settings.module.js';
 import { BankTransferProvider } from './bank-transfer.provider.js';
 import { PaymentsController } from './payments.controller.js';
 import { PaymentsService } from './payments.service.js';
-import { createStripeClient, STRIPE_CLIENT, StripeProvider } from './stripe.provider.js';
+import {
+  createFakeStripeClient,
+  createStripeClient,
+  STRIPE_CLIENT,
+  StripeProvider,
+} from './stripe.provider.js';
 
 @Module({
   imports: [GroupsModule, SiteSettingsModule],
@@ -21,10 +26,12 @@ import { createStripeClient, STRIPE_CLIENT, StripeProvider } from './stripe.prov
       provide: STRIPE_CLIENT,
       inject: [ConfigService],
       useFactory: (config: ConfigService<EnvironmentVariables, true>) => {
+        if (!config.get('STRIPE_ENABLED', { infer: true })) return null;
+        if (config.get('STRIPE_FAKE', { infer: true })) {
+          return createFakeStripeClient(config.get('WEB_URL', { infer: true }));
+        }
         const key = config.get('STRIPE_SECRET_KEY', { infer: true });
-        return key && config.get('STRIPE_ENABLED', { infer: true })
-          ? createStripeClient(key)
-          : null;
+        return key ? createStripeClient(key) : null;
       },
     },
   ],

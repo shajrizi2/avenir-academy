@@ -111,6 +111,14 @@ export class PaymentsController {
     return this.payments.exportCsv(query);
   }
 
+  /** The hosted Checkout session of a card payment (support and test tooling). */
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Get('payments/:id/stripe-session')
+  stripeSession(@Param('id') id: string): Promise<{ sessionId: string | null }> {
+    return this.payments.stripeSessionOf(id);
+  }
+
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @Post('payments/manual')

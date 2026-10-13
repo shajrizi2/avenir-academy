@@ -1,6 +1,6 @@
 # AI Academy: guide for Claude
 
-AI Academy is an LMS for live, cohort-based courses on AI and digital marketing. Classes run on Google Meet; we only store the link. The full spec, roadmap and decisions log are in `docs/PLAN.md`; read it before starting a sprint.
+Avenir Academy (package scope `@ai-academy/*`) is an LMS for live, cohort-based courses on AI, coding, digital marketing and SEO, sold at €89 a month in groups of at most 10. Classes run on Google Meet; we only store the link. The platform is **Albanian only**. The full spec, roadmap and decisions log are in `docs/PLAN.md`; read it before starting a sprint.
 
 ## Stack
 
@@ -9,7 +9,8 @@ AI Academy is an LMS for live, cohort-based courses on AI and digital marketing.
 - **apps/api:** NestJS 12 (ESM), Prisma 7 (`prisma-client` generator + `@prisma/adapter-pg`), PostgreSQL 16, Passport JWT, bcrypt, class-validator. Global prefix `/api/v1`, Swagger at `/api/docs`.
 - **packages/shared** (`@ai-academy/shared`): enums, zod schemas, and API response types shared by web and api. It compiles to `dist/`.
 - **Tests:** Vitest for unit tests (api, web, shared) and API e2e (not Jest; see PLAN D1). Playwright for web e2e (`apps/web/e2e`, runs on the system Chrome).
-- **i18n:** the marketing site (`/sq`, `/en`) is bilingual through a small native helper (no i18n library, see PLAN D8). Albanian (`sq`) is the primary language. The signed-in app is English-only for now.
+- **i18n:** Albanian only (PLAN D29). Every string of the web app comes from `apps/web/messages/sq.json` through `import { t, fmt, plural } from '@/i18n/messages'`; API messages and emails are Albanian in the code. `/en/...` redirects to `/sq/...`; `messages/en.json` stays for later and is never imported by the app. No i18n library (PLAN D8).
+- **Payments:** Stripe Checkout (card) and bank transfer behind `PaymentProvider` (`apps/api/src/modules/payments/`). Scheduled emails run inside the API with `@nestjs/schedule`.
 
 ## Commands (run from the repo root)
 
@@ -19,7 +20,7 @@ AI Academy is an LMS for live, cohort-based courses on AI and digital marketing.
 | `pnpm bootstrap`  | First-time setup: env files, Postgres, migrations, seed                                               |
 | `pnpm db:up`      | Start Postgres (docker compose), waiting until it is healthy                                          |
 | `pnpm db:migrate` | `prisma migrate dev` + `prisma generate`                                                              |
-| `pnpm db:seed`    | Seed users, both tracks, a sample session and a sample test                                           |
+| `pnpm db:seed`    | Seed users, the three courses, one group each (48 lectures), lessons, payments and a test             |
 | `pnpm db:reset`   | Drop the database, re-run all migrations, re-seed                                                     |
 | `pnpm dev`        | Run web (:3000), api (:4000), and the shared package watcher                                          |
 | `pnpm build`      | Build all packages                                                                                    |
@@ -31,13 +32,15 @@ AI Academy is an LMS for live, cohort-based courses on AI and digital marketing.
 
 To run a single package, use `pnpm --filter @ai-academy/api <script>` (or `@ai-academy/web`, `@ai-academy/shared`).
 
-Seed logins (all use the password `Password123!`): `admin@aiacademy.dev`, `instructor@aiacademy.dev`, `student1@aiacademy.dev`, `student2@aiacademy.dev`.
+Seed logins (all use the password `Password123!`): `admin@aiacademy.dev`, `instructor@aiacademy.dev`, `student1@aiacademy.dev` (enrolled and paid in Vibe Coding), `student2@aiacademy.dev` (a bank transfer waiting for the admin). Production content comes from `node dist/src/cli/seed-courses.js` (courses + groups, no people).
+
+Without Stripe keys, card checkout answers 503 and bank transfer works; `STRIPE_FAKE=true` in `apps/api/.env` gives a fake Stripe (no network) whose checkout lands on the success page, and a signed webhook can be posted by hand (see `apps/api/test/support.ts`).
 
 ## Folder map
 
 ```
 apps/api/
-  prisma/              schema.prisma, migrations/, seed.ts
+  prisma/              schema.prisma, migrations/, seed.ts, catalog.ts (the three courses)
   prisma.config.ts     Prisma 7 config (schema path, seed command, datasource URL)
   src/main.ts          bootstrap (prefix, validation pipe, cookies, swagger)
   src/setup-app.ts     app-wide config shared by main.ts and the e2e tests
@@ -45,19 +48,22 @@ apps/api/
   src/common/          decorators (@Public, @Roles, @CurrentUser), guards, filters
   src/config/          env validation
   src/prisma/          PrismaService (global)
-  src/mail/            MailService (console transport in dev)
+  src/cli/             seed-admin.ts, seed-courses.ts (production seeds)
+  src/common/i18n/     Albanian messages for class-validator errors
+  src/mail/            MailService (console transport in dev; sendLogged = idempotent), templates.ts (every email), ics.ts
+  src/modules/groups, payments, lessons, notifications (cron jobs + email log)
   src/modules/         auth, users, courses, enrollments, ... (one Nest module per folder)
   test/                e2e tests (*.e2e-spec.ts)
 apps/web/
   messages/sq.json     landing copy (Albanian, source of truth); en.json mirrors its keys
   e2e/                 Playwright tests
-  src/app/[locale]/    ROOT LAYOUT #1: marketing landing page /sq, /en (+ opengraph-image)
-  src/app/(site)/      ROOT LAYOUT #2 (lang="en"): everything else
-    (public)/          catalog, course detail, auth pages (header + footer layout)
-    (app)/             dashboard, profile, admin/* (sidebar layout, client-side guarded)
+  src/app/[locale]/    ROOT LAYOUT #1: marketing landing page /sq (+ opengraph-image)
+  src/app/(site)/      ROOT LAYOUT #2 (lang="sq"): everything else
+    (public)/          catalog, course detail (groups + seats), auth pages (header + footer layout)
+    (app)/             dashboard, checkout/*, payments/*, learn/* (incl. lessons), teach/*, admin/* (sidebar, client-side guarded)
   src/app/global-not-found.tsx, sitemap.ts, robots.ts
   src/components/landing/  one component per landing section + header/footer/CTA helpers
-  src/i18n/            locale helpers: getLandingMessages() (via next/root-params), format()
+  src/i18n/            messages.ts (t, fmt, plural), server.ts (landing), no-english.test.ts (flags English JSX)
   src/components/ui/   shadcn/ui primitives (generated; edit sparingly)
   src/components/      app components (layout, course, status badge, ...)
   src/lib/             api client, auth context, queries, landing-data (fail-soft loaders), analytics track()
@@ -87,7 +93,8 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
   - Refresh and reset tokens are signed with the secret plus a fingerprint of the password hash (PLAN D2).
 - **Uploads:** materials go through `StorageService`: local disk (`STORAGE_DRIVER=local`, `UPLOAD_DIR`) in development and tests, a private R2 bucket (`s3`) in production (PLAN D15, D27). Never serve files statically or from public bucket URLs. Downloads go through `GET /materials/:id/download`, and the web app uses `apiDownload()` (plain links can't carry the in-memory token).
 - **Errors:** throw Nest HTTP exceptions with a clear message. Prisma `P2002` maps to 409, `P2025` to 404, and `P2003` to 409 (global filter).
-- **Times:** store UTC and render in the viewer's local time with `<LocalDateTime>` (a client component). Browsers ship **no Albanian Intl data** (`Intl.DateTimeFormat('sq')` silently prints English), so Albanian dates use translated month names from the messages (`<DateTemplate>` on the landing page).
+- **Copy:** never hard-code user-facing English (or Albanian) in components: add a key to `messages/sq.json` and use `t.<namespace>.<key>` (`fmt()` fills `{placeholders}`, `plural()` picks a form). `src/i18n/no-english.test.ts` fails on obvious English in JSX. Write natural Albanian in the ti-form.
+- **Times:** store UTC and render in **Europe/Tirane** in Albanian with `<LocalDateTime value style="date|dateTime|long|longTime|time|short|shortTime">` or `formatDate()`; `formatSqDate/formatSqSchedule` from the shared package do the same anywhere. Browsers ship **no Albanian Intl data**, so the names live in `packages/shared/src/constants.ts`. Group dates are "YYYY-MM-DD" keys; format them as `${key}T12:00:00Z`.
 - **Web data:**
   - Next.js 16 runs with **Cache Components**. Read `apps/web/node_modules/next/dist/docs/` before using unfamiliar APIs; they differ from older Next versions.
   - Public pages are server components that fetch the API directly (`serverGet`, `API_INTERNAL_URL`). Every uncached fetch, `params` read and `useSearchParams()` must sit inside `<Suspense>`.
@@ -130,8 +137,10 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
   - A passed attempt sets the module to PASSED and the next module (order + 1) to ACTIVE in one `$transaction`.
   - Approving an enrollment creates every ModuleProgress row: module 1 ACTIVE, the rest LOCKED.
   - Test defaults: 70% pass mark, 45 minutes, 2 attempts, window in the last week of the module.
-  - Grading lives in `src/modules/tests/grading.ts` (pure, unit-tested). Progression goes through `src/modules/progress/progression.ts`: `lockProgress()` (row lock) and `passModule()` (PASSED + open the next module). Attempts count only since `unlockedAt` (PLAN D17); deadlines and expiry follow D18. Never select `Option.isCorrect` in anything sent to a student.
-- **Email:** `MailService.send()` (SMTP in production, console in development) never throws; don't `await` it where timing could reveal whether an account exists (PLAN D21).
-- **Tests:** the Playwright journeys (`apps/web/e2e/`) create their own users and courses through the API (`e2e/support.ts`), so they can run in parallel; don't depend on seed users' state beyond logging in. `a11y.spec.ts` must stay at zero axe violations.
+  - Grading lives in `src/modules/tests/grading.ts` (pure, unit-tested). Progression goes through `src/modules/progress/progression.ts`: `lockProgress()` (row lock), `passModule()` (PASSED, then `unlockIfReady()` for the next module) and `isModulePaid()`. **A module opens only when the previous one is PASSED and its month has a CONFIRMED payment**; `PaymentsService.applyConfirmed` calls `unlockIfReady` too. Attempts count only since `unlockedAt` (PLAN D17); deadlines and expiry follow D18. Never select `Option.isCorrect` in anything sent to a student.
+  - **Seats:** count and take a seat only inside a transaction after `GroupsService.lockAndCountFree()` (row lock on the group). Seats taken = APPROVED enrollments + PENDING_PAYMENT holds not yet expired.
+  - **Payments:** only `applyConfirmed` confirms a payment (Stripe webhook, admin confirm, manual). The success redirect proves nothing. Every outcome is idempotent (status checks, `StripeEvent` ids, email unique keys).
+- **Email:** every email is an Albanian template in `src/mail/templates.ts` and goes through `MailService.sendLogged()` with a `uniqueKey` (`EmailLog` makes repeats no-ops). `send()` never throws; don't `await` it where timing could reveal whether an account exists (PLAN D21). Cron jobs live in `src/modules/notifications/scheduler.service.ts` and only call service methods that take `now`, so tests drive them directly (`CRON_ENABLED=false`).
+- **Tests:** the Playwright journeys (`apps/web/e2e/`) create their own users, courses and groups through the API (`e2e/support.ts`) and simulate Stripe with a signed webhook against the fake client, so they can run in parallel; don't depend on seed users' state beyond logging in. `a11y.spec.ts` must stay at zero axe violations. API e2e suites boot through `test/support.ts` (`bootApp`, `captureMail`, `signStripeEvent`).
 - **Don't** add paid services or change `schema.prisma` without asking the product owner. Don't leave TODO stubs in shipped scope.
 - **Commits:** small, imperative subject lines, one milestone per commit.

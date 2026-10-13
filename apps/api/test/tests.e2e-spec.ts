@@ -236,7 +236,7 @@ describe('Tests and progression (e2e)', () => {
       .set(as('instructor'))
       .send({ questions: [twoCorrect] })
       .expect(400);
-    expect(JSON.stringify(invalid.body)).toContain('Question 1');
+    expect(JSON.stringify(invalid.body)).toContain('Pyetja 1');
 
     test = (
       await http()
@@ -411,7 +411,18 @@ describe('Tests and progression (e2e)', () => {
     expect(view.attempts).toHaveLength(2);
   });
 
-  it('passes the module and unlocks the next one in the same step', async () => {
+  it('passes the module and unlocks the next one in the same step, once that month is paid', async () => {
+    // The next month is paid up front here (an admin records a cash payment), so the pass
+    // opens module 2 straight away. Unpaid months stay locked: see payments.e2e-spec.ts.
+    const enrollment = await prisma.enrollment.findUniqueOrThrow({
+      where: { userId_courseId: { userId: studentId, courseId: course.id } },
+    });
+    await http()
+      .post('/api/v1/payments/manual')
+      .set(as('admin'))
+      .send({ enrollmentId: enrollment.id, moduleId: module2, note: 'Cash' })
+      .expect(201);
+
     const session = (
       await http().post(`/api/v1/tests/${test.id}/attempts`).set(as('student')).expect(200)
     ).body as AttemptSession;
@@ -493,7 +504,7 @@ describe('Tests and progression (e2e)', () => {
       .post(`/api/v1/tests/${created.id}/attempts`)
       .set(as('student'))
       .expect(409);
-    expect(JSON.stringify(closed.body)).toContain('not open yet');
+    expect(JSON.stringify(closed.body)).toContain('nuk është hapur ende');
 
     const progress = (await http().get('/api/v1/me/progress').set(as('student')).expect(200))
       .body as CourseProgress[];

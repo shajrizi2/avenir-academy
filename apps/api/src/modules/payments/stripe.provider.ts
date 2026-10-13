@@ -46,6 +46,50 @@ export function createStripeClient(secretKey: string): StripeClient {
   return new Stripe(secretKey, { appInfo: { name: 'Avenir Academy' } });
 }
 
+/**
+ * A stand-in for tests and local runs without keys (STRIPE_FAKE=true, never in production):
+ * checkout "sessions" send the browser straight to the success page, webhooks are verified
+ * with the real signature code, refunds and receipts are stubs.
+ */
+export function createFakeStripeClient(webUrl: string): StripeClient {
+  const real = new Stripe('sk_test_fake');
+  let n = 0;
+  const session = (id: string, params: Stripe.Checkout.SessionCreateParams) =>
+    ({
+      id,
+      object: 'checkout.session',
+      url: `${webUrl}/checkout/success?payment=${params.client_reference_id ?? ''}&fake=1`,
+      client_reference_id: params.client_reference_id ?? null,
+      payment_status: 'unpaid',
+      payment_intent: `pi_fake_${id}`,
+      metadata: params.metadata ?? {},
+    }) as unknown as Stripe.Checkout.Session;
+  return {
+    checkout: {
+      sessions: {
+        create: (params) => Promise.resolve(session(`cs_fake_${++n}_${Date.now()}`, params)),
+        expire: (id) => Promise.resolve(session(id, {})),
+      },
+    },
+    paymentIntents: {
+      retrieve: (id) =>
+        Promise.resolve({
+          id,
+          object: 'payment_intent',
+          latest_charge: { id: `ch_${id}`, receipt_url: `https://receipt.stripe.test/${id}` },
+        } as unknown as Stripe.PaymentIntent),
+    },
+    refunds: {
+      create: (params) =>
+        Promise.resolve({
+          id: `re_fake_${Date.now()}`,
+          payment_intent: params.payment_intent,
+        } as unknown as Stripe.Refund),
+    },
+    webhooks: real.webhooks,
+  };
+}
+
 /** Stripe's hosted Checkout page; sq isn't among its locales, so the page auto-detects. */
 const CHECKOUT_LOCALE: Stripe.Checkout.SessionCreateParams.Locale = 'auto';
 

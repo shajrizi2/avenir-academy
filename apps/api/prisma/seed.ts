@@ -1,21 +1,36 @@
 /**
  * Idempotent development seed: running it twice leaves the same data.
- * Creates 1 admin, 1 instructor, 2 students, both tracks with 4 modules each,
- * one sample live session and one sample test.
+ * Creates 1 admin, 1 instructor, 2 students, the three courses with 4 modules each, one
+ * group per course starting 1 November 2026 (12 lectures per module), starter offline
+ * lessons, one paid student, one bank transfer waiting for confirmation, and a sample test.
  */
 import 'dotenv/config';
+import { generateSessionTimes, SESSIONS_PER_MODULE } from '@ai-academy/shared';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcrypt';
 import {
   EnrollmentStatus,
   ModuleStatus,
+  PaymentMethod,
+  PaymentStatus,
   PrismaClient,
   QuestionType,
   Role,
 } from '../src/generated/prisma/client.js';
+import {
+  CATALOG,
+  CURRENCY,
+  FIRST_GROUP_START,
+  FIRST_GROUP_START_TIME,
+  FIRST_GROUP_WEEKDAYS,
+  LIST_PRICE_CENTS,
+  PRICE_CENTS,
+  STARTER_LESSONS,
+} from './catalog.js';
 
 const SEED_PASSWORD = 'Password123!';
 const DAY = 24 * 60 * 60 * 1000;
+const MEET_URL = 'https://meet.google.com/abc-defg-hij';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -27,105 +42,6 @@ function daysFromToday(days: number): Date {
   d.setUTCHours(0, 0, 0, 0);
   return new Date(d.getTime() + days * DAY);
 }
-
-const tracks = [
-  {
-    slug: 'ai-foundations',
-    title: 'AI Foundations',
-    titleSq: 'Themelet e AI-së',
-    summarySq:
-      'Nga prompti i parë deri te puna e përditshme me AI: një program live katërmujor për profesionistë.',
-    descriptionSq:
-      'Një program praktik dhe live në katër module mujore. Fillon me mënyrën si funksionon AI-ja e sotme dhe si ta përdorësh me siguri, e lidh AI-në me mjetet që i përdor tashmë, mëson të ndërtosh me asistentë kodimi dhe përfundon duke i ridizajnuar proceset e punës në profesionin tënd. Çdo modul mbyllet me një test online; kur e kalon, hapet moduli tjetër.',
-    summary:
-      'From your first prompt to shipping AI-powered work: a four-month live programme for professionals.',
-    description:
-      'A practical, live programme in four monthly modules. You start with how modern AI works and how to use it safely, connect AI to the tools you already use, learn to build with AI coding assistants, and finish by redesigning workflows in your own profession. Every module ends with an online test; passing it unlocks the next one.',
-    startDate: daysFromToday(-7),
-    modules: [
-      {
-        title: 'AI Basics',
-        titleSq: 'Bazat e AI-së',
-        descriptionSq:
-          'Si funksionojnë modelet e mëdha gjuhësore, ku janë të forta e ku jo, bazat e shkrimit të prompteve dhe përdorimi i përgjegjshëm.',
-        description:
-          'How large language models work, what they are good and bad at, prompting fundamentals, and responsible use.',
-      },
-      {
-        title: 'AI Integration',
-        titleSq: 'Integrimi i AI-së',
-        descriptionSq:
-          'Lidhja e AI-së me mjetet e përditshme: tabela, dokumente, email, automatizime dhe platforma pa kod.',
-        description:
-          'Connecting AI to everyday tools: spreadsheets, documents, email, automations and no-code platforms.',
-      },
-      {
-        title: 'AI Coding',
-        titleSq: 'Kodimi me AI',
-        descriptionSq:
-          'Ndërtimi i aplikacioneve dhe skripteve të vogla me asistentë kodimi, nga ideja te një prototip që funksionon.',
-        description:
-          'Building small apps and scripts with AI coding assistants, from idea to working prototype.',
-      },
-      {
-        title: 'AI in Your Profession',
-        titleSq: 'AI në profesionin tënd',
-        descriptionSq:
-          'Moduli përmbyllës: gjen rastet me vlerë të lartë në fushën tënde dhe ndërton një proces pune me AI që e përsërit lehtë.',
-        description:
-          'A capstone module: identify high-value use cases in your field and build a repeatable AI workflow.',
-      },
-    ],
-  },
-  {
-    slug: 'digital-marketing',
-    title: 'Digital Marketing',
-    titleSq: 'Marketingu Digjital',
-    summarySq:
-      'Planifiko, krijo dhe mat fushata që japin rezultat, me AI-në si bashkëpilot marketingu në modulin e fundit.',
-    descriptionSq:
-      'Një program live dhe praktik që mbulon gjithë rrugëtimin e marketingut. Mëson bazat e pozicionimit dhe të audiencave, krijon përmbajtje për rrjetet sociale, drejton dhe mat fushata me pagesë dhe përfundon duke e vënë AI-në në punë në gjithë marketingun tënd. Çdo modul mujor mbyllet me një test online.',
-    summary:
-      'Plan, create and measure campaigns that work, with AI as your marketing co-pilot in the final module.',
-    description:
-      'A live, hands-on track covering the full marketing funnel. Learn the fundamentals of positioning and audiences, create content for social channels, run and measure paid campaigns, and finish by putting AI to work across your marketing. Each monthly module ends with an online test.',
-    startDate: daysFromToday(21),
-    modules: [
-      {
-        title: 'Marketing Fundamentals',
-        titleSq: 'Bazat e marketingut',
-        descriptionSq:
-          'Pozicionimi, audiencat, rrugëtimi i klientit dhe vendosja e qëllimeve që mund t’i matësh vërtet.',
-        description:
-          'Positioning, audiences, the customer journey and setting goals you can actually measure.',
-      },
-      {
-        title: 'Social and Content',
-        titleSq: 'Rrjetet sociale dhe përmbajtja',
-        descriptionSq:
-          'Strategjia e përmbajtjes, kanalet sociale, formatet e tregimit dhe ndërtimi i një kalendari përmbajtjeje.',
-        description:
-          'Content strategy, social media channels, storytelling formats and building a content calendar.',
-      },
-      {
-        title: 'Ads and Analytics',
-        titleSq: 'Reklamat dhe analitika',
-        descriptionSq:
-          'Fushata reklamash në kërkim dhe në rrjete sociale, matja e konvertimeve dhe leximi i paneleve analitike.',
-        description:
-          'Running search and social ad campaigns, tracking conversions and reading analytics dashboards.',
-      },
-      {
-        title: 'AI for Marketing',
-        titleSq: 'AI për marketing',
-        descriptionSq:
-          'Përdorimi i AI-së për kërkime, shkrim tekstesh, prodhim kreativ, personalizim dhe raportim.',
-        description:
-          'Using AI for research, copywriting, creative production, personalisation and reporting.',
-      },
-    ],
-  },
-] as const;
 
 async function upsertUser(
   email: string,
@@ -167,125 +83,232 @@ async function main(): Promise<void> {
     passwordHash,
   );
 
+  // The three courses, their modules and one group each (a test group starts today, so the
+  // lectures and the join window can be tried right away).
+  const groupsByCourse = new Map<string, string>();
   const courses = [];
-  for (const track of tracks) {
-    const { modules, ...courseData } = track;
+  for (const [index, entry] of CATALOG.entries()) {
+    const { modules, ...courseData } = entry;
+    const data = {
+      ...courseData,
+      titleSq: courseData.title,
+      summarySq: courseData.summary,
+      descriptionSq: courseData.description,
+      startDate: new Date(`${FIRST_GROUP_START}T00:00:00Z`),
+      priceCents: PRICE_CENTS,
+      listPriceCents: LIST_PRICE_CENTS,
+      currency: CURRENCY,
+      isPublished: true,
+    };
     const course = await prisma.course.upsert({
-      where: { slug: track.slug },
-      update: { ...courseData, isPublished: true },
-      create: { ...courseData, isPublished: true },
+      where: { slug: entry.slug },
+      update: data,
+      create: data,
     });
-    for (const [index, module] of modules.entries()) {
-      const order = index + 1;
-      await prisma.module.upsert({
+    const moduleIds: string[] = [];
+    for (const [i, module] of modules.entries()) {
+      const order = i + 1;
+      const row = await prisma.module.upsert({
         where: { courseId_order: { courseId: course.id, order } },
-        update: { ...module, instructorId: instructor.id },
-        create: { ...module, order, courseId: course.id, instructorId: instructor.id },
+        update: {
+          ...module,
+          titleSq: module.title,
+          descriptionSq: module.description,
+          instructorId: instructor.id,
+        },
+        create: {
+          ...module,
+          titleSq: module.title,
+          descriptionSq: module.description,
+          order,
+          courseId: course.id,
+          instructorId: instructor.id,
+        },
+      });
+      moduleIds.push(row.id);
+    }
+
+    const groupName = `Grupi 1 – Nëntor 2026`;
+    let group = await prisma.group.findFirst({ where: { courseId: course.id, name: groupName } });
+    if (!group) {
+      group = await prisma.group.create({
+        data: {
+          courseId: course.id,
+          name: groupName,
+          startDate: new Date(`${FIRST_GROUP_START}T00:00:00Z`),
+          endDate: new Date(`${FIRST_GROUP_START}T00:00:00Z`),
+          weekdays: FIRST_GROUP_WEEKDAYS,
+          startTime: FIRST_GROUP_START_TIME,
+          durationMin: 120,
+          capacity: 10,
+          instructorId: instructor.id,
+          meetUrl: MEET_URL,
+        },
+      });
+      const times = generateSessionTimes(
+        {
+          startDate: FIRST_GROUP_START,
+          weekdays: FIRST_GROUP_WEEKDAYS,
+          startTime: FIRST_GROUP_START_TIME,
+          timezone: 'Europe/Tirane',
+        },
+        moduleIds.length * SESSIONS_PER_MODULE,
+      );
+      await prisma.liveSession.createMany({
+        data: times.map((startsAt, i) => ({
+          groupId: group!.id,
+          moduleId: moduleIds[Math.floor(i / SESSIONS_PER_MODULE)],
+          title: `Leksioni ${(i % SESSIONS_PER_MODULE) + 1}`,
+          startsAt,
+          durationMin: 120,
+          meetUrl: MEET_URL,
+        })),
+      });
+      const last = times.at(-1);
+      if (last) {
+        await prisma.group.update({
+          where: { id: group.id },
+          data: { endDate: new Date(last.toISOString().slice(0, 10) + 'T00:00:00Z') },
+        });
+      }
+    }
+    groupsByCourse.set(course.id, group.id);
+
+    // Starter offline lessons on module 1.
+    for (const [i, lesson] of (STARTER_LESSONS[entry.slug] ?? []).entries()) {
+      await prisma.lesson.upsert({
+        where: { moduleId_order: { moduleId: moduleIds[0], order: i + 1 } },
+        update: { title: lesson.title, content: lesson.content, estimatedMin: lesson.estimatedMin },
+        create: {
+          moduleId: moduleIds[0],
+          order: i + 1,
+          title: lesson.title,
+          content: lesson.content,
+          estimatedMin: lesson.estimatedMin,
+        },
       });
     }
-    courses.push(course);
+    courses.push({ ...course, moduleIds, index });
   }
-  const [aiCourse, marketingCourse] = courses;
+  const [vibe, marketing] = courses;
+  const vibeGroupId = groupsByCourse.get(vibe.id)!;
+  const marketingGroupId = groupsByCourse.get(marketing.id)!;
 
-  const aiModules = await prisma.module.findMany({
-    where: { courseId: aiCourse.id },
-    orderBy: { order: 'asc' },
-  });
-  const aiBasics = aiModules[0];
-
-  // student1: approved in AI Foundations, so Module 1 is ACTIVE and the rest are LOCKED.
-  await prisma.enrollment.upsert({
-    where: { userId_courseId: { userId: student1.id, courseId: aiCourse.id } },
+  // student1: enrolled in Vibe Coding, first month paid (confirmed bank transfer).
+  const enrollment1 = await prisma.enrollment.upsert({
+    where: { userId_courseId: { userId: student1.id, courseId: vibe.id } },
     update: {},
     create: {
       userId: student1.id,
-      courseId: aiCourse.id,
+      courseId: vibe.id,
+      groupId: vibeGroupId,
       status: EnrollmentStatus.APPROVED,
       decidedAt: daysFromToday(-8),
     },
   });
-  for (const module of aiModules) {
-    const active = module.order === 1;
+  for (const [i, moduleId] of vibe.moduleIds.entries()) {
+    const active = i === 0;
     await prisma.moduleProgress.upsert({
-      where: { userId_moduleId: { userId: student1.id, moduleId: module.id } },
+      where: { userId_moduleId: { userId: student1.id, moduleId } },
       update: {},
       create: {
         userId: student1.id,
-        moduleId: module.id,
+        moduleId,
         status: active ? ModuleStatus.ACTIVE : ModuleStatus.LOCKED,
         unlockedAt: active ? daysFromToday(-7) : null,
       },
     });
   }
-
-  // student2: pending request in Digital Marketing (shows up in the admin approval queue).
-  await prisma.enrollment.upsert({
-    where: { userId_courseId: { userId: student2.id, courseId: marketingCourse.id } },
+  await prisma.payment.upsert({
+    where: { reference: 'AV-SEED0001' },
     update: {},
-    create: { userId: student2.id, courseId: marketingCourse.id, status: EnrollmentStatus.PENDING },
+    create: {
+      enrollmentId: enrollment1.id,
+      moduleId: vibe.moduleIds[0],
+      amountCents: PRICE_CENTS,
+      currency: CURRENCY,
+      provider: PaymentMethod.BANK_TRANSFER,
+      status: PaymentStatus.CONFIRMED,
+      reference: 'AV-SEED0001',
+      confirmedAt: daysFromToday(-8),
+      confirmedById: admin.id,
+      note: 'Seed: paguar me para në dorë',
+    },
   });
 
-  // One upcoming live session for AI Basics, two days from now at 17:00 UTC.
-  const sessionTitle = 'Week 2: Prompting fundamentals';
-  const existingSession = await prisma.liveSession.findFirst({
-    where: { moduleId: aiBasics.id, title: sessionTitle },
+  // student2: a seat held in Digital Marketing, bank transfer waiting for the admin.
+  const hold = new Date(Date.now() + 40 * 60 * 60 * 1000);
+  const enrollment2 = await prisma.enrollment.upsert({
+    where: { userId_courseId: { userId: student2.id, courseId: marketing.id } },
+    update: {},
+    create: {
+      userId: student2.id,
+      courseId: marketing.id,
+      groupId: marketingGroupId,
+      status: EnrollmentStatus.PENDING_PAYMENT,
+      holdExpiresAt: hold,
+    },
   });
-  if (!existingSession) {
-    await prisma.liveSession.create({
-      data: {
-        moduleId: aiBasics.id,
-        title: sessionTitle,
-        startsAt: new Date(daysFromToday(2).getTime() + 17 * 60 * 60 * 1000),
-        durationMin: 90,
-        meetUrl: 'https://meet.google.com/abc-defg-hij',
-      },
-    });
-  }
+  await prisma.payment.upsert({
+    where: { reference: 'AV-SEED0002' },
+    update: {},
+    create: {
+      enrollmentId: enrollment2.id,
+      moduleId: marketing.moduleIds[0],
+      amountCents: PRICE_CENTS,
+      currency: CURRENCY,
+      provider: PaymentMethod.BANK_TRANSFER,
+      status: PaymentStatus.PENDING,
+      reference: 'AV-SEED0002',
+      holdExpiresAt: hold,
+    },
+  });
 
-  // The AI Basics test. Its window is the last week of the 4-week module.
-  const moduleStart = aiCourse.startDate ?? daysFromToday(0);
-  const existingTest = await prisma.test.findUnique({ where: { moduleId: aiBasics.id } });
+  // A sample test on Vibe Coding module 1, open from a week ago for the next month, so the
+  // whole attempt flow can be tried locally.
+  const firstModule = vibe.moduleIds[0];
+  const existingTest = await prisma.test.findUnique({ where: { moduleId: firstModule } });
   if (!existingTest) {
     await prisma.test.create({
       data: {
-        moduleId: aiBasics.id,
-        title: 'AI Basics: Module Test',
-        opensAt: new Date(moduleStart.getTime() + 21 * DAY),
-        closesAt: new Date(moduleStart.getTime() + 28 * DAY),
+        moduleId: firstModule,
+        title: 'Bazat e kodimit me AI: testi i modulit',
+        opensAt: daysFromToday(-7),
+        closesAt: daysFromToday(30),
         isPublished: true,
         questions: {
           create: [
             {
               order: 1,
               type: QuestionType.SINGLE_CHOICE,
-              text: 'What does a large language model fundamentally do?',
+              text: 'Çfarë bën në thelb një model i madh gjuhësor?',
               options: {
                 create: [
-                  { text: 'Predicts the next token based on context', isCorrect: true },
-                  { text: 'Looks answers up in a fixed database' },
-                  { text: 'Executes code to find the answer' },
-                  { text: 'Copies text from the internet in real time' },
+                  { text: 'Parashikon fjalën tjetër sipas kontekstit', isCorrect: true },
+                  { text: 'Kërkon përgjigjet në një bazë të dhënash fikse' },
+                  { text: 'Ekzekuton kod për të gjetur përgjigjen' },
+                  { text: 'Kopjon tekst nga interneti në kohë reale' },
                 ],
               },
             },
             {
               order: 2,
               type: QuestionType.MULTI_CHOICE,
-              text: 'Which of these make a prompt more effective? (Select all that apply)',
+              text: 'Cilat e bëjnë një prompt më efektiv? (Zgjidh të gjitha që vlejnë)',
               options: {
                 create: [
-                  { text: 'Giving clear context and a goal', isCorrect: true },
-                  { text: 'Providing an example of the desired output', isCorrect: true },
-                  { text: 'Keeping it as vague as possible' },
-                  { text: 'Specifying the format of the answer', isCorrect: true },
+                  { text: 'Konteksti i qartë dhe qëllimi', isCorrect: true },
+                  { text: 'Një shembull i rezultatit të dëshiruar', isCorrect: true },
+                  { text: 'Sa më i paqartë të jetë' },
+                  { text: 'Formati i përgjigjes', isCorrect: true },
                 ],
               },
             },
             {
               order: 3,
               type: QuestionType.TRUE_FALSE,
-              text: 'AI-generated output is always factually correct.',
-              options: { create: [{ text: 'True' }, { text: 'False', isCorrect: true }] },
+              text: 'Përgjigjet e AI-së janë gjithmonë të sakta.',
+              options: { create: [{ text: 'E vërtetë' }, { text: 'E gabuar', isCorrect: true }] },
             },
           ],
         },
@@ -293,21 +316,26 @@ async function main(): Promise<void> {
     });
   }
 
-  // Landing-page settings. Every value is a PLACEHOLDER for the team to replace (via
-  // PATCH /api/v1/site-settings or Prisma Studio). `update: {}` keeps edits on re-seed.
+  // Site settings. Every value is a PLACEHOLDER for the team to replace in the admin.
+  // `update: {}` keeps edits on re-seed.
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: {},
     create: {
       id: 1,
-      nextCohortStart: marketingCourse.startDate,
-      scheduleSq: '2 mbrëmje në javë, 19:00–20:30',
-      scheduleEn: '2 evenings a week, 19:00–20:30',
-      seatsTotal: 20,
-      priceAmount: null, // null renders "contact us for the price"
+      nextCohortStart: new Date(`${FIRST_GROUP_START}T00:00:00Z`),
+      scheduleSq: '3 herë në javë nga 2 orë, 19:00–21:00',
+      scheduleEn: '3 times a week for 2 hours, 19:00–21:00',
+      seatsTotal: 10,
+      priceAmount: 89,
+      priceNoteSq: 'në muaj',
+      priceNoteEn: 'a month',
       contactEmail: 'info@example.com',
       contactPhone: '+383 44 000 000',
       whatsappNumber: '38344000000',
+      bankBeneficiary: 'Avenir Academy (VENDOS PËRFITUESIN)',
+      bankIban: 'XK051212012345678906',
+      bankName: 'VENDOS EMRIN E BANKËS',
     },
   });
   // Testimonials are intentionally NOT seeded: only real quotes may appear on the site.

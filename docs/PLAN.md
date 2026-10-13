@@ -6,17 +6,24 @@ AI Academy is a simple LMS for live, cohort-based courses on AI and digital mark
 
 Tracks cover AI (basics → AI integration → AI coding → AI in your profession) and digital marketing.
 
-- Classes happen **live on Google Meet**. The platform only stores the Meet link for each session.
-- Students register on the site and request enrollment in a course. An admin approves the request, which unlocks **Module 1**.
-- Each module lasts about **one month** and ends with an **online test**. Passing the test unlocks the next module.
-- A bilingual **marketing landing page** (`/sq`, `/en`; Albanian first) sells the platform. Its one goal is to turn a visitor into a registration (see §6.1).
+- Classes happen **live on Google Meet** with senior professionals. The platform only stores the Meet link for each session.
+- Three courses: **Development & Vibe Coding përmes AI** (`vibe-coding-ai`), **Digital Marketing & AI** (`digital-marketing-ai`), **SEO përmes AI** (`seo-ai`). Each costs **€89 a month** (shown as a discount from the standard €150), stored in cents on the course and editable in the admin.
+- Students enrol in a **group** (cohort) of at most **10 people**, on a weekly schedule (e.g. Mon/Wed/Fri 19:00–21:00 Europe/Tirane). A month = one module = **12 live lectures of 2 hours** (3 a week, 24 hours a month). The first groups start on **1 November 2026**.
+- Registration requires **payment**: Stripe Checkout (card, default) or bank transfer. An enrollment counts only when the first month's payment is CONFIRMED. Each month is paid separately.
+- Each module ends with an **online test**. The next module opens when the test is passed **and** that month is paid.
+- Between lectures, students learn **offline** from short Markdown lessons in their panel.
+- The platform is **Albanian only**: public site, panels, emails, validation and error messages.
+- The marketing landing page (`/sq`) sells the three courses and the launch offer. Its one goal is to turn a visitor into a paid registration (see §6.1).
 
-### Tracks (seed data)
+### Courses (seed data, `apps/api/prisma/catalog.ts`)
 
-| Course            | Module 1               | Module 2           | Module 3          | Module 4              |
-| ----------------- | ---------------------- | ------------------ | ----------------- | --------------------- |
-| AI Foundations    | AI Basics              | AI Integration     | AI Coding         | AI in Your Profession |
-| Digital Marketing | Marketing Fundamentals | Social and Content | Ads and Analytics | AI for Marketing      |
+| Course                              | Module 1                       | Module 2                       | Module 3                       | Module 4                            |
+| ----------------------------------- | ------------------------------ | ------------------------------ | ------------------------------ | ----------------------------------- |
+| Development & Vibe Coding përmes AI | Bazat e kodimit me AI          | Aplikacione web me AI          | Të dhëna, API dhe automatizime | Publikimi dhe projekti përfundimtar |
+| Digital Marketing & AI              | Strategjia dhe audiencat me AI | Përmbajtja dhe rrjetet sociale | Reklamat me pagesë             | Analitika dhe automatizimi          |
+| SEO përmes AI                       | Bazat e SEO-së dhe fjalët kyçe | Përmbajtja që renditet         | SEO teknike                    | Linket, autoriteti dhe raportimi    |
+
+The module titles and descriptions are a starting point for the product owner to adjust.
 
 ### Roles
 
@@ -26,28 +33,34 @@ Tracks cover AI (basics → AI integration → AI coding → AI in your professi
 
 ### Out of scope
 
-Online payments (an admin approves enrollment manually), certificates, video hosting, the Google Calendar API, chat, and i18n of the signed-in app (it stays English for now; only the landing page is bilingual).
+Certificates, video hosting (lessons embed YouTube/Vimeo), the Google Calendar API (the platform sends an `.ics`), chat, and an English version of the site (the English copy stays in `messages/en.json` for later).
 
 ## 2. Business rules
 
-### Enrollment & progression
+### Groups, payment and enrollment
 
-1. A student requests enrollment in a course, which creates an `Enrollment` with status `PENDING`. There is at most one per user and course.
-2. When an admin approves it, the server creates one `ModuleProgress` row per module. Module 1 (`order = 1`) becomes `ACTIVE` and all other modules become `LOCKED`.
-3. A student can open a module only if they are enrolled (`APPROVED`) and the module is not `LOCKED`.
+1. A student picks a **group** of a course and a payment method at checkout. Inside one transaction the group row is locked and the free seats counted (seats taken = `APPROVED` enrollments + `PENDING_PAYMENT` enrollments whose hold hasn't expired). With a free seat the enrollment becomes `PENDING_PAYMENT` with a hold (Stripe: 30 minutes, bank transfer: 48 hours); a full group makes it `WAITLISTED`. There is at most one enrollment per user and course.
+2. A `Payment` covers one month (module). It is `CONFIRMED` by the Stripe webhook (never by the success redirect) or by an admin for bank transfers. Confirming the first month activates the enrollment (`APPROVED`): one `ModuleProgress` row per module, module 1 `ACTIVE`, the rest `LOCKED`. The student gets the registration email with the month's 12 lectures and an `.ics`.
+3. Unpaid holds expire (`EXPIRED` payment and enrollment) and free the seat; bank-transfer holds get a warning 12 hours before. Admins can move waitlisted students into a group (48-hour hold) and record payments received outside the platform.
+4. A student can open a module only if they are enrolled (`APPROVED`), the module is not `LOCKED`, and (for the live sessions) only their group's lectures are shown.
+5. Admins can still approve a request by hand (free seats); the legacy `PENDING` request stays for that.
 
 ### Tests
 
 - Defaults, editable per test: **pass mark 70%**, **45-minute** time limit, **2 attempts**. The test window opens in the **last week of the module**.
 - Question types: `SINGLE_CHOICE`, `MULTI_CHOICE`, `TRUE_FALSE`.
 - **Grading happens only on the server.** Correct answers (`Option.isCorrect`) are never sent to students, neither when an attempt starts nor while it is in progress.
-- A passed attempt sets the module to `PASSED` and the next module (`order + 1`) to `ACTIVE` in **one Prisma transaction**.
+- A passed attempt sets the module to `PASSED` and opens the next module (`order + 1`) in **one Prisma transaction**, but only if that month is paid; otherwise it opens when the payment is confirmed (`unlockIfReady` runs in both places).
 - With no attempts left, the module stays `FAILED` until an admin resets attempts or unlocks it manually (`PATCH /progress/:id`).
 - An attempt that runs past its time limit becomes `EXPIRED`, and the server grades whatever answers were saved.
 
+### Emails (Albanian, logged in `EmailLog`, idempotent by `uniqueKey`)
+
+Registration confirmed (timetable + `.ics`), lecture reminders 24 h and 1 h before (to students who paid the month), the offline-learning email at 09:00 Europe/Tirane on days without a lecture (students can opt out of this one only), payment pending/confirmed/failed, hold expiring (12 h before, bank) and expired, refund issued, waitlist joined, seat offered. Jobs run inside the API with `@nestjs/schedule`.
+
 ### Time
 
-All times are stored in UTC and displayed in the viewer's local time.
+All times are stored in UTC and displayed in **Europe/Tirane**, in Albanian (the academy's time zone, where lectures are scheduled). Browsers ship no Albanian Intl data, so month and weekday names come from `@ai-academy/shared`.
 
 ## 3. Tech stack
 
@@ -80,7 +93,15 @@ All times are stored in UTC and displayed in the viewer's local time.
 - `Option`: question, text, isCorrect
 - `TestAttempt`: test, user, status (`IN_PROGRESS` | `SUBMITTED` | `EXPIRED`), startedAt, submittedAt?, scorePct?, passed?, answers (JSON)
 - `Testimonial`: name, role?, quote, avatarUrl?, isPublished, locale (`sq` | `en`). Only real quotes; never seeded.
-- `SiteSettings`: singleton row (id 1) holding nextCohortStart?, scheduleSq?/scheduleEn?, seatsTotal?, priceAmount? (whole units; null shows "contact us"), priceCurrency, priceNoteSq?/priceNoteEn?, contactEmail?, contactPhone?, whatsappNumber?
+- `SiteSettings`: singleton row (id 1) holding nextCohortStart?, scheduleSq?/scheduleEn?, seatsTotal?, priceAmount?, priceCurrency, priceNoteSq?/priceNoteEn?, contactEmail?, contactPhone?, whatsappNumber?, stripeEnabled, bankTransferEnabled, bankBeneficiary?/bankIban?/bankName?/bankSwift?
+- `Course` also has priceCents (8900), listPriceCents? (15000), currency ("EUR").
+- `Group`: course, name, startDate/endDate (dates), weekdays (0–6), startTime ("HH:mm"), durationMin (120), timezone, capacity (≤ 10), status (`OPEN` | `FULL` | `RUNNING` | `FINISHED`), instructor?, meetUrl?, offlineEmailDays
+- `Enrollment` gains group?, holdExpiresAt? and the statuses `PENDING_PAYMENT`, `WAITLISTED`, `EXPIRED`; `LiveSession` gains group?
+- `Payment`: enrollment, module, amountCents, currency, provider (`STRIPE` | `BANK_TRANSFER`), status (`PENDING` | `CONFIRMED` | `FAILED` | `REFUNDED` | `EXPIRED`), reference (unique), stripeSessionId?/stripePaymentIntentId?/stripeChargeId?/receiptUrl?, holdExpiresAt?, note?, confirmedAt?/confirmedBy?, failedAt?, refundedAt?
+- `StripeEvent`: processed webhook event ids
+- `Lesson`: module, order, title, content (Markdown), videoUrl?, estimatedMin?; `LessonProgress`: user + lesson, completedAt; `Material` gains lesson?
+- `EmailLog`: user?, to, type (`EmailType`), uniqueKey (unique), subject, status (`PENDING` | `SENT` | `FAILED`), error?, meta?
+- `User` gains offlineEmailsEnabled
 
 Changes to the data model need the product owner's approval first.
 
@@ -98,13 +119,17 @@ Changes to the data model need the product owner's approval first.
 | tests       | `GET/POST /modules/:id/test` (builder data with correct answers / create), `PATCH/DELETE /tests/:id`, `PUT /tests/:id/questions` (locked once anyone has started), `PATCH /tests/:id/publish`, `GET /tests/:id/results` (instructor of the module/admin); `GET /tests/:id`, `POST /tests/:id/attempts` (start or resume; no answers in the response), `GET/PATCH /attempts/:id` (resume / autosave), `POST /attempts/:id/submit` (student); `PATCH /progress/:id` (admin: `ACTIVE` unlocks or resets attempts, `PASSED` passes by hand) |
 | progress    | `GET /me/progress` (student); `GET /admin/stats` (admin overview numbers)                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | landing     | `GET /instructors`, `GET /testimonials?locale=`, `GET /site-settings` (public); `PATCH /site-settings`, `GET /testimonials?all=true`, `POST/PATCH/DELETE /testimonials/:id`, `PATCH /users/:id/profile` (admin)                                                                                                                                                                                                                                                                                                                         |
+| groups      | `GET /groups?courseId=`, `GET /groups/:id` (public, with seats left); `GET /admin/groups`, `GET /admin/groups/:id`, `POST /courses/:id/groups`, `PATCH /groups/:id`, `POST /groups/:id/sessions/regenerate`, `DELETE /groups/:id`, `GET /groups/:id/students` (admin; instructors read their own); `PATCH /enrollments/:id/move` (waitlist → group)                                                                                                                                                                                     |
+| payments    | `GET /payments/methods` (public); `POST /checkout` (first month, holds a seat), `POST /enrollments/:id/payments` (later months), `GET /me/payments`, `GET /me/payments/:id` (student); `POST /payments/stripe/webhook` (Stripe, raw body + signature); `GET /payments`, `GET /payments/export.csv`, `POST /payments/:id/confirm`, `/reject`, `/refund`, `POST /payments/manual`, `GET /payments/:id/stripe-session` (admin)                                                                                                             |
+| lessons     | `GET /modules/:id/lessons`, `GET /lessons/:id` (same access as the module), `POST /lessons/:id/complete`, `GET /me/next-lesson` (student); `POST /modules/:id/lessons`, `PUT /modules/:id/lessons/order`, `PATCH/DELETE /lessons/:id` (instructor of the module/admin)                                                                                                                                                                                                                                                                  |
+| emails      | `GET /admin/emails?type=&status=` (admin)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ## 6. Pages (Next.js)
 
-- **Public:** `/` (redirects to `/sq` or `/en`), `/[locale]` landing page, `/courses`, `/courses/[slug]`, `/register`, `/login`, `/forgot-password` (+ `/reset-password`)
-- **Student:** `/dashboard` (upcoming sessions, my courses), `/learn/[courseSlug]`, `/learn/[courseSlug]/[moduleId]` (the module test card, sessions with a "Join on Google Meet" button that becomes active 15 minutes before the start, materials), `/tests/[testId]`, `/tests/[testId]/result`, `/profile`
+- **Public:** `/` (redirects to `/sq`; `/en/...` → `/sq/...` with 301), `/sq` landing page, `/courses`, `/courses/[slug]` (groups with real seats, price), `/register`, `/login`, `/forgot-password` (+ `/reset-password`)
+- **Student:** `/checkout/[groupId]` (+ `?module=` for later months), `/checkout/success` (waits for the webhook), `/payments/[id]` (bank details, receipt), `/dashboard` (upcoming sessions, "continue where you left off", my courses with payment state), `/learn/[courseSlug]` (modules with paid/unpaid), `/learn/[courseSlug]/[moduleId]` (test card, the group's sessions with "Hyr në Google Meet" 15 minutes before, offline lessons, materials), `/learn/[courseSlug]/[moduleId]/lessons/[lessonId]`, `/tests/[testId]`, `/tests/[testId]/result`, `/profile` (offline-email opt-out)
 - **Instructor (and admin):** `/teach` (my modules), `/teach/modules/[id]` (sessions, materials and a test summary), `/teach/modules/[id]/test` (builder), `/teach/modules/[id]/results`, `/teach/sessions/[id]` (attendance). See D14.
-- **Admin:** `/admin`, `/admin/enrollments`, `/admin/courses`, `/admin/courses/[id]` (details, modules, instructor assignment), `/admin/users`, `/admin/instructors`, `/admin/testimonials`, `/admin/settings`
+- **Admin:** `/admin`, `/admin/enrollments` (incl. waitlist moves), `/admin/groups`, `/admin/groups/[id]`, `/admin/payments`, `/admin/emails`, `/admin/courses`, `/admin/courses/[id]` (details, prices, modules, instructor assignment), `/admin/users`, `/admin/instructors`, `/admin/testimonials`, `/admin/settings` (payment methods, bank details)
 
 ### Design
 
@@ -217,4 +242,9 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **D25.** Auth forms (login, register, forgot and reset password) stay disabled until React hydrates. Before hydration, typed text was lost, and a submit was a native GET that put the email and password in the URL. The forms also use `method="post"` as a fallback.
 - **D26.** Production domains (product owner): the web app at `avenir.academy` (`www` redirects with 308) and the API at `api.avenir.academy`. The browser calls the API directly (`NEXT_PUBLIC_API_URL`, baked at build time; `credentials: 'include'`), so CORS allows only `https://avenir.academy` and exposes `Content-Disposition` for downloads. The refresh cookie gets `Domain=.avenir.academy` (`COOKIE_DOMAIN`), `Secure`, `HttpOnly`, `SameSite=Lax` (the two hosts are the same site), so `proxy.ts` on the web host still sees it. Without `NEXT_PUBLIC_API_URL` (development, Playwright) the same-origin rewrite of D3 is used as before.
 - **D27.** Material files in Cloudflare R2 (product owner): `StorageService` has two drivers, `STORAGE_DRIVER=local` (disk, development and tests) and `s3` (any S3-compatible bucket; R2 in production). The bucket stays private and files are still streamed through `GET /materials/:id/download`, so the access rules of D15 hold and the bucket needs no CORS or public URLs. The 20 MB limit is unchanged; Caddy allows 25 MB request bodies for the multipart envelope.
+- **D29.** Albanian only (product owner, launch): the whole platform is in Albanian, from `apps/web/messages/sq.json` (`t.*` in components) and Albanian strings in the API (validation through one `exceptionFactory`, every thrown message, every email). `/en/...` redirects to `/sq/...` with 301, there is no language switch and no hreflang; `messages/en.json` stays for later and a test guarantees every English key also exists in Albanian. A second test flags hard-coded English in JSX. Dates are shown in Europe/Tirane with Albanian names from the shared package (D8 still holds: no i18n library).
+- **D30.** Groups (product owner, launch): students enrol in a `Group` of at most 10. Lectures are generated from the group's weekly schedule, 12 per module (the first on or after the start date; 1 November 2026 is a Sunday, so the first groups start Monday the 2nd), and can be edited afterwards. Overbooking is prevented by `SELECT … FOR UPDATE` on the group row while counting seats; a race test fires five checkouts at a two-seat group. Seats taken include active holds, so a Stripe session in progress keeps its seat for 30 minutes and a bank transfer for 48 hours.
+- **D31.** Payments (product owner, launch): a `PaymentProvider` interface with `StripeProvider` (hosted Checkout, `price_data` from the course, `locale: auto` because Stripe has no Albanian, 30-minute expiry, `client_reference_id` = our payment id, signed webhooks on a raw-body route with `StripeEvent` dedup, refunds through the API) and `BankTransferProvider` (IBAN + reference `AV-XXXXXXXX`, admin confirmation). Only the webhook confirms a card payment. Each month is paid separately and the next module opens only when the test is passed and the month is paid (`unlockIfReady`). Admins can record manual payments for money received outside the platform. `STRIPE_FAKE=true` (never in production) swaps in a fake client for tests and demos.
+- **D32.** Emails and jobs (launch): every email goes through `MailService.sendLogged` with a unique key stored in `EmailLog`, so cron jobs and restarts never send twice. Jobs run inside the API with `@nestjs/schedule` in Europe/Tirane (`CRON_ENABLED=false` in tests, which call the services with a fixed `now`). Reminders go only to students with a confirmed payment for that month; the offline-learning email goes only on days without a lecture, on the group's configured days (Sundays off), to students who haven't opted out. The timetable email carries an `.ics` built in-house (no library).
+- **D33.** Offline lessons (launch): Markdown rendered with react-markdown without raw HTML (no XSS), YouTube (privacy-enhanced) and Vimeo embeds allowed by the CSP's `frame-src`, completion per student, and a "continue where you left off" card.
 - **D28.** Deployment (product owner, replaces D20): one DigitalOcean Droplet (Ubuntu 24.04, 2 vCPU / 4 GB, FRA1, weekly DO backups). Separate images per app (`apps/web/Dockerfile`, `apps/api/Dockerfile`, `turbo prune`), built by `.github/workflows/deploy.yml` after CI passes on `main`, pushed to GHCR tagged with the git SHA, and deployed over SSH by `deploy/scripts/deploy.sh`, which migrates (`prisma migrate deploy` from the api image), health-checks through Caddy and rolls back to the previous tag on failure. Postgres is on an internal-only Docker network. A backup container dumps the database nightly at 02:30 Europe/Tirane to the private R2 bucket `avenir-backups` (14 daily + 8 weekly). Email goes through Resend's SMTP (D21, no code change). The first admin comes from `node dist/src/cli/seed-admin.js` with `ADMIN_*` variables. Runbook: docs/DEPLOY.md.

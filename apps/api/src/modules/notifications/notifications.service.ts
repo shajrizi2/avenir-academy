@@ -12,7 +12,6 @@ import {
 import { MailService } from '../../mail/mail.service.js';
 import * as templates from '../../mail/templates.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { isJoinable } from '../sessions/session.view.js';
 
 const HOUR = 60 * 60_000;
 
@@ -67,7 +66,8 @@ export class NotificationsService {
           hoursBefore,
           courseTitle: session.module.course.title,
           session,
-          meetUrl: isJoinable(session, now) ? session.meetUrl : null,
+          // The group's link goes in the email; the panel still gates the button (PLAN D16).
+          meetUrl: session.meetUrl,
           panelUrl: `${this.webUrl}/dashboard`,
         });
         const result = await this.mail.sendLogged({

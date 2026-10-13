@@ -196,6 +196,16 @@ export class EnvironmentVariables {
   })
   STRIPE_WEBHOOK_SECRET?: string;
 
+  /**
+   * Tests and local runs without keys: a fake Stripe client (no network) whose checkout goes
+   * straight to the success page. Refused in production.
+   */
+  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  @IsBoolean()
+  @ValidateIf((env: EnvironmentVariables) => env.NODE_ENV === NodeEnv.Production)
+  @IsIn([false], { message: 'STRIPE_FAKE must not be set in production' })
+  STRIPE_FAKE = false;
+
   /** Scheduled jobs (reminders, offline emails, hold expiry). Off in tests, where they run by hand. */
   @Transform(({ value }: { value: unknown }) => value !== false && value !== 'false')
   @IsBoolean()
