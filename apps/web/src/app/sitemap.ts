@@ -8,7 +8,6 @@ import { SITE_URL } from '@/lib/site';
 /** Generated per request so newly published courses appear without a deploy. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
-  const languages = { sq: `${SITE_URL}/sq`, en: `${SITE_URL}/en` };
 
   let courses: CourseSummary[] = [];
   try {
@@ -19,8 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   return [
-    { url: `${SITE_URL}/sq`, changeFrequency: 'weekly', priority: 1, alternates: { languages } },
-    { url: `${SITE_URL}/en`, changeFrequency: 'weekly', priority: 0.9, alternates: { languages } },
+    { url: `${SITE_URL}/sq`, changeFrequency: 'weekly', priority: 1 },
     { url: `${SITE_URL}/courses`, changeFrequency: 'weekly', priority: 0.8 },
     ...courses.map((course) => ({
       url: `${SITE_URL}/courses/${course.slug}`,

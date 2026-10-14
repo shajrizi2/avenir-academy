@@ -6,6 +6,7 @@ const start = new Date('2026-11-02T18:00:00Z');
 const session = {
   id: 's1',
   moduleId: 'm1',
+  groupId: null,
   title: 'Week 1',
   startsAt: start,
   durationMin: 90,

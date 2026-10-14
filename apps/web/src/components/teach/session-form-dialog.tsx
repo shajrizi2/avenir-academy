@@ -21,12 +21,15 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { FieldGroup } from '@/components/ui/field';
+import { t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 import { isoToLocalInput, localInputToIso } from '@/lib/datetime';
 
+const m = t.teach.sessions;
+
 /** The form edits a local date-time; it is converted to UTC ISO on submit. */
 const formSchema = sessionSchema.extend({
-  startsAt: z.string().min(1, 'Pick a date and time'),
+  startsAt: z.string().min(1, 'Zgjidh datën dhe orën'),
 });
 type FormInput = z.input<typeof formSchema>;
 type FormOutput = z.output<typeof formSchema>;
@@ -49,6 +52,8 @@ export function SessionFormDialog({ trigger, title, session, onSubmit }: Session
       startsAt: isoToLocalInput(session?.startsAt),
       durationMin: session?.durationMin ?? SESSION_DEFAULT_DURATION_MIN,
       meetUrl: session?.meetUrl ?? '',
+      // Editing keeps the session in its group; new sessions get one from the API's default.
+      groupId: session?.groupId ?? undefined,
     },
   });
 
@@ -69,27 +74,29 @@ export function SessionFormDialog({ trigger, title, session, onSubmit }: Session
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            Times are in your local time zone. Students see the Join button 15 minutes before the
-            start.
-          </DialogDescription>
+          <DialogDescription>{m.formHint}</DialogDescription>
         </DialogHeader>
         <form onSubmit={(e) => void submit(e)} noValidate>
           <FieldGroup>
             <FormError message={error} />
-            <TextField form={form} name="title" label="Title" placeholder="Week 1: How LLMs work" />
-            <TextField form={form} name="startsAt" label="Starts at" type="datetime-local" />
-            <TextField form={form} name="durationMin" label="Duration (minutes)" type="number" />
+            <TextField
+              form={form}
+              name="title"
+              label={m.fieldTitle}
+              placeholder={m.titlePlaceholder}
+            />
+            <TextField form={form} name="startsAt" label={m.startsAt} type="datetime-local" />
+            <TextField form={form} name="durationMin" label={m.duration} type="number" />
             <TextField
               form={form}
               name="meetUrl"
-              label="Google Meet link"
+              label={m.meetUrl}
               type="url"
               placeholder="https://meet.google.com/abc-defg-hij"
             />
             <div>
               <Button type="submit" variant="chunky" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Saving…' : 'Save session'}
+                {form.formState.isSubmitting ? t.common.saving : m.save}
               </Button>
             </div>
           </FieldGroup>

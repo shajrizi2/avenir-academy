@@ -9,17 +9,20 @@ import { FormError } from '@/components/form-error';
 import { TextField } from '@/components/form/text-field';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
+import { t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 import { isoToLocalInput, localInputToIso } from '@/lib/datetime';
+
+const m = t.teach.test;
 
 /** The form edits local date-times; they are converted to UTC ISO on submit. */
 const formSchema = testSettingsFields
   .extend({
-    opensAt: z.string().min(1, 'Pick a date and time'),
-    closesAt: z.string().min(1, 'Pick a date and time'),
+    opensAt: z.string().min(1, 'Zgjidh datën dhe orën'),
+    closesAt: z.string().min(1, 'Zgjidh datën dhe orën'),
   })
   .refine((v) => new Date(v.closesAt) > new Date(v.opensAt), {
-    message: 'The window must close after it opens',
+    message: 'Testi duhet të mbyllet pasi hapet',
     path: ['closesAt'],
   });
 type FormInput = z.input<typeof formSchema>;
@@ -70,25 +73,25 @@ export function TestSettingsForm({
     <form onSubmit={(e) => void submit(e)} noValidate>
       <FieldGroup>
         <FormError message={error} />
-        <TextField form={form} name="title" label="Title" />
+        <TextField form={form} name="title" label={m.fieldTitle} />
         <div className="grid gap-6 sm:grid-cols-3">
-          <TextField form={form} name="passMark" label="Pass mark (%)" type="number" />
-          <TextField form={form} name="timeLimitMin" label="Time limit (minutes)" type="number" />
-          <TextField form={form} name="maxAttempts" label="Attempts" type="number" />
+          <TextField form={form} name="passMark" label={m.passMark} type="number" />
+          <TextField form={form} name="timeLimitMin" label={m.timeLimit} type="number" />
+          <TextField form={form} name="maxAttempts" label={m.maxAttempts} type="number" />
         </div>
         <div className="grid gap-6 sm:grid-cols-2">
-          <TextField form={form} name="opensAt" label="Opens" type="datetime-local" />
+          <TextField form={form} name="opensAt" label={m.opensAt} type="datetime-local" />
           <TextField
             form={form}
             name="closesAt"
-            label="Closes"
+            label={m.closesAt}
             type="datetime-local"
-            description="Your local time. By default, the module’s last week."
+            description={m.closesHint}
           />
         </div>
         <div>
           <Button type="submit" variant="chunky" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Saving…' : test ? 'Save settings' : 'Create test'}
+            {form.formState.isSubmitting ? t.common.saving : test ? m.saveSettings : m.createSubmit}
           </Button>
         </div>
       </FieldGroup>

@@ -1,16 +1,11 @@
 'use client';
 
 import type { TestSettings } from '@ai-academy/shared';
-import { LocalDateTime } from '@/components/local-date-time';
+import { type DateStyle, LocalDateTime } from '@/components/local-date-time';
 import { useNow } from '@/lib/use-now';
 
-export const TEST_TIME_FORMAT: Intl.DateTimeFormatOptions = {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  hour: '2-digit',
-  minute: '2-digit',
-};
+/** "2 nëntor, 19:00": the short style used wherever a test window is shown. */
+export const TEST_TIME_FORMAT: DateStyle = 'shortTime';
 
 export type WindowState = 'unknown' | 'upcoming' | 'open' | 'closed';
 
@@ -23,12 +18,12 @@ export function useWindowState(test: Pick<TestSettings, 'opensAt' | 'closesAt'>)
   return 'open';
 }
 
-/** "Mon 23 Nov, 09:00 – Mon 30 Nov, 09:00" in the viewer's time zone. */
+/** "23 nëntor, 09:00 – 30 nëntor, 09:00" in Europe/Tirane. */
 export function TestWindow({ test }: { test: Pick<TestSettings, 'opensAt' | 'closesAt'> }) {
   return (
     <>
-      <LocalDateTime value={test.opensAt} options={TEST_TIME_FORMAT} /> –{' '}
-      <LocalDateTime value={test.closesAt} options={TEST_TIME_FORMAT} />
+      <LocalDateTime value={test.opensAt} style={TEST_TIME_FORMAT} /> –{' '}
+      <LocalDateTime value={test.closesAt} style={TEST_TIME_FORMAT} />
     </>
   );
 }

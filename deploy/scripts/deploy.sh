@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Deploys image tag <tag> (a git SHA; "latest" also works):
-#   1. pull the web and api images (and build the backup image)
+#   1. pull the web, api and migrate images unless they are already here (ship.sh copies
+#      them over SSH), and build the backup image
 #   2. run database migrations (prisma migrate deploy)
 #   3. start everything and wait until every container is healthy
 #   4. check https://api.<domain>/api/v1/health and https://<domain>/ through Caddy
 # If 3 or 4 fails, it rolls back to the previously deployed tag and exits non-zero.
-# Called by .github/workflows/deploy.yml; you can also run it by hand on the server:
+# Called by .github/workflows/deploy.yml and deploy/scripts/ship.sh; you can also run it by
+# hand on the server:
 #   deploy/scripts/deploy.sh <tag>
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -15,7 +17,7 @@ PREVIOUS="$(cat "$DIR/.image-tag" 2>/dev/null || true)"
 export IMAGE_TAG="$TAG"
 
 log "Deploying $TAG (previous: ${PREVIOUS:-none})"
-"$COMPOSE" pull migrate api web
+pull_images migrate api web
 "$COMPOSE" build backup
 
 log "Migrating the database"
@@ -30,7 +32,7 @@ log "Starting the new version"
 if "$COMPOSE" up -d --wait --wait-timeout 300 --remove-orphans && check_health; then
   [[ -n $PREVIOUS && $PREVIOUS != "$TAG" ]] && echo "$PREVIOUS" >"$DIR/.image-tag.previous"
   echo "$TAG" >"$DIR/.image-tag"
-  docker image prune -f >/dev/null
+  remove_old_images "$TAG" "$PREVIOUS"
   log "Deployed $TAG"
   exit 0
 fi

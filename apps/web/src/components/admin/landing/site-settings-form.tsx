@@ -3,15 +3,18 @@
 import { type SiteSettings, type SiteSettingsInput, siteSettingsSchema } from '@ai-academy/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useId, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { FormError } from '@/components/form-error';
 import { TextField } from '@/components/form/text-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { FieldGroup } from '@/components/ui/field';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { isoToLocalInput, localInputToIso } from '@/lib/datetime';
 import { siteSettingsQuery } from '@/lib/queries';
@@ -34,6 +37,10 @@ const orNull = <T,>(value: T | '' | undefined): T | null =>
 function SettingsForm({ settings }: { settings: SiteSettings }) {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const stripeId = useId();
+  const bankId = useId();
+  const s = t.admin.settings;
+  const p = t.adminLaunch.settings;
   const form = useForm<SiteSettingsInput, unknown, Values>({
     resolver: zodResolver(siteSettingsSchema),
     defaultValues: {
@@ -48,6 +55,12 @@ function SettingsForm({ settings }: { settings: SiteSettings }) {
       contactEmail: text(settings.contactEmail),
       contactPhone: text(settings.contactPhone),
       whatsappNumber: text(settings.whatsappNumber),
+      stripeEnabled: settings.stripeEnabled,
+      bankTransferEnabled: settings.bankTransferEnabled,
+      bankBeneficiary: text(settings.bankBeneficiary),
+      bankIban: text(settings.bankIban),
+      bankName: text(settings.bankName),
+      bankSwift: text(settings.bankSwift),
     },
   });
 
@@ -68,9 +81,15 @@ function SettingsForm({ settings }: { settings: SiteSettings }) {
           contactEmail: orNull(values.contactEmail),
           contactPhone: orNull(values.contactPhone),
           whatsappNumber: orNull(values.whatsappNumber),
+          stripeEnabled: values.stripeEnabled,
+          bankTransferEnabled: values.bankTransferEnabled,
+          bankBeneficiary: orNull(values.bankBeneficiary),
+          bankIban: orNull(values.bankIban),
+          bankName: orNull(values.bankName),
+          bankSwift: orNull(values.bankSwift),
         },
       });
-      toast.success('Saved. The landing page shows the new values on the next visit.');
+      toast.success(s.saved);
       queryClient.setQueryData(siteSettingsQuery.queryKey, saved);
     } catch (e) {
       setError(errorMessage(e));
@@ -83,87 +102,133 @@ function SettingsForm({ settings }: { settings: SiteSettings }) {
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <Card>
           <CardHeader>
-            <CardTitle as="h2">Next cohort</CardTitle>
-            <CardDescription>
-              Shown in the hero badge and the “Next cohort” section.
-            </CardDescription>
+            <CardTitle as="h2">{p.payments}</CardTitle>
+            <CardDescription>{p.paymentsHint}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <Controller
+                control={form.control}
+                name="stripeEnabled"
+                render={({ field }) => (
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id={stripeId}
+                      checked={field.value ?? false}
+                      onCheckedChange={(checked) => field.onChange(checked === true)}
+                    />
+                    <div className="space-y-1">
+                      <Label htmlFor={stripeId}>{p.stripeEnabled}</Label>
+                      <p className="text-ink-soft text-sm">{p.stripeHint}</p>
+                    </div>
+                  </div>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="bankTransferEnabled"
+                render={({ field }) => (
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id={bankId}
+                      checked={field.value ?? false}
+                      onCheckedChange={(checked) => field.onChange(checked === true)}
+                    />
+                    <Label htmlFor={bankId}>{p.bankEnabled}</Label>
+                  </div>
+                )}
+              />
+            </FieldGroup>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle as="h2">{p.bank}</CardTitle>
+            <CardDescription>{p.bankHint}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <TextField form={form} name="bankBeneficiary" label={p.beneficiary} />
+              <TextField form={form} name="bankIban" label={p.iban} />
+              <TextField form={form} name="bankName" label={p.bankName} />
+              <TextField form={form} name="bankSwift" label={p.swift} />
+            </FieldGroup>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle as="h2">{s.nextCohort}</CardTitle>
+            <CardDescription>{s.nextCohortHint}</CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
               <TextField
                 form={form}
                 name="nextCohortStart"
-                label="Start date and time"
+                label={s.startDateTime}
                 type="datetime-local"
               />
               <TextField
                 form={form}
                 name="scheduleSq"
-                label="Schedule (Albanian)"
-                placeholder="2 mbrëmje në javë, 19:00–20:30"
+                label={s.scheduleSq}
+                placeholder={s.scheduleSqPlaceholder}
               />
               <TextField
                 form={form}
                 name="scheduleEn"
-                label="Schedule (English)"
-                placeholder="2 evenings a week, 19:00–20:30"
+                label={s.scheduleEn}
+                placeholder={s.scheduleEnPlaceholder}
               />
-              <TextField form={form} name="seatsTotal" label="Seats per cohort" type="number" />
+              <TextField form={form} name="seatsTotal" label={s.seatsTotal} type="number" />
             </FieldGroup>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle as="h2">Price</CardTitle>
-            <CardDescription>
-              Leave the amount empty to show “Contact us for pricing”.
-            </CardDescription>
+            <CardTitle as="h2">{s.price}</CardTitle>
+            <CardDescription>{s.priceHint}</CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
-              <TextField
-                form={form}
-                name="priceAmount"
-                label="Amount (whole units)"
-                type="number"
-              />
-              <TextField form={form} name="priceCurrency" label="Currency" placeholder="EUR" />
+              <TextField form={form} name="priceAmount" label={s.priceAmount} type="number" />
+              <TextField form={form} name="priceCurrency" label={s.currency} placeholder="EUR" />
               <TextField
                 form={form}
                 name="priceNoteSq"
-                label="Price note (Albanian)"
-                placeholder="për modul"
+                label={s.priceNoteSq}
+                placeholder={s.priceNoteSqPlaceholder}
               />
               <TextField
                 form={form}
                 name="priceNoteEn"
-                label="Price note (English)"
-                placeholder="per module"
+                label={s.priceNoteEn}
+                placeholder={s.priceNoteEnPlaceholder}
               />
             </FieldGroup>
           </CardContent>
         </Card>
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle as="h2">Contact</CardTitle>
-            <CardDescription>Shown in the final call-to-action and the footer.</CardDescription>
+            <CardTitle as="h2">{s.contact}</CardTitle>
+            <CardDescription>{s.contactHint}</CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup className="grid gap-6 md:grid-cols-3">
-              <TextField form={form} name="contactEmail" label="Email" type="email" />
+              <TextField form={form} name="contactEmail" label={s.contactEmail} type="email" />
               <TextField
                 form={form}
                 name="contactPhone"
-                label="Phone"
+                label={s.contactPhone}
                 type="tel"
                 placeholder="+383 44 000 000"
               />
               <TextField
                 form={form}
                 name="whatsappNumber"
-                label="WhatsApp number"
+                label={s.whatsapp}
                 placeholder="38344000000"
-                description="Digits only, with the country code."
+                description={s.whatsappHint}
               />
             </FieldGroup>
           </CardContent>
@@ -175,7 +240,7 @@ function SettingsForm({ settings }: { settings: SiteSettings }) {
         size="lg"
         disabled={form.formState.isSubmitting || !form.formState.isDirty}
       >
-        {form.formState.isSubmitting ? 'Saving…' : 'Save settings'}
+        {form.formState.isSubmitting ? t.common.saving : s.save}
       </Button>
     </form>
   );

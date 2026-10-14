@@ -168,6 +168,48 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsString()
   SMTP_PASS?: string;
+
+  /**
+   * Card payments through Stripe Checkout. In production the keys must be set while Stripe
+   * is enabled (the app refuses to start otherwise); in development they may be left empty,
+   * and card checkout then answers 503. Admins can also switch Stripe off in site settings.
+   */
+  @Transform(({ value }: { value: unknown }) => value !== false && value !== 'false')
+  @IsBoolean()
+  STRIPE_ENABLED = true;
+
+  @ValidateIf(
+    (env: EnvironmentVariables) => env.NODE_ENV === NodeEnv.Production && env.STRIPE_ENABLED,
+  )
+  @IsString()
+  @MinLength(1, {
+    message: 'STRIPE_SECRET_KEY is required in production while STRIPE_ENABLED=true',
+  })
+  STRIPE_SECRET_KEY?: string;
+
+  @ValidateIf(
+    (env: EnvironmentVariables) => env.NODE_ENV === NodeEnv.Production && env.STRIPE_ENABLED,
+  )
+  @IsString()
+  @MinLength(1, {
+    message: 'STRIPE_WEBHOOK_SECRET is required in production while STRIPE_ENABLED=true',
+  })
+  STRIPE_WEBHOOK_SECRET?: string;
+
+  /**
+   * Tests and local runs without keys: a fake Stripe client (no network) whose checkout goes
+   * straight to the success page. Refused in production.
+   */
+  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  @IsBoolean()
+  @ValidateIf((env: EnvironmentVariables) => env.NODE_ENV === NodeEnv.Production)
+  @IsIn([false], { message: 'STRIPE_FAKE must not be set in production' })
+  STRIPE_FAKE = false;
+
+  /** Scheduled jobs (reminders, offline emails, hold expiry). Off in tests, where they run by hand. */
+  @Transform(({ value }: { value: unknown }) => value !== false && value !== 'false')
+  @IsBoolean()
+  CRON_ENABLED = true;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

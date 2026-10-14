@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { fmt, t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 
 /** Approve (opens module 1 for the student) or reject, with an optional internal note. */
@@ -33,8 +34,8 @@ export function DecisionButtons({ enrollment }: { enrollment: AdminEnrollment })
     onSuccess: (updated) => {
       toast.success(
         updated.status === 'APPROVED'
-          ? `${name} is enrolled. Module 1 is now open for them.`
-          : `Request from ${name} declined.`,
+          ? fmt(t.adminLaunch.enrollments.approved, { name })
+          : fmt(t.adminLaunch.enrollments.declined, { name }),
       );
       setRejectOpen(false);
       void queryClient.invalidateQueries({ queryKey: ['enrollments'] });
@@ -50,42 +51,47 @@ export function DecisionButtons({ enrollment }: { enrollment: AdminEnrollment })
         disabled={decide.isPending}
         onClick={() => decide.mutate({ status: 'APPROVED' })}
       >
-        <Check data-icon="inline-start" /> Approve
+        <Check data-icon="inline-start" /> {t.adminLaunch.enrollments.approve}
       </Button>
       {enrollment.status === 'PENDING' && (
         <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" disabled={decide.isPending}>
-              <X data-icon="inline-start" /> Decline
+              <X data-icon="inline-start" /> {t.adminLaunch.enrollments.decline}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Decline this request?</DialogTitle>
+              <DialogTitle>{t.adminLaunch.enrollments.declineTitle}</DialogTitle>
               <DialogDescription>
-                {name} asked to join {enrollment.course.title}. You can still approve it later.
+                {fmt(t.adminLaunch.enrollments.declineText, {
+                  name,
+                  course: enrollment.course.title,
+                })}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-2">
-              <Label htmlFor={`note-${enrollment.id}`}>Internal note (optional)</Label>
+              <Label htmlFor={`note-${enrollment.id}`}>
+                {t.adminLaunch.enrollments.declineNote}
+              </Label>
               <Textarea
                 id={`note-${enrollment.id}`}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 maxLength={500}
-                placeholder="e.g. Course is full; offered a seat in the next cohort"
+                placeholder={t.adminLaunch.enrollments.declinePlaceholder}
               />
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="chunky-outline">Cancel</Button>
+                <Button variant="chunky-outline">{t.common.cancel}</Button>
               </DialogClose>
               <Button
                 variant="destructive"
                 disabled={decide.isPending}
                 onClick={() => decide.mutate({ status: 'REJECTED', note: note || undefined })}
               >
-                Decline request
+                {t.adminLaunch.enrollments.declineConfirm}
               </Button>
             </DialogFooter>
           </DialogContent>

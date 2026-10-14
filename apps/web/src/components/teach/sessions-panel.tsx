@@ -13,10 +13,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { moduleSessionsQuery } from '@/lib/queries';
 import { useNow } from '@/lib/use-now';
 import { SessionFormDialog, type SessionValues } from './session-form-dialog';
+
+const m = t.teach.sessions;
 
 /** Live sessions of one module: schedule, edit, delete and open attendance. */
 export function SessionsPanel({ moduleId }: { moduleId: string }) {
@@ -33,7 +36,7 @@ export function SessionsPanel({ moduleId }: { moduleId: string }) {
 
   async function create(values: SessionValues) {
     await apiFetch(`/modules/${moduleId}/sessions`, { method: 'POST', body: values });
-    toast.success('Session scheduled');
+    toast.success(m.scheduled);
     await refresh();
   }
 
@@ -46,14 +49,14 @@ export function SessionsPanel({ moduleId }: { moduleId: string }) {
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
         <CardTitle as="h2" className="flex items-center gap-2">
-          <Video className="size-5" aria-hidden /> Live sessions
+          <Video className="size-5" aria-hidden /> {m.title}
         </CardTitle>
         <SessionFormDialog
-          title="Schedule a session"
+          title={m.schedule}
           onSubmit={create}
           trigger={
             <Button variant="chunky" size="sm">
-              <CalendarPlus data-icon="inline-start" /> Add session
+              <CalendarPlus data-icon="inline-start" /> {m.add}
             </Button>
           }
         />
@@ -64,15 +67,11 @@ export function SessionsPanel({ moduleId }: { moduleId: string }) {
         ) : error ? (
           <FormError message={errorMessage(error)} />
         ) : data.length === 0 ? (
-          <EmptyState
-            icon={Video}
-            title="No sessions yet"
-            description="Schedule the module’s live classes with their Google Meet link."
-          />
+          <EmptyState icon={Video} title={m.emptyTitle} description={m.emptyText} />
         ) : (
           <>
-            <SessionList title="Upcoming" sessions={upcoming} onChanged={refresh} />
-            <SessionList title="Past" sessions={past} onChanged={refresh} past />
+            <SessionList title={m.upcoming} sessions={upcoming} onChanged={refresh} />
+            <SessionList title={m.past} sessions={past} onChanged={refresh} past />
           </>
         )}
       </CardContent>
@@ -115,14 +114,14 @@ function SessionRow({
 }) {
   async function update(values: SessionValues) {
     await apiFetch(`/sessions/${session.id}`, { method: 'PATCH', body: values });
-    toast.success('Session saved');
+    toast.success(m.saved);
     await onChanged();
   }
 
   async function remove() {
     try {
       await apiFetch(`/sessions/${session.id}`, { method: 'DELETE' });
-      toast.success('Session deleted');
+      toast.success(m.deleted);
       await onChanged();
     } catch (e) {
       toast.error(errorMessage(e));
@@ -135,57 +134,55 @@ function SessionRow({
       <div className="min-w-0 flex-1 space-y-1">
         <p className="text-ink font-bold">{session.title}</p>
         <p className="text-ink-soft text-sm">
-          <LocalDateTime
-            value={session.startsAt}
-            options={{
-              weekday: 'short',
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            }}
-          />{' '}
-          · {session.durationMin} min
+          <LocalDateTime value={session.startsAt} style="longTime" /> · {session.durationMin}{' '}
+          {t.common.minShort}
         </p>
         {past && (
           <Badge variant={session.presentCount > 0 ? 'secondary' : 'outline'}>
-            {session.presentCount} present
+            {fmt(m.present, { count: session.presentCount })}
           </Badge>
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button asChild variant={past ? 'chunky' : 'outline'} size="sm">
           <Link href={`/teach/sessions/${session.id}`}>
-            <UserCheck data-icon="inline-start" /> Attendance
+            <UserCheck data-icon="inline-start" /> {m.attendance}
           </Link>
         </Button>
         {session.meetUrl && !past && (
           <Button asChild variant="outline" size="sm">
             <a href={session.meetUrl} target="_blank" rel="noopener noreferrer">
-              Open Meet <ExternalLink data-icon="inline-end" />
+              {m.openMeet} <ExternalLink data-icon="inline-end" />
             </a>
           </Button>
         )}
         <SessionFormDialog
-          title="Edit session"
+          title={m.edit}
           session={session}
           onSubmit={update}
           trigger={
-            <Button variant="ghost" size="icon-sm" aria-label={`Edit ${session.title}`}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={fmt(m.editAria, { title: session.title })}
+            >
               <Pencil />
             </Button>
           }
         />
         <ConfirmDialog
           trigger={
-            <Button variant="ghost" size="icon-sm" aria-label={`Delete ${session.title}`}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={fmt(m.deleteAria, { title: session.title })}
+            >
               <Trash2 />
             </Button>
           }
-          title="Delete this session?"
-          description="Students will no longer see it, and its attendance records are removed."
-          confirmLabel="Delete session"
+          title={m.deleteTitle}
+          description={m.deleteText}
+          confirmLabel={m.deleteConfirm}
           onConfirm={remove}
         />
       </div>

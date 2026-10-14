@@ -1,4 +1,3 @@
-import { isLocale } from '@ai-academy/shared';
 import { ImageResponse } from 'next/og';
 import { getMessages } from '@/i18n/messages';
 
@@ -13,12 +12,11 @@ const PILLS = [
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-export const alt = 'AI Academy';
+export const alt = 'Avenir Academy';
 
 /** Social preview card per locale, generated from the hero copy. */
-export default async function OpengraphImage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  const { hero } = getMessages(isLocale(locale) ? locale : 'sq').landing;
+export default function OpengraphImage() {
+  const { hero } = getMessages().landing;
 
   return new ImageResponse(
     <div
@@ -54,7 +52,7 @@ export default async function OpengraphImage({ params }: { params: Promise<{ loc
           <div style={{ width: 9, height: 21, borderRadius: 3, background: '#7c5cfc' }} />
           <div style={{ width: 9, height: 31, borderRadius: 3, background: '#ffffff' }} />
         </div>
-        AI Academy
+        Avenir Academy
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ fontSize: 88, fontWeight: 800, letterSpacing: -2, lineHeight: 1.05 }}>

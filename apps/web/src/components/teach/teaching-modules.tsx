@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { trackTheme } from '@/components/course/track-theme';
 import { EmptyState } from '@/components/empty-state';
 import { FormError } from '@/components/form-error';
-import { LocalDateTime } from '@/components/local-date-time';
+import { formatDate } from '@/components/local-date-time';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, plural, t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { teachingModulesQuery } from '@/lib/queries';
@@ -17,19 +18,17 @@ import { cn } from '@/lib/utils';
 export function TeachingModules() {
   const { user } = useAuth();
   const { data, isPending, error } = useQuery(teachingModulesQuery);
+  const m = t.teach.index;
 
   if (isPending) return <Skeleton className="rounded-card h-48 w-full" />;
   if (error) return <FormError message={errorMessage(error)} />;
   if (data.length === 0) {
+    const isAdmin = user?.role === 'ADMIN';
     return (
       <EmptyState
         icon={ClipboardCheck}
-        title={user?.role === 'ADMIN' ? 'No modules yet' : 'No modules assigned to you yet'}
-        description={
-          user?.role === 'ADMIN'
-            ? 'Add modules to a course on the Courses page.'
-            : 'An admin assigns modules to instructors. They will appear here.'
-        }
+        title={isAdmin ? m.emptyAdminTitle : m.emptyTitle}
+        description={isAdmin ? m.emptyAdminText : m.emptyText}
       />
     );
   }
@@ -66,29 +65,19 @@ export function TeachingModules() {
                 <CalendarClock className="text-ink-soft size-4" aria-hidden />
                 {module.nextSession ? (
                   <span>
-                    Next:{' '}
-                    <LocalDateTime
-                      value={module.nextSession.startsAt}
-                      options={{
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      }}
-                    />
+                    {fmt(m.next, { date: formatDate(module.nextSession.startsAt, 'longTime') })}
                   </span>
                 ) : (
-                  <span className="text-ink-soft">No upcoming session</span>
+                  <span className="text-ink-soft">{m.noUpcoming}</span>
                 )}
               </p>
               <p className="text-ink-soft mt-auto text-sm">
-                {module.studentCount} student{module.studentCount === 1 ? '' : 's'} ·{' '}
-                {module.sessionCount} session{module.sessionCount === 1 ? '' : 's'} ·{' '}
-                {module.materialCount} material{module.materialCount === 1 ? '' : 's'}
+                {plural(module.studentCount, t.common.count.student, t.common.count.students)} ·{' '}
+                {plural(module.sessionCount, t.common.count.session, t.common.count.sessions)} ·{' '}
+                {plural(module.materialCount, t.common.count.material, t.common.count.materials)}
               </p>
               <span className="text-ink inline-flex items-center gap-1 text-sm font-bold">
-                Manage <ArrowRight className="size-4" aria-hidden />
+                {m.manage} <ArrowRight className="size-4" aria-hidden />
               </span>
             </div>
           </li>

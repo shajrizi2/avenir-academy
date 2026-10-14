@@ -23,8 +23,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { fmt, t } from '@/i18n/messages';
 import { apiFetch, apiUpload, errorMessage } from '@/lib/api';
 
+const m = t.teach.materials;
 const MAX_MB = MATERIAL_MAX_BYTES / 1024 / 1024;
 const ACCEPT = MATERIAL_FILE_EXTENSIONS.map((ext) => `.${ext}`).join(',');
 
@@ -48,16 +50,16 @@ export function MaterialsPanel({
     <Card>
       <CardHeader>
         <CardTitle as="h2" className="flex items-center gap-2">
-          <FolderOpen className="size-5" aria-hidden /> Materials
+          <FolderOpen className="size-5" aria-hidden /> {m.title}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="bg-soft rounded-card space-y-4 p-4">
           <FilterPills
-            label="Material type"
+            label={m.typeLabel}
             options={[
-              { value: 'LINK', label: 'Add a link' },
-              { value: 'FILE', label: 'Upload a file' },
+              { value: 'LINK', label: m.addLink },
+              { value: 'FILE', label: m.uploadFile },
             ]}
             value={mode}
             onChange={setMode}
@@ -70,24 +72,28 @@ export function MaterialsPanel({
         </div>
 
         {materials.length === 0 ? (
-          <p className="text-ink-soft">No materials yet. Students see them on the module page.</p>
+          <p className="text-ink-soft">{m.empty}</p>
         ) : (
           <ul className="space-y-3">
             {materials.map((material) => (
               <MaterialItem key={material.id} material={material}>
                 <ConfirmDialog
                   trigger={
-                    <Button variant="ghost" size="icon-sm" aria-label={`Delete ${material.title}`}>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={fmt(m.deleteAria, { title: material.title })}
+                    >
                       <Trash2 />
                     </Button>
                   }
-                  title="Delete this material?"
-                  description="Students will no longer see it. Uploaded files are deleted from the server."
-                  confirmLabel="Delete"
+                  title={m.deleteTitle}
+                  description={m.deleteText}
+                  confirmLabel={t.common.delete}
                   onConfirm={async () => {
                     try {
                       await apiFetch(`/materials/${material.id}`, { method: 'DELETE' });
-                      toast.success('Material deleted');
+                      toast.success(m.deleted);
                       await refresh();
                     } catch (e) {
                       toast.error(errorMessage(e));
@@ -114,7 +120,7 @@ function LinkForm({ moduleId, onAdded }: { moduleId: string; onAdded: () => Prom
     setError(null);
     try {
       await apiFetch(`/modules/${moduleId}/materials`, { method: 'POST', body: values });
-      toast.success('Link added');
+      toast.success(m.linkAdded);
       form.reset();
       await onAdded();
     } catch (e) {
@@ -125,11 +131,22 @@ function LinkForm({ moduleId, onAdded }: { moduleId: string; onAdded: () => Prom
     <form onSubmit={(e) => void submit(e)} noValidate>
       <FieldGroup>
         <FormError message={error} />
-        <TextField form={form} name="title" label="Title" placeholder="Slides for week 1" />
-        <TextField form={form} name="url" label="Link" type="url" placeholder="https://…" />
+        <TextField
+          form={form}
+          name="title"
+          label={m.fieldTitle}
+          placeholder={m.linkTitlePlaceholder}
+        />
+        <TextField
+          form={form}
+          name="url"
+          label={m.link}
+          type="url"
+          placeholder={m.linkPlaceholder}
+        />
         <div>
           <Button type="submit" variant="chunky" disabled={form.formState.isSubmitting}>
-            <Link2 data-icon="inline-start" /> Add link
+            <Link2 data-icon="inline-start" /> {m.addLink}
           </Button>
         </div>
       </FieldGroup>
@@ -147,9 +164,9 @@ function FileForm({ moduleId, onAdded }: { moduleId: string; onAdded: () => Prom
   async function upload(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (title.trim().length < 2) return setError('Give the file a title (at least 2 characters).');
-    if (!file) return setError('Choose a file to upload.');
-    if (file.size > MATERIAL_MAX_BYTES) return setError(`The file is larger than ${MAX_MB} MB.`);
+    if (title.trim().length < 2) return setError(m.titleTooShort);
+    if (!file) return setError(m.chooseFile);
+    if (file.size > MATERIAL_MAX_BYTES) return setError(fmt(m.fileTooLarge, { max: MAX_MB }));
 
     const form = new FormData();
     form.set('title', title.trim());
@@ -157,7 +174,7 @@ function FileForm({ moduleId, onAdded }: { moduleId: string; onAdded: () => Prom
     setUploading(true);
     try {
       await apiUpload(`/modules/${moduleId}/materials`, form);
-      toast.success('File uploaded');
+      toast.success(m.fileUploaded);
       setTitle('');
       setFile(null);
       if (fileInput.current) fileInput.current.value = '';
@@ -174,17 +191,17 @@ function FileForm({ moduleId, onAdded }: { moduleId: string; onAdded: () => Prom
       <FieldGroup>
         <FormError message={error} />
         <div className="grid gap-2">
-          <Label htmlFor="material-title">Title</Label>
+          <Label htmlFor="material-title">{m.fieldTitle}</Label>
           <Input
             id="material-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Worksheet: prompt patterns"
+            placeholder={m.fileTitlePlaceholder}
             maxLength={120}
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="material-file">File</Label>
+          <Label htmlFor="material-file">{m.file}</Label>
           <Input
             id="material-file"
             ref={fileInput}
@@ -194,12 +211,12 @@ function FileForm({ moduleId, onAdded }: { moduleId: string; onAdded: () => Prom
             className="h-auto py-2.5"
           />
           <p className="text-ink-soft text-sm">
-            Up to {MAX_MB} MB: {MATERIAL_FILE_EXTENSIONS.join(', ')}.
+            {fmt(m.fileHint, { max: MAX_MB, types: MATERIAL_FILE_EXTENSIONS.join(', ') })}
           </p>
         </div>
         <div>
           <Button type="submit" variant="chunky" disabled={uploading}>
-            <FileUp data-icon="inline-start" /> {uploading ? 'Uploading…' : 'Upload file'}
+            <FileUp data-icon="inline-start" /> {uploading ? m.uploading : m.uploadFile}
           </Button>
         </div>
       </FieldGroup>

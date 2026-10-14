@@ -19,7 +19,8 @@ Follow sections 1–10 once, in order; section 11 is for every day after launch.
   `Domain=.avenir.academy; Secure; HttpOnly; SameSite=Lax`).
 - Images are built by GitHub Actions and pulled from GitHub Container Registry
   (`ghcr.io/<owner>/avenir-web`, `avenir-api`, and `avenir-migrate` = the api image plus the
-  Prisma CLI), tagged with the git SHA.
+  Prisma CLI), tagged with the git SHA. Without GitHub Actions, `scripts/ship.sh` builds
+  them on your laptop and copies them over SSH instead (step 7, option B).
 - Everything about the stack lives in `deploy/`:
 
 | File                        | What it is                                                        |
@@ -31,6 +32,7 @@ Follow sections 1–10 once, in order; section 11 is for every day after launch.
 | `scripts/server-setup.sh`   | One-time Droplet setup (user, SSH, firewall, Docker, swap)        |
 | `scripts/compose.sh`        | `docker compose` with the right env file and image tag            |
 | `scripts/deploy.sh <tag>`   | Pull, migrate, start, health-check, auto-rollback                 |
+| `scripts/ship.sh <host>`    | (laptop) Build, copy over SSH and deploy, without GitHub Actions  |
 | `scripts/rollback.sh [tag]` | Back to an earlier image tag                                      |
 | `scripts/restore.sh`        | List / test-restore / restore database backups                    |
 
@@ -184,7 +186,8 @@ nano .env.production
 
 Fill in: `ACME_EMAIL`, `IMAGE_REGISTRY` (`ghcr.io/<your-github-user-or-org>`, lowercase), the
 `S3_*` values (token `avenir-api`), `SMTP_PASS` (Resend key), the `BACKUP_S3_*` values (token
-`avenir-backup`). Every variable is explained in the file. Check that nothing is left empty:
+`avenir-backup`) and the two `STRIPE_*` keys (step 8b; use the **test** keys until launch).
+Every variable is explained in the file. Check that nothing is left empty:
 
 ```sh
 grep -nE '^[A-Z_]+=$|<' .env.production    # prints nothing when complete
@@ -194,6 +197,14 @@ Keep a copy of this file in your password manager: without `POSTGRES_PASSWORD` a
 keys you can't restore a backup onto a new server.
 
 ## 7. GitHub and the first deploy
+
+There are two ways to deploy; pick one (you can switch later).
+
+- **Option A, GitHub Actions** (a–d below): merging to `main` deploys automatically, with CI
+  checks first. Needs Actions to work on your account (free: unlimited for public
+  repositories, 2,000 minutes a month for private ones).
+- **Option B, from your laptop** (e): `deploy/scripts/ship.sh` builds, copies and deploys.
+  No GitHub Actions, registry or tokens; you start every deploy yourself.
 
 **a) A deploy key for GitHub Actions (laptop).** A separate key that can only log in as
 `deploy`:
@@ -256,6 +267,29 @@ port 80/443 blocked).
 After the first deploy, the GHCR packages are **private**; leave them that way (the server
 logs in with the token from step c).
 
+**e) Option B: deploy from your laptop.** Needs Docker, pnpm and SSH access as `deploy`
+(your key from step 3). In `.env.production` on the server, set `IMAGE_REGISTRY=avenir` (any
+name works; nothing is pulled from it). Then, from the repo on `main` **(laptop)**:
+
+```sh
+git checkout main && git pull
+deploy/scripts/ship.sh deploy@<droplet-ip>
+```
+
+It refuses to run with uncommitted changes, then:
+
+1. runs `pnpm lint`, `pnpm type-check` and `pnpm test` (`--skip-checks` skips them);
+2. builds the three images for the current commit, for `linux/amd64`;
+3. copies `deploy/` to `/opt/avenir/deploy` (your `.env.production` is left alone);
+4. streams the images over SSH (`docker save | gzip | docker load`, about 250 MB each time);
+5. runs `deploy/scripts/deploy.sh <sha>` on the server: migrations, health checks and the
+   automatic rollback, exactly as option A.
+
+The web image bakes in `https://avenir.academy` and `https://api.avenir.academy/api/v1`; for
+Google Analytics run it with `NEXT_PUBLIC_GA_ID=G-… deploy/scripts/ship.sh …`. Steps a–d
+are not needed. `deploy.sh` keeps the current and the previous version's images on the
+server, so `rollback.sh` works without a registry.
+
 ## 8. Create the first admin
 
 Production has no seed data. **(server)**:
@@ -272,10 +306,58 @@ unset ADMIN_PASSWORD
 ```
 
 It creates only that admin account, nothing else. Running it again changes nothing (an
-existing account keeps its password and is made an admin). Then log in at
-`https://avenir.academy/login` and set up the content: courses and modules (with Albanian
-titles), instructors (Users → role), **Site settings** (cohort date, price, contact) and real
-testimonials.
+existing account keeps its password and is made an admin).
+
+**8a. The courses and the first groups.** The three courses (Development & Vibe Coding
+përmes AI, Digital Marketing & AI, SEO përmes AI) with four modules each, €89 a month instead
+of €150, and one group per course starting on 1 November 2026 (Mon/Wed/Fri 19:00–21:00, 10
+seats, 48 lectures generated) come from `apps/api/prisma/catalog.ts`. **(server)**:
+
+```sh
+scripts/compose.sh run --rm --no-deps api node dist/src/cli/seed-courses.js
+```
+
+No students, instructors or testimonials are created. Running it again leaves existing
+courses and groups alone. Then, in the admin at `https://avenir.academy/admin`:
+
+- **Grupet**: set each group's real Google Meet link (it is copied to every lecture) and its
+  instructor; adjust the schedule if needed (lectures are regenerated).
+- **Kurset**: review the descriptions and module titles (placeholders written by us), the
+  prices (cents) and the instructors per module; add offline lessons under **Mësimdhënia**.
+- **Cilësimet e faqes**: the bank details for transfers (beneficiary, IBAN, bank, SWIFT),
+  which payment methods are on, contact details. The refund policy text is in
+  `apps/web/messages/sq.json` (`landing.faq.items[1]`) and still says `[VENDOS POLITIKËN…]`.
+- **Përdoruesit**: give the instructors their role; they fill in their public profile.
+
+**8b. Stripe (card payments).** Create the account at <https://dashboard.stripe.com>,
+complete the business details so live payments are allowed, then:
+
+1. **Developers → API keys**: copy the **Secret key**. Use the _test_ key (`sk_test_…`) first.
+2. **Developers → Webhooks → Add endpoint**: URL
+   `https://api.avenir.academy/api/v1/payments/stripe/webhook`, events
+   `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+   `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`.
+   Copy the endpoint's **Signing secret** (`whsec_…`).
+3. **(server)** put both in `.env.production` (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`),
+   then `scripts/compose.sh up -d api`. The API refuses to start without them while
+   `STRIPE_ENABLED=true`; set `STRIPE_ENABLED=false` to run with bank transfers only.
+4. Test it end to end with the test keys: register a student, pick a group, pay with card
+   `4242 4242 4242 4242` (any future date, any CVC). The success page waits for the webhook,
+   then the student gets the timetable email. Stripe → **Developers → Webhooks** shows the
+   event as delivered (200). A redelivered event is ignored (the ids are stored).
+5. **At launch**, repeat steps 1–3 with the **live** keys (`sk_live_…`, and a webhook
+   endpoint created in live mode with its own `whsec_…`), restart the API, and make one real
+   payment of €89 with your own card, then refund it from **Admin → Pagesat**.
+
+Only the signed webhook confirms a card payment; the browser's return to the site never does.
+Bank transfers need no Stripe: the student gets the IBAN and a reference `AV-XXXXXXXX`, the
+seat is held 48 hours, and an admin confirms the payment in **Admin → Pagesat**.
+
+**8c. Scheduled emails.** The API itself runs the jobs (Europe/Tirane): hold expiry every
+minute, lecture reminders every 5 minutes (24 h and 1 h before), the offline-learning email at
+09:00 on days without a lecture, hold warnings hourly, group statuses nightly. They need
+nothing on the server besides `CRON_ENABLED=true` (the default). **Admin → Email-et** lists
+every email with its status; a job that runs twice never sends twice.
 
 ## 9. After-deploy checklist
 
@@ -284,11 +366,14 @@ testimonials.
       `{"status":"ok","db":"up"}`; `http://` redirects to `https://` on all three.
 - [ ] `curl -sI https://avenir.academy | grep -i strict-transport` shows HSTS.
 - [ ] `https://avenir.academy/sitemap.xml` and `/robots.txt` use `https://avenir.academy`.
-- [ ] Journey (use a second browser or a private window for the student):
-      register a student → request enrollment → as admin, approve it in **Admin →
-      Enrollments** → the student sees module 1 → as admin, add a live session (Meet link) and
-      upload a PDF material to module 1 → the student sees the session (Join opens 15 minutes
-      before) and downloads the PDF.
+- [ ] Journey (use a second browser or a private window for the student): register a
+      student → pick a course and group → pay by **card** (test key, `4242…`) → the success
+      page confirms within seconds → the timetable email arrives with the `.ics` → the
+      student sees the 12 lectures (Join opens 15 minutes before) and the offline lessons.
+      Then a second student pays by **bank transfer** → as admin, confirm it in **Admin →
+      Pagesat** → the student is enrolled and the group shows one seat less.
+- [ ] Reminders: the day before the first lecture, the 24-hour email appears in **Admin →
+      Email-et** for every paid student; an hour before, the 1-hour one.
 - [ ] Log out and back in; reload a signed-in page (the refresh cookie works across
       `avenir.academy` and `api.avenir.academy`).
 - [ ] Email: "Forgot password" for your own account → the email arrives (check spam), the
@@ -338,8 +423,9 @@ deployed image tag.
 alias avenir=/opt/avenir/deploy/scripts/compose.sh     # put it in ~/.bashrc
 ```
 
-**Deploy.** Merge to `main`; CI then Deploy run on their own. By hand: Actions → Deploy → Run
-workflow. On the server: `deploy/scripts/deploy.sh <git-sha>` (the image must exist in GHCR).
+**Deploy.** Merge to `main`; CI then Deploy run on their own (option B: run
+`deploy/scripts/ship.sh deploy@<droplet-ip>` from your laptop). By hand: Actions → Deploy → Run
+workflow. On the server: `deploy/scripts/deploy.sh <git-sha>` (the images must be in GHCR or already on the server).
 `cat /opt/avenir/deploy/.image-tag` shows what is running.
 
 **Roll back.**
@@ -356,6 +442,12 @@ it removed or renamed data, restore the backup taken before that deploy instead
 
 **Logs.** `avenir logs -f api` (or `web`, `caddy`, `backup`, `postgres`); `avenir logs --since
 1h api`. Each container keeps 3 × 10 MB.
+
+**Stripe.** Keys are rotated like any secret (`.env.production`, then `avenir restart api`);
+the webhook endpoint stays. If Stripe shows failed deliveries, **Resend** them from the
+dashboard: the API accepts redeliveries and skips the ones it already processed. Refunds go
+through **Admin → Pagesat** (the money returns to the card through Stripe) or the Stripe
+dashboard (the platform learns about it from the `charge.refunded` event).
 
 **Restart a service.** `avenir restart api`. After editing `.env.production`:
 `avenir up -d` (recreates only the services whose settings changed).

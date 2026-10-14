@@ -19,7 +19,7 @@ export function Logo({ href = '/' }: { href?: string }) {
       className="text-ink tracking-heading flex items-center gap-2 rounded-lg text-lg font-extrabold"
     >
       <LogoMark className="size-8" />
-      <span>AI Academy</span>
+      <span>Avenir Academy</span>
     </Link>
   );
 }

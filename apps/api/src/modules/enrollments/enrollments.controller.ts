@@ -7,6 +7,7 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../generated/prisma/enums.js';
 import { DecideEnrollmentDto } from './dto/decide-enrollment.dto.js';
 import { ListEnrollmentsQueryDto } from './dto/list-enrollments-query.dto.js';
+import { MoveEnrollmentDto } from './dto/move-enrollment.dto.js';
 import {
   type AdminEnrollmentRecord,
   type EnrollmentRecord,
@@ -19,6 +20,7 @@ import {
 export class EnrollmentsController {
   constructor(private readonly enrollments: EnrollmentsService) {}
 
+  /** Legacy: a request without payment, for an admin to approve. Checkout is the normal path. */
   @Roles(Role.STUDENT)
   @Post('courses/:id/enroll')
   enroll(@CurrentUser() user: AuthUser, @Param('id') courseId: string): Promise<EnrollmentRecord> {
@@ -43,5 +45,12 @@ export class EnrollmentsController {
     @Body() dto: DecideEnrollmentDto,
   ): Promise<AdminEnrollmentRecord> {
     return this.enrollments.decide(id, dto);
+  }
+
+  /** Waitlist → a group with a free seat (held 48 hours, the student is emailed). */
+  @Roles(Role.ADMIN)
+  @Patch('enrollments/:id/move')
+  move(@Param('id') id: string, @Body() dto: MoveEnrollmentDto): Promise<AdminEnrollmentRecord> {
+    return this.enrollments.move(id, dto.groupId);
   }
 }

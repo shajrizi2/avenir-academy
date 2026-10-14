@@ -16,6 +16,7 @@ import { FormError } from '@/components/form-error';
 import { TextField } from '@/components/form/text-field';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
+import { fmt, t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { useHydrated } from '@/lib/use-hydrated';
 
@@ -34,11 +35,11 @@ export function ResetPasswordForm() {
   const onSubmit = form.handleSubmit(async ({ password }) => {
     setError(null);
     try {
-      const res = await apiFetch<MessageResponse>('/auth/reset-password', {
+      await apiFetch<MessageResponse>('/auth/reset-password', {
         method: 'POST',
         body: { token, password },
       });
-      toast.success(res.message);
+      toast.success(t.auth.reset.done);
       router.replace('/login');
     } catch (e) {
       setError(errorMessage(e));
@@ -46,9 +47,7 @@ export function ResetPasswordForm() {
   });
 
   if (!token) {
-    return (
-      <FormError message="This reset link is incomplete. Please request a new one from the forgot password page." />
-    );
+    return <FormError message={t.auth.reset.invalidLink} />;
   }
 
   return (
@@ -59,15 +58,15 @@ export function ResetPasswordForm() {
           <TextField
             form={form}
             name="password"
-            label="New password"
+            label={t.auth.fields.newPassword}
             type="password"
             autoComplete="new-password"
-            description={`At least ${PASSWORD_MIN_LENGTH} characters, with a letter and a number.`}
+            description={fmt(t.auth.fields.passwordHint, { min: PASSWORD_MIN_LENGTH })}
           />
           <TextField
             form={form}
             name="confirmPassword"
-            label="Confirm new password"
+            label={t.auth.fields.confirmPassword}
             type="password"
             autoComplete="new-password"
           />
@@ -77,14 +76,14 @@ export function ResetPasswordForm() {
             size="lg"
             disabled={!hydrated || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? 'Saving…' : 'Update password'}
+            {form.formState.isSubmitting ? t.auth.reset.submitting : t.auth.reset.submit}
           </Button>
           {error && (
             <Link
               href="/forgot-password"
               className="text-ink text-center text-sm font-semibold underline-offset-4 hover:underline"
             >
-              Request a new reset link
+              {t.auth.reset.requestNew}
             </Link>
           )}
         </FieldGroup>

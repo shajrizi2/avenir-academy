@@ -13,10 +13,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 import { moduleQuery, testBuilderQuery } from '@/lib/queries';
 import { QuestionsEditor, QuestionsPreview, type QuestionsValues } from './questions-editor';
 import { TestSettingsForm, type TestSettingsValues } from './test-settings-form';
+
+const m = t.teach.test;
 
 /** /teach/modules/[id]/test: create the module's test, write its questions and publish it. */
 export function TestBuilder() {
@@ -43,7 +46,7 @@ export function TestBuilder() {
     const next = test
       ? await apiFetch<StaffTest>(`/tests/${test.id}`, { method: 'PATCH', body: values })
       : await apiFetch<StaffTest>(`/modules/${moduleId}/test`, { method: 'POST', body: values });
-    await saved(next, test ? 'Test settings saved' : 'Test created. Now add the questions.');
+    await saved(next, test ? m.settingsSaved : m.created);
   }
 
   async function saveQuestions(values: QuestionsValues) {
@@ -52,7 +55,7 @@ export function TestBuilder() {
       method: 'PUT',
       body: values,
     });
-    await saved(next, 'Questions saved');
+    await saved(next, m.questionsSaved);
   }
 
   return (
@@ -61,17 +64,17 @@ export function TestBuilder() {
         href={`/teach/modules/${moduleId}`}
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
-        <ArrowLeft className="size-4" aria-hidden /> Module {moduleInfo.data.order}:{' '}
-        {moduleInfo.data.title}
+        <ArrowLeft className="size-4" aria-hidden />{' '}
+        {fmt(t.teach.module.title, { number: moduleInfo.data.order, title: moduleInfo.data.title })}
       </Link>
       <PageHeader
-        title={test ? test.title : 'Create the module test'}
-        description="Students take it online during its window. Passing it unlocks the next module."
+        title={test ? test.title : m.createTitle}
+        description={m.builderDescription}
         actions={
           test && (
             <Button asChild variant="chunky-outline">
               <Link href={`/teach/modules/${moduleId}/results`}>
-                <BarChart3 data-icon="inline-start" /> Results
+                <BarChart3 data-icon="inline-start" /> {m.results}
               </Link>
             </Button>
           )
@@ -82,14 +85,14 @@ export function TestBuilder() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2">Settings</CardTitle>
+          <CardTitle as="h2">{m.settings}</CardTitle>
         </CardHeader>
         <CardContent>
           <TestSettingsForm
             key={test?.id ?? 'new'}
             test={test}
             defaultWindow={defaultWindow}
-            defaultTitle={`${moduleInfo.data.title}: Module Test`}
+            defaultTitle={fmt(m.defaultTitle, { module: moduleInfo.data.title })}
             onSubmit={saveSettings}
           />
         </CardContent>
@@ -99,18 +102,15 @@ export function TestBuilder() {
         <section aria-labelledby="questions-title" className="space-y-4">
           <div className="space-y-1">
             <h2 id="questions-title" className="text-ink text-subheading font-extrabold">
-              Questions
+              {m.questions}
             </h2>
-            <p className="text-ink-soft">
-              A question scores its points only when the student picks exactly the correct answers.
-            </p>
+            <p className="text-ink-soft">{m.questionsHint}</p>
           </div>
           {test.attemptCount > 0 ? (
             <>
               <p className="border-line rounded-card bg-locked-tint text-locked-ink flex items-start gap-2 border p-4 text-sm font-semibold">
                 <Lock className="mt-0.5 size-4 shrink-0" aria-hidden />
-                Students have already taken this test, so its questions can’t change. You can still
-                edit the settings and the window.
+                {m.lockedHint}
               </p>
               <QuestionsPreview questions={test.questions} />
             </>
@@ -144,7 +144,7 @@ function PublishCard({
         method: 'PATCH',
         body: { isPublished: !test.isPublished },
       });
-      await onSaved(next, next.isPublished ? 'Test published' : 'Test hidden from students');
+      await onSaved(next, next.isPublished ? m.publishedToast : m.hiddenToast);
     } catch (e) {
       toast.error(errorMessage(e));
     }
@@ -153,7 +153,7 @@ function PublishCard({
   async function remove() {
     try {
       await apiFetch(`/tests/${test.id}`, { method: 'DELETE' });
-      toast.success('Test deleted');
+      toast.success(m.deleted);
       await queryClient.invalidateQueries({ queryKey: ['modules', test.moduleId] });
       router.push(`/teach/modules/${test.moduleId}`);
     } catch (e) {
@@ -167,17 +167,17 @@ function PublishCard({
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <CardTitle as="h2">Visibility</CardTitle>
+            <CardTitle as="h2">{m.visibility}</CardTitle>
             <Badge variant={test.isPublished ? 'secondary' : 'outline'}>
-              {test.isPublished ? 'Published' : 'Draft'}
+              {test.isPublished ? m.published : m.draft}
             </Badge>
           </div>
           <CardDescription className="text-ink">
             {test.isPublished
-              ? 'Students see this test on the module page and can take it during its window.'
+              ? m.visiblePublished
               : test.questions.length === 0
-                ? 'Add questions, then publish the test so students can see it.'
-                : 'Students can’t see the test until you publish it.'}
+                ? m.visibleNoQuestions
+                : m.visibleDraft}
           </CardDescription>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -188,24 +188,24 @@ function PublishCard({
           >
             {test.isPublished ? (
               <>
-                <EyeOff data-icon="inline-start" /> Unpublish
+                <EyeOff data-icon="inline-start" /> {m.unpublish}
               </>
             ) : (
               <>
-                <Eye data-icon="inline-start" /> Publish
+                <Eye data-icon="inline-start" /> {m.publish}
               </>
             )}
           </Button>
           {test.attemptCount === 0 && (
             <ConfirmDialog
               trigger={
-                <Button variant="ghost" size="icon" aria-label="Delete test">
+                <Button variant="ghost" size="icon" aria-label={m.deleteAria}>
                   <Trash2 />
                 </Button>
               }
-              title="Delete this test?"
-              description="Its settings and questions are removed. Nobody has taken it yet."
-              confirmLabel="Delete test"
+              title={m.deleteTitle}
+              description={m.deleteText}
+              confirmLabel={m.deleteConfirm}
               onConfirm={remove}
             />
           )}

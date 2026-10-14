@@ -2,6 +2,7 @@ import type { CourseSummary } from '@ai-academy/shared';
 import { BookOpen } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { t } from '@/i18n/messages';
 import { serverGet } from '@/lib/server-api';
 import { CourseCard } from './course-card';
 
@@ -10,15 +11,11 @@ export async function CourseGrid() {
   const courses = await serverGet<CourseSummary[]>('/courses');
   if (courses.length === 0) {
     return (
-      <EmptyState
-        icon={BookOpen}
-        title="No courses yet"
-        description="New cohorts are announced regularly. Check back soon."
-      />
+      <EmptyState icon={BookOpen} title={t.catalog.emptyTitle} description={t.catalog.emptyText} />
     );
   }
   return (
-    <ul className="grid gap-6 md:grid-cols-2">
+    <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {courses.map((course) => (
         <li
           key={course.id}
@@ -33,8 +30,8 @@ export async function CourseGrid() {
 
 export function CourseGridSkeleton() {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      {[0, 1].map((i) => (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {[0, 1, 2].map((i) => (
         <Skeleton key={i} className="rounded-card h-96" />
       ))}
     </div>

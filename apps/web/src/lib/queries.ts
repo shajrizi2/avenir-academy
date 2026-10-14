@@ -1,16 +1,28 @@
 import type {
   AdminEnrollment,
+  AdminGroup,
+  AdminPayment,
   AdminStats,
-  AttemptSession,
-  CourseProgress,
   AdminTestimonial,
+  AttemptSession,
   CourseDetail,
+  CourseProgress,
   CourseSummary,
+  EmailLogEntry,
+  EmailType,
   EnrollmentStatus,
   EnrollmentSummary,
+  GroupStudent,
+  GroupSummary,
   LearnCourse,
+  LessonDetail,
+  LessonSummary,
   ModuleDetail,
+  NextLesson,
   Paginated,
+  PaymentMethod,
+  PaymentStatus,
+  PaymentSummary,
   PublicUser,
   Role,
   SessionAttendance,
@@ -72,6 +84,54 @@ export const attendanceQuery = (sessionId: string) =>
     queryFn: () =>
       apiFetch<SessionAttendance>(`/sessions/${encodeURIComponent(sessionId)}/attendance`),
   });
+
+// ---- Groups, payments and lessons ----
+
+/** Open groups of a course (public), with real seats left. */
+export const courseGroupsQuery = (courseId: string) =>
+  queryOptions({
+    queryKey: ['groups', 'course', courseId],
+    queryFn: () => apiFetch<GroupSummary[]>('/groups', { query: { courseId } }),
+  });
+
+export const groupQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['groups', id],
+    queryFn: () => apiFetch<GroupSummary>(`/groups/${encodeURIComponent(id)}`),
+  });
+
+export const paymentMethodsQuery = queryOptions({
+  queryKey: ['payments', 'methods'],
+  queryFn: () => apiFetch<PaymentMethod[]>('/payments/methods'),
+});
+
+export const myPaymentsQuery = queryOptions({
+  queryKey: ['me', 'payments'],
+  queryFn: () => apiFetch<PaymentSummary[]>('/me/payments'),
+});
+
+export const myPaymentQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['me', 'payments', id],
+    queryFn: () => apiFetch<PaymentSummary>(`/me/payments/${encodeURIComponent(id)}`),
+  });
+
+export const lessonQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['lessons', id],
+    queryFn: () => apiFetch<LessonDetail>(`/lessons/${encodeURIComponent(id)}`),
+  });
+
+export const moduleLessonsQuery = (moduleId: string) =>
+  queryOptions({
+    queryKey: ['modules', moduleId, 'lessons'],
+    queryFn: () => apiFetch<LessonSummary[]>(`/modules/${encodeURIComponent(moduleId)}/lessons`),
+  });
+
+export const nextLessonQuery = queryOptions({
+  queryKey: ['me', 'next-lesson'],
+  queryFn: () => apiFetch<NextLesson | null>('/me/next-lesson'),
+});
 
 // ---- Tests and progress ----
 
@@ -141,6 +201,7 @@ export const instructorsQuery = queryOptions({
 
 export interface EnrollmentsQueryParams {
   status?: EnrollmentStatus;
+  groupId?: string;
   page: number;
   pageSize: number;
 }
@@ -161,6 +222,52 @@ export const adminCourseQuery = (id: string) =>
   queryOptions({
     queryKey: ['courses', 'by-id', id],
     queryFn: () => apiFetch<CourseDetail>(`/courses/by-id/${encodeURIComponent(id)}`),
+  });
+
+export const adminGroupsQuery = (courseId?: string) =>
+  queryOptions({
+    queryKey: ['admin', 'groups', courseId ?? 'all'],
+    queryFn: () => apiFetch<AdminGroup[]>('/admin/groups', { query: { courseId } }),
+  });
+
+export const adminGroupQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['admin', 'groups', 'by-id', id],
+    queryFn: () => apiFetch<AdminGroup>(`/admin/groups/${encodeURIComponent(id)}`),
+  });
+
+export const groupStudentsQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['groups', id, 'students'],
+    queryFn: () => apiFetch<GroupStudent[]>(`/groups/${encodeURIComponent(id)}/students`),
+  });
+
+export interface PaymentsQueryParams {
+  provider?: PaymentMethod;
+  status?: PaymentStatus;
+  groupId?: string;
+  page: number;
+  pageSize: number;
+}
+
+export const adminPaymentsQuery = (params: PaymentsQueryParams) =>
+  queryOptions({
+    queryKey: ['admin', 'payments', params],
+    queryFn: () => apiFetch<Paginated<AdminPayment>>('/payments', { query: { ...params } }),
+    placeholderData: keepPreviousData,
+  });
+
+export interface EmailsQueryParams {
+  type?: EmailType;
+  page: number;
+  pageSize: number;
+}
+
+export const adminEmailsQuery = (params: EmailsQueryParams) =>
+  queryOptions({
+    queryKey: ['admin', 'emails', params],
+    queryFn: () => apiFetch<Paginated<EmailLogEntry>>('/admin/emails', { query: { ...params } }),
+    placeholderData: keepPreviousData,
   });
 
 export const adminTestimonialsQuery = queryOptions({

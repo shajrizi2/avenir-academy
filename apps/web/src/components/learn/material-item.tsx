@@ -5,6 +5,7 @@ import { Download, ExternalLink, FileText, Link2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { fmt, t } from '@/i18n/messages';
 import { apiDownload, errorMessage } from '@/lib/api';
 
 /** One material: a link opens in a new tab; a file downloads through the API. */
@@ -42,7 +43,9 @@ export function MaterialItem({
       <div className="min-w-0 flex-1 basis-40">
         <p className="text-ink font-bold break-words">{material.title}</p>
         <p className="text-ink-soft text-sm">
-          {isFile ? `${material.fileType?.toUpperCase()} file` : 'Link'}
+          {isFile
+            ? fmt(t.learn.material.file, { type: material.fileType?.toUpperCase() ?? '' })
+            : t.learn.material.link}
         </p>
       </div>
       <div className="ml-auto flex items-center gap-2">
@@ -53,13 +56,16 @@ export function MaterialItem({
             onClick={() => void download()}
             disabled={downloading}
           >
-            <Download data-icon="inline-start" /> {downloading ? 'Downloading…' : 'Download'}
+            <Download data-icon="inline-start" />{' '}
+            {downloading ? t.learn.material.downloading : t.learn.material.download}
           </Button>
         ) : (
           <Button asChild variant="outline" size="sm">
             <a href={material.url ?? '#'} target="_blank" rel="noopener noreferrer">
-              Open <ExternalLink data-icon="inline-end" />
-              <span className="sr-only">: {material.title} (opens in a new tab)</span>
+              {t.learn.material.open} <ExternalLink data-icon="inline-end" />
+              <span className="sr-only">
+                : {material.title} {t.common.opensInNewTab}
+              </span>
             </a>
           </Button>
         )}

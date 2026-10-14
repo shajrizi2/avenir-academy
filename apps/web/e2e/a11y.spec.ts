@@ -18,7 +18,7 @@ async function expectNoViolations(page: Page) {
 
 test.use({ reducedMotion: 'reduce' });
 
-for (const path of ['/sq', '/en', '/courses', '/courses/ai-foundations', '/login', '/register']) {
+for (const path of ['/sq', '/courses', '/courses/vibe-coding-ai', '/login', '/register']) {
   test(`${path} has no accessibility violations`, async ({ page }) => {
     await page.goto(path);
     await expectNoViolations(page);
@@ -27,10 +27,12 @@ for (const path of ['/sq', '/en', '/courses', '/courses/ai-foundations', '/login
 
 const signedIn: [string, string, string][] = [
   ['student', STUDENT, '/dashboard'],
-  ['student', STUDENT, '/learn/ai-foundations'],
+  ['student', STUDENT, '/learn/vibe-coding-ai'],
   ['instructor', INSTRUCTOR, '/teach'],
   ['admin', ADMIN, '/admin'],
   ['admin', ADMIN, '/admin/enrollments'],
+  ['admin', ADMIN, '/admin/payments'],
+  ['admin', ADMIN, '/admin/groups'],
 ];
 
 for (const [role, email, path] of signedIn) {

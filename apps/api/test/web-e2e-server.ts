@@ -1,7 +1,7 @@
 /**
  * Starts the built API for the web (Playwright) e2e suite: a fresh, seeded `ai_academy_e2e`
  * database, relaxed rate limits and a throwaway upload folder. Playwright runs this as a web
- * server (apps/web/playwright.config.ts); run `pnpm build` first.
+ * server (apps/web/playwright.config.ts), passing PORT and WEB_URL; run `pnpm build` first.
  */
 import { execSync, spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -25,6 +25,9 @@ const api = spawn(process.execPath, ['dist/src/main.js'], {
     RATE_LIMIT_PER_MIN: '100000',
     AUTH_RATE_LIMIT_PER_MIN: '100000',
     MAIL_TRANSPORT: 'console',
+    STRIPE_FAKE: 'true',
+    STRIPE_WEBHOOK_SECRET: 'whsec_e2e_secret',
+    CRON_ENABLED: 'false',
     UPLOAD_DIR: `${tmpdir()}/ai-academy-web-e2e-uploads`,
   },
 });

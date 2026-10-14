@@ -49,7 +49,7 @@ export abstract class StorageService {
 }
 
 function checkKey(key: string): string {
-  if (!KEY_PATTERN.test(key)) throw new NotFoundException('File not found');
+  if (!KEY_PATTERN.test(key)) throw new NotFoundException('Skedari nuk u gjet');
   return key;
 }
 
@@ -72,7 +72,7 @@ export class LocalStorageService extends StorageService {
   protected async read(key: string): Promise<StoredFile> {
     const path = join(this.root, key);
     const info = await stat(path).catch(() => null);
-    if (!info?.isFile()) throw new NotFoundException('File not found');
+    if (!info?.isFile()) throw new NotFoundException('Skedari nuk u gjet');
     return { stream: createReadStream(path), size: info.size };
   }
 
@@ -114,10 +114,10 @@ export class S3StorageService extends StorageService {
       const object = await this.client.send(
         new GetObjectCommand({ Bucket: this.bucket, Key: this.prefix + key }),
       );
-      if (!object.Body) throw new NotFoundException('File not found');
+      if (!object.Body) throw new NotFoundException('Skedari nuk u gjet');
       return { stream: object.Body as Readable, size: object.ContentLength ?? 0 };
     } catch (error) {
-      if (error instanceof NoSuchKey) throw new NotFoundException('File not found');
+      if (error instanceof NoSuchKey) throw new NotFoundException('Skedari nuk u gjet');
       throw error;
     }
   }

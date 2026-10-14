@@ -1,44 +1,25 @@
-'use client';
-
-import { useSyncExternalStore } from 'react';
-
-const subscribe = () => () => {};
+import { formatSqDate } from '@ai-academy/shared';
 
 interface DateTemplateProps {
-  /** Copy containing a `{date}` placeholder, e.g. "Next cohort starts {date}". */
+  /** Copy containing a `{date}` placeholder, e.g. "Grupi i parë nis më {date}". */
   template: string;
-  /** ISO-8601 UTC timestamp. */
+  /** ISO-8601 UTC timestamp, or a "YYYY-MM-DD" day. */
   value: string;
-  /** Translated month names (January first). */
-  months: string[];
 }
 
 /**
- * Renders translated copy with a date such as "27 tetor 2026" in the viewer's local time
- * zone. Month names come from the messages because browsers (Chrome included) ship no
- * Albanian Intl data, so `Intl.DateTimeFormat('sq')` silently falls back to English.
- * The server snapshot uses UTC; the client switches to local time after hydration.
+ * Renders translated copy with a date such as "2 nëntor 2026". Month names come from our
+ * own constants because browsers ship no Albanian Intl data; the day is read in
+ * Europe/Tirane, where the academy schedules everything.
  */
-export function DateTemplate({ template, value, months }: DateTemplateProps) {
-  const text = useSyncExternalStore(
-    subscribe,
-    () => formatDate(value, months, false),
-    () => formatDate(value, months, true),
-  );
+export function DateTemplate({ template, value }: DateTemplateProps) {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00Z` : value;
   const [before, after = ''] = template.split('{date}');
   return (
     <>
       {before}
-      <time dateTime={value}>{text}</time>
+      <time dateTime={value}>{formatSqDate(date)}</time>
       {after}
     </>
   );
-}
-
-function formatDate(value: string, months: string[], utc: boolean): string {
-  const d = new Date(value);
-  const day = utc ? d.getUTCDate() : d.getDate();
-  const month = utc ? d.getUTCMonth() : d.getMonth();
-  const year = utc ? d.getUTCFullYear() : d.getFullYear();
-  return `${day} ${months[month]} ${year}`;
 }

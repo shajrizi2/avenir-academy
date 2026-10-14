@@ -18,6 +18,12 @@ const settingsSelect = {
   contactEmail: true,
   contactPhone: true,
   whatsappNumber: true,
+  stripeEnabled: true,
+  bankTransferEnabled: true,
+  bankBeneficiary: true,
+  bankIban: true,
+  bankName: true,
+  bankSwift: true,
 } as const satisfies Prisma.SiteSettingsSelect;
 
 export type SiteSettingsRecord = Prisma.SiteSettingsGetPayload<{ select: typeof settingsSelect }>;
@@ -35,6 +41,12 @@ export const EMPTY_SETTINGS: SiteSettingsRecord = {
   contactEmail: null,
   contactPhone: null,
   whatsappNumber: null,
+  stripeEnabled: true,
+  bankTransferEnabled: true,
+  bankBeneficiary: null,
+  bankIban: null,
+  bankName: null,
+  bankSwift: null,
 };
 
 @Injectable()

@@ -126,7 +126,7 @@ export class AttemptsService {
     const now = new Date();
     const attemptId = await this.prisma.$transaction(async (tx) => {
       const progress = await lockProgress(tx, user.id, test.moduleId);
-      if (!progress) throw new ForbiddenException('You are not enrolled in this module');
+      if (!progress) throw new ForbiddenException('Nuk je i regjistruar në këtë modul');
       const open = await tx.testAttempt.findFirst({
         where: { testId, userId: user.id, status: AttemptStatus.IN_PROGRESS },
         select: { id: true },
@@ -134,20 +134,20 @@ export class AttemptsService {
       if (open) return open.id;
 
       if (progress.status === ModuleStatus.PASSED) {
-        throw new ConflictException('You have already passed this module');
+        throw new ConflictException('E ke kaluar tashmë këtë modul');
       }
       if (progress.status !== ModuleStatus.ACTIVE) {
         throw new ConflictException(
-          'You have used all your attempts. An admin can give you another try.',
+          'I ke përdorur të gjitha tentativat. Një administrator mund të të japë një mundësi tjetër.',
         );
       }
-      if (now < test.opensAt) throw new ConflictException('This test is not open yet');
-      if (now > test.closesAt) throw new ConflictException('This test has closed');
-      if (test._count.questions === 0) throw new ConflictException('This test has no questions');
+      if (now < test.opensAt) throw new ConflictException('Ky test nuk është hapur ende');
+      if (now > test.closesAt) throw new ConflictException('Ky test është mbyllur');
+      if (test._count.questions === 0) throw new ConflictException('Ky test nuk ka pyetje');
       const used = await tx.testAttempt.count({
         where: countedAttemptsWhere(testId, user.id, progress.unlockedAt),
       });
-      if (used >= test.maxAttempts) throw new ConflictException('You have no attempts left');
+      if (used >= test.maxAttempts) throw new ConflictException('Nuk ke më tentativa');
 
       const created = await tx.testAttempt.create({
         data: { testId, userId: user.id, answers: {} },
@@ -209,11 +209,11 @@ export class AttemptsService {
   ): Promise<{ savedAt: Date }> {
     const attempt = await this.findOwnAttempt(user, attemptId);
     if (attempt.status !== AttemptStatus.IN_PROGRESS) {
-      throw new ConflictException('This attempt has already been handed in');
+      throw new ConflictException('Kjo tentativë është dorëzuar tashmë');
     }
     if (isOverdue(attempt.deadline)) {
       await this.finalize(attemptId, AttemptStatus.EXPIRED);
-      throw new ConflictException('Time is up. Your saved answers have been graded.');
+      throw new ConflictException('Koha mbaroi. Përgjigjet e ruajtura u vlerësuan.');
     }
     const clean = cleanAnswers(await this.gradableQuestions(attempt.testId), answers);
     const savedAt = new Date();
@@ -221,7 +221,7 @@ export class AttemptsService {
       where: { id: attemptId, status: AttemptStatus.IN_PROGRESS },
       data: { answers: clean },
     });
-    if (count === 0) throw new ConflictException('This attempt has already been handed in');
+    if (count === 0) throw new ConflictException('Kjo tentativë është dorëzuar tashmë');
     return { savedAt };
   }
 
@@ -379,7 +379,7 @@ export class AttemptsService {
       },
     });
     // Unpublished tests don't exist as far as students are concerned.
-    if (!test?.isPublished) throw new NotFoundException('Test not found');
+    if (!test?.isPublished) throw new NotFoundException('Testi nuk u gjet');
     return test;
   }
 
@@ -398,7 +398,7 @@ export class AttemptsService {
         test: { select: { timeLimitMin: true, closesAt: true } },
       },
     });
-    if (!attempt || attempt.userId !== user.id) throw new NotFoundException('Attempt not found');
+    if (!attempt || attempt.userId !== user.id) throw new NotFoundException('Tentativa nuk u gjet');
     return {
       status: attempt.status,
       testId: attempt.testId,

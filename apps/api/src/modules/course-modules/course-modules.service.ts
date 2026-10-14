@@ -9,10 +9,16 @@ import type { AuthUser } from '../../common/auth-user.js';
 import {
   EnrollmentStatus,
   ModuleStatus,
+  PaymentStatus,
   type Prisma,
   Role,
 } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import {
+  lessonSummarySelect,
+  type LessonSummaryRecord,
+  toLessonSummary,
+} from '../lessons/lesson.view.js';
 import { materialSelect, type MaterialView, toMaterialView } from '../materials/material.view.js';
 import {
   hasEnded,
@@ -48,6 +54,7 @@ export interface ModuleDetailRecord extends ModuleSummaryRow {
   canManage: boolean;
   sessions: SessionView[];
   materials: MaterialView[];
+  lessons: LessonSummaryRecord[];
   test: (TestSettingsRow & { questionCount: number }) | null;
 }
 
@@ -64,7 +71,17 @@ export interface TeachingModuleRecord {
 
 export interface LearnCourseRecord extends CourseRef {
   summary: string;
-  modules: (ModuleSummaryRow & { status: ModuleStatus })[];
+  priceCents: number;
+  currency: string;
+  enrollmentId: string;
+  group: { id: string; name: string; startDate: Date } | null;
+  modules: (ModuleSummaryRow & {
+    status: ModuleStatus;
+    paid: boolean;
+    paymentPending: boolean;
+    lessonCount: number;
+    completedLessons: number;
+  })[];
 }
 
 @Injectable()
@@ -83,7 +100,7 @@ export class CourseModulesService {
       where: { id: courseId },
       select: { id: true },
     });
-    if (!course) throw new NotFoundException('Course not found');
+    if (!course) throw new NotFoundException('Kursi nuk u gjet');
     await this.assertInstructor(dto.instructorId);
 
     return this.prisma.$transaction(async (tx) => {
@@ -174,30 +191,52 @@ export class CourseModulesService {
       }),
     ]);
     if (last?.id !== id) {
-      throw new ConflictException('Only the last module of a course can be deleted');
+      throw new ConflictException('Vetëm moduli i fundit i një kursi mund të fshihet');
     }
     if (started > 0) {
       throw new ConflictException(
-        'Students have already started this module, so it cannot be deleted',
+        'Studentët e kanë nisur tashmë këtë modul, ndaj nuk mund të fshihet',
       );
     }
     await this.prisma.module.delete({ where: { id } });
   }
 
   async findDetail(user: AuthUser, id: string): Promise<ModuleDetailRecord> {
-    const { isStaff, status } = await this.access.assertCanView(user, id);
+    const { module: access, isStaff, status } = await this.access.assertCanView(user, id);
+    // Students see only their own group's lectures (and legacy ones without a group).
+    const groupId = isStaff
+      ? undefined
+      : (
+          await this.prisma.enrollment.findUnique({
+            where: { userId_courseId: { userId: user.id, courseId: access.courseId } },
+            select: { groupId: true },
+          })
+        )?.groupId;
     const module = await this.prisma.module.findUniqueOrThrow({
       where: { id },
       select: {
         ...moduleSummarySelect,
         course: courseRefSelect,
-        sessions: { orderBy: { startsAt: 'asc' }, select: sessionSelect },
+        sessions: {
+          where: isStaff ? undefined : { OR: [{ groupId: null }, { groupId: groupId ?? '' }] },
+          orderBy: { startsAt: 'asc' },
+          select: sessionSelect,
+        },
         materials: { orderBy: { title: 'asc' }, select: materialSelect },
+        lessons: {
+          orderBy: { order: 'asc' },
+          select: {
+            ...lessonSummarySelect,
+            progress: isStaff
+              ? { where: { userId: '' }, select: { completedAt: true } }
+              : { where: { userId: user.id }, select: { completedAt: true } },
+          },
+        },
         test: { select: { ...testSettingsSelect, _count: { select: { questions: true } } } },
       },
     });
     const now = new Date();
-    const { test, ...rest } = module;
+    const { test, lessons, ...rest } = module;
     let moduleTest: ModuleDetailRecord['test'] = null;
     // Students only see a test once it is published.
     if (test && (isStaff || test.isPublished)) {
@@ -210,6 +249,9 @@ export class CourseModulesService {
       canManage: isStaff,
       sessions: module.sessions.map((s) => toSessionView(s, isStaff, now)),
       materials: module.materials.map(toMaterialView),
+      lessons: lessons.map((l) =>
+        toLessonSummary(l, isStaff ? null : (l.progress[0]?.completedAt ?? null)),
+      ),
       test: moduleTest,
     };
   }
@@ -253,33 +295,63 @@ export class CourseModulesService {
     });
   }
 
-  /** An approved student's view of a course: every module with their own status. */
+  /** An approved student's view of a course: every module with their status and payment. */
   async learnCourse(userId: string, slug: string): Promise<LearnCourseRecord> {
     const course = await this.prisma.course.findUnique({
       where: { slug },
       select: {
         ...courseRefSelect.select,
         summary: true,
-        enrollments: { where: { userId }, select: { status: true } },
+        priceCents: true,
+        currency: true,
+        enrollments: {
+          where: { userId },
+          select: {
+            id: true,
+            status: true,
+            group: { select: { id: true, name: true, startDate: true } },
+            payments: {
+              where: { status: { in: [PaymentStatus.CONFIRMED, PaymentStatus.PENDING] } },
+              select: { moduleId: true, status: true },
+            },
+          },
+        },
         modules: {
           orderBy: { order: 'asc' },
           select: {
             ...moduleSummarySelect,
             progress: { where: { userId }, select: { status: true } },
+            _count: { select: { lessons: true } },
+            lessons: { select: { progress: { where: { userId }, select: { lessonId: true } } } },
           },
         },
       },
     });
-    if (!course) throw new NotFoundException('Course not found');
-    if (course.enrollments[0]?.status !== EnrollmentStatus.APPROVED) {
-      throw new ForbiddenException('You are not enrolled in this course');
+    if (!course) throw new NotFoundException('Kursi nuk u gjet');
+    const enrollment = course.enrollments[0];
+    if (enrollment?.status !== EnrollmentStatus.APPROVED) {
+      throw new ForbiddenException('Nuk je i regjistruar në këtë kurs');
     }
+    const paid = new Set(
+      enrollment.payments
+        .filter((p) => p.status === PaymentStatus.CONFIRMED)
+        .map((p) => p.moduleId),
+    );
+    const pending = new Set(
+      enrollment.payments.filter((p) => p.status === PaymentStatus.PENDING).map((p) => p.moduleId),
+    );
     const { enrollments: _enrollments, modules, ...rest } = course;
     return {
       ...rest,
-      modules: modules.map(({ progress, ...m }) => ({
+      enrollmentId: enrollment.id,
+      group: enrollment.group,
+      modules: modules.map(({ progress, _count, lessons, ...m }) => ({
         ...m,
         status: progress[0]?.status ?? ModuleStatus.LOCKED,
+        paid: paid.has(m.id),
+        paymentPending: !paid.has(m.id) && pending.has(m.id),
+        lessonCount: _count.lessons,
+        completedLessons: lessons.filter((l) => l.progress.length > 0).length,
       })),
     };
   }
@@ -291,7 +363,7 @@ export class CourseModulesService {
       select: { role: true },
     });
     if (user?.role !== Role.INSTRUCTOR) {
-      throw new BadRequestException('instructorId must belong to a user with the INSTRUCTOR role');
+      throw new BadRequestException('Instruktori duhet të jetë një përdorues me rolin INSTRUCTOR');
     }
   }
 }

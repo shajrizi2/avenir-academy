@@ -8,6 +8,7 @@ import {
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -46,7 +47,7 @@ export class UpdateProfileDto {
   )
   @ValidateIf((_o, v) => v !== null)
   @IsString()
-  @Matches(PHONE_PATTERN, { message: 'phone must be a valid phone number' })
+  @Matches(PHONE_PATTERN, { message: 'Numri i telefonit nuk është i vlefshëm' })
   phone?: string | null;
 
   @ApiPropertyOptional({ nullable: true, maxLength: TITLE_MAX_LENGTH, example: 'AI engineer' })
@@ -72,4 +73,9 @@ export class UpdateProfileDto {
   @IsUrl({ protocols: ['https', 'http'], require_protocol: true })
   @MaxLength(URL_MAX_LENGTH)
   avatarUrl?: string | null;
+
+  @ApiPropertyOptional({ description: 'Receive the offline-learning emails (students)' })
+  @IsOptional()
+  @IsBoolean()
+  offlineEmailsEnabled?: boolean;
 }

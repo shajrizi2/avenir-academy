@@ -5,12 +5,16 @@ import {
   CalendarClock,
   ClipboardCheck,
   GraduationCap,
+  Landmark,
   Library,
+  ListOrdered,
   type LucideIcon,
   Percent,
   TriangleAlert,
+  Users,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fmt, t } from '@/i18n/messages';
 import { adminStatsQuery } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
@@ -26,42 +30,62 @@ interface StatItem {
 export function PlatformStats() {
   const { data } = useQuery(adminStatsQuery);
 
+  const o = t.admin.overview;
   const items: StatItem[] | null = data
     ? [
         {
-          label: 'Enrolled students',
+          label: o.enrolledStudents,
           value: String(data.approvedEnrollments),
-          hint: `${data.students} student accounts`,
+          hint: fmt(o.studentAccounts, { count: data.students }),
           icon: GraduationCap,
         },
         {
-          label: 'Published courses',
+          label: o.bankTransfers,
+          value: String(data.pendingBankTransfers),
+          hint: o.bankTransfersHint,
+          icon: Landmark,
+          alert: data.pendingBankTransfers > 0,
+        },
+        {
+          label: o.openGroups,
+          value: String(data.openGroups),
+          hint: o.openGroupsHint,
+          icon: Users,
+        },
+        {
+          label: o.waitlisted,
+          value: String(data.waitlisted),
+          hint: o.waitlistedHint,
+          icon: ListOrdered,
+        },
+        {
+          label: o.publishedCourses,
           value: String(data.publishedCourses),
-          hint: `${data.instructors} instructors`,
+          hint: fmt(o.instructorsCount, { count: data.instructors }),
           icon: Library,
         },
         {
-          label: 'Live sessions',
+          label: o.liveSessions,
           value: String(data.sessionsNext7Days),
-          hint: 'in the next 7 days',
+          hint: o.next7Days,
           icon: CalendarClock,
         },
         {
-          label: 'Tests open now',
+          label: o.openTests,
           value: String(data.openTests),
-          hint: `${data.attemptsLast30Days} attempts in 30 days`,
+          hint: fmt(o.attempts30Days, { count: data.attemptsLast30Days }),
           icon: ClipboardCheck,
         },
         {
-          label: 'Pass rate',
+          label: o.passRate,
           value: data.passRateLast30Days === null ? '–' : `${data.passRateLast30Days}%`,
-          hint: 'of attempts in 30 days',
+          hint: o.ofAttempts30Days,
           icon: Percent,
         },
         {
-          label: 'Out of attempts',
+          label: o.outOfAttempts,
           value: String(data.failedModules),
-          hint: 'reset from a test’s results page',
+          hint: o.resetHint,
           icon: TriangleAlert,
           alert: data.failedModules > 0,
         },
@@ -71,7 +95,7 @@ export function PlatformStats() {
   return (
     <section aria-labelledby="stats-title" className="space-y-4">
       <h2 id="stats-title" className="text-ink text-subheading font-extrabold">
-        Platform
+        {t.admin.overview.platform}
       </h2>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items
@@ -98,7 +122,7 @@ export function PlatformStats() {
                 </div>
               </li>
             ))
-          : Array.from({ length: 6 }, (_, i) => (
+          : Array.from({ length: 9 }, (_, i) => (
               <li key={i}>
                 <Skeleton className="rounded-card h-32 w-full" />
               </li>

@@ -26,6 +26,7 @@ import {
 import { FieldGroup } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiFetch, errorMessage } from '@/lib/api';
+import { fmt, t } from '@/i18n/messages';
 import { instructorsQuery } from '@/lib/queries';
 
 /** The public profile fields shown on the landing page's Instructors section. */
@@ -50,11 +51,11 @@ export function InstructorList() {
     return (
       <EmptyState
         icon={Presentation}
-        title="No instructors yet"
-        description="Give a user the Instructor role on the Users page; they will appear here and on the landing page."
+        title={t.admin.instructors.emptyTitle}
+        description={t.admin.instructors.emptyText}
         action={
           <Button asChild variant="chunky">
-            <Link href="/admin/users?role=STUDENT">Open users</Link>
+            <Link href="/admin/users?role=STUDENT">{t.admin.instructors.openUsers}</Link>
           </Button>
         }
       />
@@ -74,10 +75,10 @@ export function InstructorList() {
             <div className="min-w-0 flex-1 space-y-1">
               <p className="text-ink font-bold">{name}</p>
               <p className="text-track-ai-ink text-sm font-semibold">
-                {instructor.title ?? 'No title yet'}
+                {instructor.title ?? t.admin.instructors.noTitle}
               </p>
               <p className="text-ink-soft line-clamp-3 text-sm">
-                {instructor.bio ?? 'No bio yet. Add one so students know who teaches them.'}
+                {instructor.bio ?? t.admin.instructors.noBio}
               </p>
             </div>
             <ProfileDialog instructor={instructor} />
@@ -107,7 +108,7 @@ function ProfileDialog({ instructor }: { instructor: PublicUser }) {
     setError(null);
     try {
       await apiFetch(`/users/${instructor.id}/profile`, { method: 'PATCH', body: values });
-      toast.success('Profile saved');
+      toast.success(t.admin.instructors.saved);
       setOpen(false);
       await queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (e) {
@@ -121,31 +122,39 @@ function ProfileDialog({ instructor }: { instructor: PublicUser }) {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label={`Edit ${instructor.firstName}’s profile`}
+          aria-label={fmt(t.admin.instructors.editProfile, { name: instructor.firstName })}
         >
           <Pencil />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Public profile</DialogTitle>
-          <DialogDescription>
-            Shown in the Instructors section of the landing page.
-          </DialogDescription>
+          <DialogTitle>{t.admin.instructors.dialogTitle}</DialogTitle>
+          <DialogDescription>{t.admin.instructors.dialogText}</DialogDescription>
         </DialogHeader>
         <form onSubmit={(e) => void submit(e)} noValidate>
           <FieldGroup>
             <FormError message={error} />
             <div className="grid gap-6 sm:grid-cols-2">
-              <TextField form={form} name="firstName" label="First name" />
-              <TextField form={form} name="lastName" label="Last name" />
+              <TextField form={form} name="firstName" label={t.admin.instructors.firstName} />
+              <TextField form={form} name="lastName" label={t.admin.instructors.lastName} />
             </div>
-            <TextField form={form} name="title" label="Title" placeholder="AI engineer" />
-            <TextareaField form={form} name="bio" label="Short bio" rows={3} />
-            <TextField form={form} name="avatarUrl" label="Photo URL" type="url" />
+            <TextField
+              form={form}
+              name="title"
+              label={t.admin.instructors.jobTitle}
+              placeholder={t.admin.instructors.jobTitlePlaceholder}
+            />
+            <TextareaField form={form} name="bio" label={t.admin.instructors.bio} rows={3} />
+            <TextField
+              form={form}
+              name="avatarUrl"
+              label={t.admin.instructors.avatarUrl}
+              type="url"
+            />
             <div>
               <Button type="submit" variant="chunky" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Saving…' : 'Save profile'}
+                {form.formState.isSubmitting ? t.common.saving : t.admin.instructors.save}
               </Button>
             </div>
           </FieldGroup>

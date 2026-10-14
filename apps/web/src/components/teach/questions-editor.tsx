@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError as FieldErrorText, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { fmt, plural, t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
@@ -27,15 +28,13 @@ type FormInput = z.input<typeof questionsSchema>;
 export type QuestionsValues = z.output<typeof questionsSchema>;
 type QuestionsForm = UseFormReturn<FormInput, unknown, QuestionsValues>;
 
-export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  SINGLE_CHOICE: 'Single choice',
-  MULTI_CHOICE: 'Multiple choice',
-  TRUE_FALSE: 'True / false',
-};
+const m = t.teach.questions;
+
+export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = m.types;
 
 const trueFalseOptions = () => [
-  { text: 'True', isCorrect: true },
-  { text: 'False', isCorrect: false },
+  { text: m.true, isCorrect: true },
+  { text: m.false, isCorrect: false },
 ];
 const blankOptions = () => [
   { text: '', isCorrect: true },
@@ -105,13 +104,13 @@ export function QuestionsEditor({ questions, onSave }: QuestionsEditorProps) {
           onClick={() => append(blankQuestion())}
           disabled={fields.length >= TEST_MAX_QUESTIONS}
         >
-          <Plus data-icon="inline-start" /> Add question
+          <Plus data-icon="inline-start" /> {m.add}
         </Button>
         <Button type="submit" variant="chunky" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Saving…' : 'Save questions'}
+          {form.formState.isSubmitting ? t.common.saving : m.save}
         </Button>
         {form.formState.isDirty && (
-          <p className="text-active-ink text-sm font-semibold">You have unsaved changes.</p>
+          <p className="text-active-ink text-sm font-semibold">{m.unsaved}</p>
         )}
       </div>
     </form>
@@ -174,13 +173,15 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
   return (
     <li className="border-line rounded-card bg-background space-y-5 border p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-ink text-lg font-extrabold">Question {index + 1}</h3>
+        <h3 className="text-ink text-lg font-extrabold">
+          {fmt(m.question, { number: index + 1 })}
+        </h3>
         <div className="flex gap-1">
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={`Move question ${index + 1} up`}
+            aria-label={fmt(m.moveUp, { number: index + 1 })}
             disabled={index === 0}
             onClick={() => onMove(index - 1)}
           >
@@ -190,7 +191,7 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={`Move question ${index + 1} down`}
+            aria-label={fmt(m.moveDown, { number: index + 1 })}
             disabled={index === count - 1}
             onClick={() => onMove(index + 1)}
           >
@@ -200,7 +201,7 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={`Remove question ${index + 1}`}
+            aria-label={fmt(m.remove, { number: index + 1 })}
             disabled={count === 1}
             onClick={onRemove}
           >
@@ -211,7 +212,7 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
 
       <div className="grid gap-6 sm:grid-cols-[1fr_8rem]">
         <Field>
-          <FieldLabel htmlFor={typeId}>Type</FieldLabel>
+          <FieldLabel htmlFor={typeId}>{m.type}</FieldLabel>
           <select
             id={typeId}
             className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 w-full rounded-lg border px-3 text-base outline-none focus-visible:ring-3 md:text-sm"
@@ -224,16 +225,14 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
             ))}
           </select>
         </Field>
-        <TextField form={form} name={`questions.${index}.points`} label="Points" type="number" />
+        <TextField form={form} name={`questions.${index}.points`} label={m.points} type="number" />
       </div>
-      <TextareaField form={form} name={`questions.${index}.text`} label="Question" rows={2} />
+      <TextareaField form={form} name={`questions.${index}.text`} label={m.text} rows={2} />
 
       <fieldset className="space-y-3">
         <legend className="text-ink mb-1 text-sm font-semibold">
-          Answers{' '}
-          <span className="text-ink-soft font-normal">
-            ({multi ? 'tick every correct answer' : 'pick the correct answer'})
-          </span>
+          {m.answers}{' '}
+          <span className="text-ink-soft font-normal">({multi ? m.tickAll : m.pickOne})</span>
         </legend>
         <ul className="space-y-2">
           {fields.map((option, i) => {
@@ -257,15 +256,15 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
                       className="sr-only"
                       checked={correct}
                       onChange={() => choose(i)}
-                      aria-label={`Answer ${i + 1} is correct`}
+                      aria-label={fmt(m.answerCorrect, { number: i + 1 })}
                     />
                     {correct ? <Check className="size-5" aria-hidden /> : null}
                   </label>
                   <Input
-                    aria-label={`Answer ${i + 1}`}
+                    aria-label={fmt(m.answer, { number: i + 1 })}
                     aria-invalid={Boolean(textError)}
                     readOnly={type === 'TRUE_FALSE'}
-                    placeholder={`Answer ${i + 1}`}
+                    placeholder={fmt(m.answer, { number: i + 1 })}
                     {...form.register(`questions.${index}.options.${i}.text`)}
                   />
                   {type !== 'TRUE_FALSE' && (
@@ -273,7 +272,7 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
                       type="button"
                       variant="ghost"
                       size="icon"
-                      aria-label={`Remove answer ${i + 1}`}
+                      aria-label={fmt(m.removeAnswer, { number: i + 1 })}
                       disabled={fields.length <= QUESTION_MIN_OPTIONS}
                       onClick={() => remove(i)}
                     >
@@ -294,7 +293,7 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
             size="sm"
             onClick={() => append({ text: '', isCorrect: false })}
           >
-            <Plus data-icon="inline-start" /> Add answer
+            <Plus data-icon="inline-start" /> {m.addAnswer}
           </Button>
         )}
       </fieldset>
@@ -312,11 +311,9 @@ export function QuestionsPreview({ questions }: { questions: StaffQuestion[] }) 
           className="border-line rounded-card bg-background space-y-3 border p-4 sm:p-6"
         >
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-ink font-extrabold">Question {q.order}</h3>
+            <h3 className="text-ink font-extrabold">{fmt(m.question, { number: q.order })}</h3>
             <Badge variant="outline">{QUESTION_TYPE_LABELS[q.type]}</Badge>
-            <Badge variant="secondary">
-              {q.points} point{q.points === 1 ? '' : 's'}
-            </Badge>
+            <Badge variant="secondary">{plural(q.points, m.point, m.pointsCount)}</Badge>
           </div>
           <p className="text-ink">{q.text}</p>
           <ul className="space-y-1">
@@ -329,7 +326,7 @@ export function QuestionsPreview({ questions }: { questions: StaffQuestion[] }) 
                 )}
               >
                 {o.isCorrect ? (
-                  <Check className="size-4" aria-label="Correct" />
+                  <Check className="size-4" aria-label={m.correct} />
                 ) : (
                   <span className="size-4" aria-hidden />
                 )}

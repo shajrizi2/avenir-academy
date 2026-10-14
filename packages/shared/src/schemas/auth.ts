@@ -7,31 +7,33 @@ import {
   PHONE_PATTERN,
 } from '../constants.js';
 
+// Validation messages are in Albanian: the platform is Albanian only.
+
 export const emailSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .max(EMAIL_MAX_LENGTH)
-  .pipe(z.email('Enter a valid email address'));
+  .max(EMAIL_MAX_LENGTH, `Përdor më së shumti ${EMAIL_MAX_LENGTH} karaktere`)
+  .pipe(z.email('Shkruaj një adresë email-i të vlefshme'));
 
 export const passwordSchema = z
   .string()
-  .min(PASSWORD_MIN_LENGTH, `Use at least ${PASSWORD_MIN_LENGTH} characters`)
-  .max(PASSWORD_MAX_LENGTH, `Use at most ${PASSWORD_MAX_LENGTH} characters`)
-  .regex(/[A-Za-z]/, 'Include at least one letter')
-  .regex(/[0-9]/, 'Include at least one number');
+  .min(PASSWORD_MIN_LENGTH, `Përdor të paktën ${PASSWORD_MIN_LENGTH} karaktere`)
+  .max(PASSWORD_MAX_LENGTH, `Përdor më së shumti ${PASSWORD_MAX_LENGTH} karaktere`)
+  .regex(/[A-Za-z]/, 'Përfshi të paktën një shkronjë')
+  .regex(/[0-9]/, 'Përfshi të paktën një numër');
 
 export const nameSchema = z
   .string()
   .trim()
-  .min(1, 'Required')
-  .max(NAME_MAX_LENGTH, `Use at most ${NAME_MAX_LENGTH} characters`);
+  .min(1, 'E detyrueshme')
+  .max(NAME_MAX_LENGTH, `Përdor më së shumti ${NAME_MAX_LENGTH} karaktere`);
 
 /** Optional phone: empty string is treated as "not provided". */
 export const phoneSchema = z
   .string()
   .trim()
-  .regex(PHONE_PATTERN, 'Enter a valid phone number')
+  .regex(PHONE_PATTERN, 'Shkruaj një numër telefoni të vlefshëm')
   .optional()
   .or(z.literal('').transform(() => undefined));
 
@@ -48,14 +50,14 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export const registerFormSchema = registerSchema
   .extend({ confirmPassword: z.string() })
   .refine((v) => v.password === v.confirmPassword, {
-    message: 'Passwords do not match',
+    message: 'Fjalëkalimet nuk përputhen',
     path: ['confirmPassword'],
   });
 export type RegisterFormInput = z.input<typeof registerFormSchema>;
 
 export const loginSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, 'Enter your password').max(PASSWORD_MAX_LENGTH),
+  password: z.string().min(1, 'Shkruaj fjalëkalimin').max(PASSWORD_MAX_LENGTH),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
@@ -71,7 +73,7 @@ export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export const resetPasswordFormSchema = z
   .object({ password: passwordSchema, confirmPassword: z.string() })
   .refine((v) => v.password === v.confirmPassword, {
-    message: 'Passwords do not match',
+    message: 'Fjalëkalimet nuk përputhen',
     path: ['confirmPassword'],
   });
 export type ResetPasswordFormInput = z.infer<typeof resetPasswordFormSchema>;

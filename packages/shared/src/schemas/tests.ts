@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { tooLong, tooShort } from './course.js';
 import {
   OPTION_TEXT_MAX_LENGTH,
   QUESTION_MAX_OPTIONS,
@@ -15,7 +16,11 @@ import {
 
 /** The fields without the window check, so forms can swap the date inputs (zod can't extend a refined object). */
 export const testSettingsFields = z.object({
-  title: z.string().trim().min(3).max(TEST_TITLE_MAX_LENGTH),
+  title: z
+    .string()
+    .trim()
+    .min(3, tooShort(3))
+    .max(TEST_TITLE_MAX_LENGTH, tooLong(TEST_TITLE_MAX_LENGTH)),
   passMark: z.coerce.number().int().min(1).max(100).default(TEST_DEFAULTS.passMark),
   timeLimitMin: z.coerce
     .number()
@@ -29,27 +34,38 @@ export const testSettingsFields = z.object({
     .min(1)
     .max(TEST_MAX_ATTEMPTS)
     .default(TEST_DEFAULTS.maxAttempts),
-  opensAt: z.iso.datetime({ message: 'Pick a date and time' }),
-  closesAt: z.iso.datetime({ message: 'Pick a date and time' }),
+  opensAt: z.iso.datetime({ message: 'Zgjidh datën dhe orën' }),
+  closesAt: z.iso.datetime({ message: 'Zgjidh datën dhe orën' }),
 });
 
 export const testSettingsSchema = testSettingsFields.refine(
   (v) => new Date(v.closesAt) > new Date(v.opensAt),
-  { message: 'The window must close after it opens', path: ['closesAt'] },
+  { message: 'Testi duhet të mbyllet pasi hapet', path: ['closesAt'] },
 );
 export type TestSettingsInput = z.input<typeof testSettingsSchema>;
 
 export const optionSchema = z.object({
-  text: z.string().trim().min(1, 'Write the answer').max(OPTION_TEXT_MAX_LENGTH),
+  text: z
+    .string()
+    .trim()
+    .min(1, 'Shkruaj përgjigjen')
+    .max(OPTION_TEXT_MAX_LENGTH, tooLong(OPTION_TEXT_MAX_LENGTH)),
   isCorrect: z.boolean(),
 });
 
 export const questionSchema = z
   .object({
     type: z.enum(['SINGLE_CHOICE', 'MULTI_CHOICE', 'TRUE_FALSE']),
-    text: z.string().trim().min(3, 'Write the question').max(QUESTION_TEXT_MAX_LENGTH),
+    text: z
+      .string()
+      .trim()
+      .min(3, 'Shkruaj pyetjen')
+      .max(QUESTION_TEXT_MAX_LENGTH, tooLong(QUESTION_TEXT_MAX_LENGTH)),
     points: z.coerce.number().int().min(1).max(QUESTION_MAX_POINTS).default(1),
-    options: z.array(optionSchema).min(QUESTION_MIN_OPTIONS).max(QUESTION_MAX_OPTIONS),
+    options: z
+      .array(optionSchema)
+      .min(QUESTION_MIN_OPTIONS, `Shto të paktën ${QUESTION_MIN_OPTIONS} opsione`)
+      .max(QUESTION_MAX_OPTIONS, `Më së shumti ${QUESTION_MAX_OPTIONS} opsione`),
   })
   .superRefine((q, ctx) => {
     const problem = questionProblem(q.type, q.options);
@@ -58,7 +74,10 @@ export const questionSchema = z
 export type QuestionInput = z.input<typeof questionSchema>;
 
 export const questionsSchema = z.object({
-  questions: z.array(questionSchema).min(1, 'Add at least one question').max(TEST_MAX_QUESTIONS),
+  questions: z
+    .array(questionSchema)
+    .min(1, 'Shto të paktën një pyetje')
+    .max(TEST_MAX_QUESTIONS, `Më së shumti ${TEST_MAX_QUESTIONS} pyetje`),
 });
 export type QuestionsInput = z.input<typeof questionsSchema>;
 
@@ -73,12 +92,12 @@ export function questionProblem(
 ): string | null {
   const correct = options.filter((o) => o.isCorrect).length;
   if (type === 'TRUE_FALSE' && options.length !== 2) {
-    return 'A true/false question has exactly two options';
+    return 'Një pyetje e vërtetë/e gabuar ka saktësisht dy opsione';
   }
   if (type === 'MULTI_CHOICE') {
-    return correct >= 1 ? null : 'Mark at least one correct answer';
+    return correct >= 1 ? null : 'Shëno të paktën një përgjigje të saktë';
   }
-  return correct === 1 ? null : 'Mark exactly one correct answer';
+  return correct === 1 ? null : 'Shëno saktësisht një përgjigje të saktë';
 }
 
 export const publishTestSchema = z.object({ isPublished: z.boolean() });

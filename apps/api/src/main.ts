@@ -6,10 +6,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 import { type EnvironmentVariables, NodeEnv } from './config/env.validation.js';
 import { REFRESH_COOKIE } from './modules/auth/auth.constants.js';
-import { setupApp } from './setup-app.js';
+import { APP_OPTIONS, setupApp } from './setup-app.js';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, APP_OPTIONS);
   setupApp(app);
 
   const config = app.get<ConfigService<EnvironmentVariables, true>>(ConfigService);
@@ -29,8 +29,8 @@ async function bootstrap(): Promise<void> {
 /** The API reference at /api/docs. Off in production unless SWAGGER_ENABLED=true. */
 function setupSwagger(app: INestApplication): void {
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('AI Academy API')
-    .setDescription('REST API for the AI Academy learning platform')
+    .setTitle('Avenir Academy API')
+    .setDescription('REST API for the Avenir Academy learning platform')
     .setVersion('1.0')
     .addBearerAuth()
     .addCookieAuth(REFRESH_COOKIE)

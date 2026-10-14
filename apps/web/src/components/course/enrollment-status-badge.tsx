@@ -1,23 +1,26 @@
 import type { EnrollmentStatus } from '@ai-academy/shared';
+import { t } from '@/i18n/messages';
 import { cn } from '@/lib/utils';
 
-const STYLES: Record<EnrollmentStatus, { label: string; className: string }> = {
-  PENDING: { label: 'Pending approval', className: 'bg-active-tint text-active-ink' },
-  APPROVED: { label: 'Enrolled', className: 'bg-passed-tint text-passed-ink' },
-  REJECTED: { label: 'Declined', className: 'bg-failed-tint text-failed-ink' },
-  CANCELLED: { label: 'Cancelled', className: 'bg-locked-tint text-locked-ink' },
+const STYLES: Record<EnrollmentStatus, string> = {
+  PENDING: 'bg-active-tint text-active-ink',
+  PENDING_PAYMENT: 'bg-active-tint text-active-ink',
+  APPROVED: 'bg-passed-tint text-passed-ink',
+  REJECTED: 'bg-failed-tint text-failed-ink',
+  CANCELLED: 'bg-locked-tint text-locked-ink',
+  WAITLISTED: 'bg-locked-tint text-locked-ink',
+  EXPIRED: 'bg-failed-tint text-failed-ink',
 };
 
 export function EnrollmentStatusBadge({ status }: { status: EnrollmentStatus }) {
-  const { label, className } = STYLES[status];
   return (
     <span
       className={cn(
         'inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold whitespace-nowrap',
-        className,
+        STYLES[status],
       )}
     >
-      {label}
+      {t.status.enrollment[status]}
     </span>
   );
 }

@@ -13,4 +13,9 @@ export class ListEnrollmentsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   courseId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  groupId?: string;
 }

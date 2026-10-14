@@ -23,9 +23,12 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https:",
   "font-src 'self'",
   `connect-src 'self' ${publicApiOrigin} https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com`,
+  // Offline lessons embed YouTube (privacy-enhanced) and Vimeo videos.
+  'frame-src https://www.youtube-nocookie.com https://player.vimeo.com',
   "frame-ancestors 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  // Checkout navigates to Stripe's hosted page (a script redirect, but allow a form too).
+  "form-action 'self' https://checkout.stripe.com",
   "object-src 'none'",
 ].join('; ');
 

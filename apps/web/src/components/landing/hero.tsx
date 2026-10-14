@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getLandingMessages } from '@/i18n/server';
 import { CohortBadge } from './cohort-badge';
+import { HeroPrice } from './hero-price';
 import { CtaLink } from './cta-link';
 import { HeroDemo } from './hero-demo';
 
@@ -36,6 +37,9 @@ export async function Hero() {
             {t.hero.ctaSecondary}
           </CtaLink>
         </div>
+        <Suspense>
+          <HeroPrice />
+        </Suspense>
         <p className="text-ink-soft mt-5 text-sm">
           <span className="text-ink font-semibold">{t.hero.eyebrow}</span>
           <span aria-hidden> · </span>

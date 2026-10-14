@@ -5,7 +5,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../src/app.module.js';
-import { setupApp } from '../src/setup-app.js';
+import { APP_OPTIONS, setupApp } from '../src/setup-app.js';
 
 describe('Auth flow (e2e)', () => {
   let app: INestApplication<App>;
@@ -14,7 +14,7 @@ describe('Auth flow (e2e)', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication(APP_OPTIONS);
     setupApp(app);
     await app.init();
   });
@@ -81,7 +81,7 @@ describe('Auth flow (e2e)', () => {
         role: 'ADMIN',
       })
       .expect(400);
-    expect(JSON.stringify(res.body)).toContain('property role should not exist');
+    expect(JSON.stringify(res.body)).toContain('Fusha Roli nuk pritej');
   });
 
   it('refreshes the session from the cookie and logs out', async () => {

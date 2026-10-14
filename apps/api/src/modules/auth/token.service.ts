@@ -50,7 +50,7 @@ export class TokenService {
       typeof decoded !== 'object' ||
       typeof (decoded as JwtPayload).sub !== 'string'
     ) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('Token i pavlefshëm');
     }
     return (decoded as JwtPayload).sub;
   }
@@ -69,7 +69,9 @@ export class TokenService {
       return payload;
     } catch {
       throw new UnauthorizedException(
-        purpose === 'reset' ? 'This reset link is invalid or has expired' : 'Session expired',
+        purpose === 'reset'
+          ? 'Kjo lidhje nuk është e vlefshme ose ka skaduar'
+          : 'Sesioni ka skaduar',
       );
     }
   }

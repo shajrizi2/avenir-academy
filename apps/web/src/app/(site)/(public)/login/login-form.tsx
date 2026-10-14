@@ -10,6 +10,7 @@ import { FormError } from '@/components/form-error';
 import { TextField } from '@/components/form/text-field';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
+import { t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useAuth } from '@/lib/auth-context';
@@ -48,11 +49,17 @@ export function LoginForm() {
       <fieldset disabled={!hydrated} className="min-w-0">
         <FieldGroup>
           <FormError message={error} />
-          <TextField form={form} name="email" label="Email" type="email" autoComplete="email" />
+          <TextField
+            form={form}
+            name="email"
+            label={t.auth.fields.email}
+            type="email"
+            autoComplete="email"
+          />
           <TextField
             form={form}
             name="password"
-            label="Password"
+            label={t.auth.fields.password}
             type="password"
             autoComplete="current-password"
           />
@@ -61,7 +68,7 @@ export function LoginForm() {
               href="/forgot-password"
               className="text-ink text-sm font-semibold underline-offset-4 hover:underline"
             >
-              Forgot your password?
+              {t.auth.login.forgot}
             </Link>
           </div>
           <Button
@@ -70,7 +77,7 @@ export function LoginForm() {
             size="lg"
             disabled={!hydrated || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? 'Logging in…' : 'Log in'}
+            {form.formState.isSubmitting ? t.auth.login.submitting : t.auth.login.submit}
           </Button>
         </FieldGroup>
       </fieldset>

@@ -21,7 +21,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../src/app.module.js';
 import { Role } from '../src/generated/prisma/enums.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
-import { setupApp } from '../src/setup-app.js';
+import { APP_OPTIONS, setupApp } from '../src/setup-app.js';
 
 const PASSWORD = 'Password123';
 const MEET = 'https://meet.google.com/abc-defg-hij';
@@ -67,7 +67,7 @@ describe('Learning flow (e2e)', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication(APP_OPTIONS);
     setupApp(app);
     await app.init();
     prisma = app.get(PrismaService);
@@ -206,7 +206,7 @@ describe('Learning flow (e2e)', () => {
     const detail = await http().get(`/api/v1/modules/${module1}`).set(as('student')).expect(200);
     expect(detail.body).toMatchObject({ status: 'ACTIVE', canManage: false });
     const locked = await http().get(`/api/v1/modules/${module2}`).set(as('student')).expect(403);
-    expect(JSON.stringify(locked.body)).toContain('locked');
+    expect(JSON.stringify(locked.body)).toContain('mbyllur');
     await http().get(`/api/v1/modules/${module1}`).set(as('outsider')).expect(403);
   });
 

@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsEmail,
   IsInt,
   IsISO8601,
@@ -60,7 +61,7 @@ export class UpdateSiteSettingsDto {
   @IsOptional()
   @IsString()
   @Length(3, 3)
-  @Matches(/^[A-Z]{3}$/, { message: 'priceCurrency must be an ISO 4217 code such as EUR' })
+  @Matches(/^[A-Z]{3}$/, { message: 'Monedha duhet të jetë një kod ISO 4217, p.sh. EUR' })
   priceCurrency?: string;
 
   @ApiPropertyOptional({ nullable: true, example: 'për modul' })
@@ -90,7 +91,7 @@ export class UpdateSiteSettingsDto {
   @IsOptional()
   @Transform(emptyToNull)
   @ValidateIf((_o, v) => v !== null)
-  @Matches(/^\+?[0-9 ()-]{6,30}$/, { message: 'contactPhone must be a valid phone number' })
+  @Matches(/^\+?[0-9 ()-]{6,30}$/, { message: 'Numri i telefonit nuk është i vlefshëm' })
   contactPhone?: string | null;
 
   @ApiPropertyOptional({ nullable: true, example: '38344000000', description: 'Digits only' })
@@ -98,7 +99,52 @@ export class UpdateSiteSettingsDto {
   @Transform(emptyToNull)
   @ValidateIf((_o, v) => v !== null)
   @Matches(/^[1-9][0-9]{6,14}$/, {
-    message: 'whatsappNumber must be digits in international format, without + or spaces',
+    message:
+      'Numri i WhatsApp duhet të ketë vetëm shifra, në format ndërkombëtar, pa + dhe pa hapësira',
   })
   whatsappNumber?: string | null;
+
+  @ApiPropertyOptional({ description: 'Offer card payments through Stripe at checkout' })
+  @IsOptional()
+  @IsBoolean()
+  stripeEnabled?: boolean;
+
+  @ApiPropertyOptional({ description: 'Offer bank transfer at checkout' })
+  @IsOptional()
+  @IsBoolean()
+  bankTransferEnabled?: boolean;
+
+  @ApiPropertyOptional({ nullable: true })
+  @IsOptional()
+  @Transform(emptyToNull)
+  @ValidateIf((_o, v) => v !== null)
+  @IsString()
+  @MaxLength(120)
+  bankBeneficiary?: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 'AL47212110090000000235698741' })
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.replace(/\s+/g, '').toUpperCase() || null : value,
+  )
+  @ValidateIf((_o, v) => v !== null)
+  @Matches(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, { message: 'IBAN-i nuk është i vlefshëm' })
+  bankIban?: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  @IsOptional()
+  @Transform(emptyToNull)
+  @ValidateIf((_o, v) => v !== null)
+  @IsString()
+  @MaxLength(120)
+  bankName?: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toUpperCase() || null : value,
+  )
+  @ValidateIf((_o, v) => v !== null)
+  @Matches(/^[A-Z0-9]{8}([A-Z0-9]{3})?$/, { message: 'Kodi SWIFT/BIC nuk është i vlefshëm' })
+  bankSwift?: string | null;
 }

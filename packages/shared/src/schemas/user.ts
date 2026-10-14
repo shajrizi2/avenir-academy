@@ -2,10 +2,10 @@ import { z } from 'zod';
 import { BIO_MAX_LENGTH, TITLE_MAX_LENGTH, URL_MAX_LENGTH } from '../constants.js';
 import { ROLES } from '../enums.js';
 import { nameSchema, phoneSchema } from './auth.js';
+import { tooLong } from './course.js';
 
 /** Empty string means "clear this field". */
-const optionalText = (max: number) =>
-  z.string().trim().max(max, `Use at most ${max} characters`).optional();
+const optionalText = (max: number) => z.string().trim().max(max, tooLong(max)).optional();
 
 export const updateProfileSchema = z.object({
   firstName: nameSchema,
@@ -15,8 +15,10 @@ export const updateProfileSchema = z.object({
   title: optionalText(TITLE_MAX_LENGTH),
   bio: optionalText(BIO_MAX_LENGTH),
   avatarUrl: z
-    .union([z.literal(''), z.url('Enter a full URL (https://…)').max(URL_MAX_LENGTH)])
+    .union([z.literal(''), z.url('Shkruaj një URL të plotë (https://…)').max(URL_MAX_LENGTH)])
     .optional(),
+  /** Students: receive the offline-learning emails between lectures. */
+  offlineEmailsEnabled: z.boolean().optional(),
 });
 export type UpdateProfileInput = z.input<typeof updateProfileSchema>;
 

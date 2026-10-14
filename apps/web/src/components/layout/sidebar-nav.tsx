@@ -3,6 +3,7 @@
 import type { Role } from '@ai-academy/shared';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { t } from '@/i18n/messages';
 import { cn } from '@/lib/utils';
 import { navItemsFor } from './nav-items';
 
@@ -20,7 +21,7 @@ export function SidebarNav({ role, onNavigate }: SidebarNavProps) {
     .sort((a, b) => b.href.length - a.href.length)[0];
 
   return (
-    <nav aria-label="Sidebar" className="flex flex-col gap-1">
+    <nav aria-label={t.nav.sidebar} className="flex flex-col gap-1">
       {items.map(({ href, label, icon: Icon }) => (
         <Link
           key={href}

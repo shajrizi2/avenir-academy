@@ -1,4 +1,9 @@
-import { ModuleStatus, type Prisma } from '../../generated/prisma/client.js';
+import {
+  EnrollmentStatus,
+  ModuleStatus,
+  PaymentStatus,
+  type Prisma,
+} from '../../generated/prisma/client.js';
 import { type ModuleRefRow, moduleRefSelect } from '../tests/test.view.js';
 
 type Tx = Prisma.TransactionClient;
@@ -42,9 +47,69 @@ export function countedAttemptsWhere(
   return { testId, userId, ...(unlockedAt ? { startedAt: { gte: unlockedAt } } : {}) };
 }
 
+/** Whether the student has a CONFIRMED payment for the month of this module. */
+export async function isModulePaid(tx: Tx, userId: string, moduleId: string): Promise<boolean> {
+  const paid = await tx.payment.count({
+    where: { moduleId, status: PaymentStatus.CONFIRMED, enrollment: { userId } },
+  });
+  return paid > 0;
+}
+
 /**
- * Marks a module PASSED and opens the next one (order + 1) in the same transaction.
- * Returns the module that was unlocked, or null when it was the last one or already open.
+ * Opens a module for a student when everything is in place: they are enrolled, the module
+ * is still LOCKED, the module before it is PASSED (or it is the first one) and the month is
+ * paid. Called after a pass and after a payment is confirmed, so whichever comes last
+ * unlocks. Returns the module when it was opened, else null.
+ */
+export async function unlockIfReady(
+  tx: Tx,
+  userId: string,
+  moduleId: string,
+  now = new Date(),
+): Promise<ModuleRefRow | null> {
+  const module = await tx.module.findUnique({
+    where: { id: moduleId },
+    select: {
+      ...moduleRefSelect,
+      progress: { where: { userId }, select: { status: true } },
+      course: {
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          enrollments: { where: { userId }, select: { status: true } },
+        },
+      },
+    },
+  });
+  if (!module) return null;
+  if (module.course.enrollments[0]?.status !== EnrollmentStatus.APPROVED) return null;
+  const current = module.progress[0]?.status;
+  if (current && current !== ModuleStatus.LOCKED) return null;
+
+  if (module.order > 1) {
+    const previous = await tx.moduleProgress.findFirst({
+      where: { userId, module: { courseId: module.course.id, order: module.order - 1 } },
+      select: { status: true },
+    });
+    if (previous?.status !== ModuleStatus.PASSED) return null;
+  }
+  if (!(await isModulePaid(tx, userId, moduleId))) return null;
+
+  await tx.moduleProgress.upsert({
+    where: { userId_moduleId: { userId, moduleId } },
+    update: { status: ModuleStatus.ACTIVE, unlockedAt: now },
+    create: { userId, moduleId, status: ModuleStatus.ACTIVE, unlockedAt: now },
+  });
+  const { progress: _progress, course, ...ref } = module;
+  return { ...ref, course: { id: course.id, slug: course.slug, title: course.title } };
+}
+
+/**
+ * Marks a module PASSED and opens the next one (order + 1) in the same transaction, when
+ * that month is paid (otherwise it opens as soon as the payment is confirmed).
+ * Returns the module that was unlocked, or null when it was the last one, already open, or
+ * still unpaid.
  */
 export async function passModule(
   tx: Tx,
@@ -60,25 +125,8 @@ export async function passModule(
     where: {
       courseId_order: { courseId: progress.module.courseId, order: progress.module.order + 1 },
     },
-    select: {
-      ...moduleRefSelect,
-      progress: { where: { userId: progress.userId }, select: { status: true } },
-    },
+    select: { id: true },
   });
   if (!next) return null;
-
-  const { progress: nextProgress, ...ref } = next;
-  const current = nextProgress[0]?.status;
-  if (current && current !== ModuleStatus.LOCKED) return null;
-  await tx.moduleProgress.upsert({
-    where: { userId_moduleId: { userId: progress.userId, moduleId: next.id } },
-    update: { status: ModuleStatus.ACTIVE, unlockedAt: now },
-    create: {
-      userId: progress.userId,
-      moduleId: next.id,
-      status: ModuleStatus.ACTIVE,
-      unlockedAt: now,
-    },
-  });
-  return ref;
+  return unlockIfReady(tx, progress.userId, next.id, now);
 }

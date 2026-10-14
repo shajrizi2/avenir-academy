@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { errorMessage } from '@/lib/api';
+import { fmt, t } from '@/i18n/messages';
 import { usersQuery } from '@/lib/queries';
 import { UsersTable } from './users-table';
 
@@ -69,8 +70,8 @@ export function UserManagement() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or email"
-            aria-label="Search users"
+            placeholder={t.admin.users.searchPlaceholder}
+            aria-label={t.admin.users.searchLabel}
             className="pl-8"
           />
         </div>
@@ -80,14 +81,14 @@ export function UserManagement() {
             update({ role: value === ALL ? undefined : value, page: undefined })
           }
         >
-          <SelectTrigger className="w-full sm:w-44" aria-label="Filter by role">
+          <SelectTrigger className="w-full sm:w-44" aria-label={t.admin.users.filterRole}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>All roles</SelectItem>
-            <SelectItem value="STUDENT">Students</SelectItem>
-            <SelectItem value="INSTRUCTOR">Instructors</SelectItem>
-            <SelectItem value="ADMIN">Admins</SelectItem>
+            <SelectItem value={ALL}>{t.admin.users.allRoles}</SelectItem>
+            <SelectItem value="STUDENT">{t.admin.users.students}</SelectItem>
+            <SelectItem value="INSTRUCTOR">{t.admin.users.instructors}</SelectItem>
+            <SelectItem value="ADMIN">{t.admin.users.admins}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -99,8 +100,8 @@ export function UserManagement() {
       ) : data.items.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No users found"
-          description="Try a different search or role filter."
+          title={t.admin.users.emptyTitle}
+          description={t.admin.users.emptyText}
         />
       ) : (
         <div className={isFetching ? 'opacity-60 transition-opacity' : undefined}>
@@ -111,7 +112,12 @@ export function UserManagement() {
       {data && data.total > 0 && (
         <div className="text-muted-foreground flex items-center justify-between gap-4 text-sm">
           <span>
-            {data.total} user{data.total === 1 ? '' : 's'} · page {page} of {pageCount}
+            {fmt(t.common.pageOf, {
+              count: data.total,
+              noun: t.admin.users.noun,
+              page,
+              pages: pageCount,
+            })}
           </span>
           <div className="flex gap-2">
             <Button
@@ -119,14 +125,14 @@ export function UserManagement() {
               disabled={page <= 1}
               onClick={() => update({ page: String(page - 1) })}
             >
-              Previous
+              {t.common.previous}
             </Button>
             <Button
               variant="outline"
               disabled={page >= pageCount}
               onClick={() => update({ page: String(page + 1) })}
             >
-              Next
+              {t.common.next}
             </Button>
           </div>
         </div>

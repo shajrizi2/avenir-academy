@@ -44,7 +44,7 @@ describe('AuthService', () => {
       update: ReturnType<typeof vi.fn>;
     };
   };
-  let mail: { send: ReturnType<typeof vi.fn> };
+  let mail: { sendLogged: ReturnType<typeof vi.fn> };
   let tokens: TokenService;
   let service: AuthService;
   let passwordHash: string;
@@ -52,7 +52,7 @@ describe('AuthService', () => {
   beforeEach(async () => {
     passwordHash = await bcrypt.hash('secret123', 4);
     prisma = { user: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() } };
-    mail = { send: vi.fn().mockResolvedValue(undefined) };
+    mail = { sendLogged: vi.fn().mockResolvedValue('sent') };
     tokens = new TokenService(new JwtService({}), config);
     service = new AuthService(
       prisma as unknown as PrismaService,
@@ -114,7 +114,7 @@ describe('AuthService', () => {
       prisma.user.findUnique.mockResolvedValue(null);
       await expect(
         service.login({ email: 'nobody@example.com', password: 'secret123' }),
-      ).rejects.toThrow('Invalid email or password');
+      ).rejects.toThrow('Email-i ose fjalëkalimi është i gabuar');
     });
   });
 
@@ -151,18 +151,18 @@ describe('AuthService', () => {
     it('emails a reset link when the account exists', async () => {
       prisma.user.findUnique.mockResolvedValue(makeUser(passwordHash));
       const res = await service.forgotPassword({ email: 'ada@example.com' });
-      expect(mail.send).toHaveBeenCalledOnce();
-      const message = mail.send.mock.calls[0][0] as { to: string; text: string };
+      expect(mail.sendLogged).toHaveBeenCalledOnce();
+      const message = mail.sendLogged.mock.calls[0][0] as { to: string; text: string };
       expect(message.to).toBe('ada@example.com');
       expect(message.text).toContain('http://localhost:3000/reset-password?token=');
-      expect(res.message).toMatch(/If an account exists/);
+      expect(res.message).toMatch(/Nëse ekziston një llogari/);
     });
 
     it('answers identically without sending mail for unknown emails', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
       const res = await service.forgotPassword({ email: 'nobody@example.com' });
-      expect(mail.send).not.toHaveBeenCalled();
-      expect(res.message).toMatch(/If an account exists/);
+      expect(mail.sendLogged).not.toHaveBeenCalled();
+      expect(res.message).toMatch(/Nëse ekziston një llogari/);
     });
   });
 
@@ -183,7 +183,7 @@ describe('AuthService', () => {
       const { token } = await tokens.signReset(user);
       prisma.user.findUnique.mockResolvedValue(makeUser(await bcrypt.hash('newpass123', 4)));
       await expect(service.resetPassword({ token, password: 'another123' })).rejects.toThrow(
-        'This reset link is invalid or has expired',
+        'Kjo lidhje nuk është e vlefshme ose ka skaduar',
       );
       expect(prisma.user.update).not.toHaveBeenCalled();
     });

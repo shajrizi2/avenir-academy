@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import type { LandingMessages } from '@/i18n/messages';
 import { CtaLink } from './cta-link';
-import { LanguageSwitch } from './language-switch';
 import { MobileMenu } from './mobile-menu';
 
 interface LandingHeaderProps {
@@ -12,7 +11,6 @@ interface LandingHeaderProps {
 }
 
 export function LandingHeader({ locale, nav }: LandingHeaderProps) {
-  const otherLocale: Locale = locale === 'sq' ? 'en' : 'sq';
   const links = [
     { href: '#how-it-works', label: nav.howItWorks },
     { href: '#tracks', label: nav.tracks },
@@ -35,12 +33,6 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
           ))}
         </nav>
         <div className="flex items-center justify-end gap-1 sm:gap-2">
-          <LanguageSwitch
-            target={otherLocale}
-            label={nav.switchTo}
-            srLabel={nav.language}
-            className="hidden lg:inline-flex"
-          />
           <Link
             href="/login"
             className="text-ink hidden rounded-lg px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline md:inline-flex"
@@ -51,7 +43,7 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
             {nav.cta}
           </CtaLink>
           <div className="md:hidden">
-            <MobileMenu locale={locale} otherLocale={otherLocale} links={links} nav={nav} />
+            <MobileMenu locale={locale} links={links} nav={nav} />
           </div>
         </div>
       </div>

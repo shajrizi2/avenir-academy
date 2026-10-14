@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import {
   AttemptStatus,
   EnrollmentStatus,
+  GroupStatus,
   ModuleStatus,
+  PaymentMethod,
+  PaymentStatus,
   Role,
 } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -20,6 +23,9 @@ export interface AdminStatsRecord {
   attemptsLast30Days: number;
   passRateLast30Days: number | null;
   failedModules: number;
+  pendingBankTransfers: number;
+  waitlisted: number;
+  openGroups: number;
 }
 
 @Injectable()
@@ -44,6 +50,9 @@ export class StatsService {
       attemptsLast30Days,
       passedLast30Days,
       failedModules,
+      pendingBankTransfers,
+      waitlisted,
+      openGroups,
     ] = await this.prisma.$transaction([
       this.prisma.user.count({ where: { role: Role.STUDENT } }),
       this.prisma.user.count({ where: { role: Role.INSTRUCTOR } }),
@@ -59,6 +68,11 @@ export class StatsService {
       this.prisma.testAttempt.count({ where: finishedSince }),
       this.prisma.testAttempt.count({ where: { ...finishedSince, passed: true } }),
       this.prisma.moduleProgress.count({ where: { status: ModuleStatus.FAILED } }),
+      this.prisma.payment.count({
+        where: { provider: PaymentMethod.BANK_TRANSFER, status: PaymentStatus.PENDING },
+      }),
+      this.prisma.enrollment.count({ where: { status: EnrollmentStatus.WAITLISTED } }),
+      this.prisma.group.count({ where: { status: { in: [GroupStatus.OPEN, GroupStatus.FULL] } } }),
     ]);
     return {
       students,
@@ -72,6 +86,9 @@ export class StatsService {
       passRateLast30Days:
         attemptsLast30Days === 0 ? null : Math.round((passedLast30Days / attemptsLast30Days) * 100),
       failedModules,
+      pendingBankTransfers,
+      waitlisted,
+      openGroups,
     };
   }
 }

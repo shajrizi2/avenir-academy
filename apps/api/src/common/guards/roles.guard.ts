@@ -23,7 +23,7 @@ export class RolesGuard implements CanActivate {
 
     const user = context.switchToHttp().getRequest<Request>().user as AuthUser | undefined;
     if (!user || !roles.includes(user.role)) {
-      throw new ForbiddenException('You do not have permission to perform this action');
+      throw new ForbiddenException('Nuk ke leje për këtë veprim');
     }
     return true;
   }

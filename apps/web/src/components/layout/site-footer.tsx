@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CookieSettingsButton } from '@/components/analytics/analytics';
 import { Logo } from '@/components/logo';
+import { t } from '@/i18n/messages';
 
 const linkClass = 'text-ink-soft hover:text-ink font-medium underline-offset-4 hover:underline';
 
@@ -10,19 +11,19 @@ export function SiteFooter() {
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-10 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="space-y-2">
           <Logo />
-          <p className="text-ink-soft">Live courses on AI and digital marketing.</p>
+          <p className="text-ink-soft">{t.nav.footerTagline}</p>
         </div>
-        <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-3">
+        <nav aria-label={t.nav.footer} className="flex flex-wrap gap-x-6 gap-y-3">
           <Link href="/courses" className={linkClass}>
-            Courses
+            {t.nav.courses}
           </Link>
           <Link href="/register" className={linkClass}>
-            Create account
+            {t.nav.createAccount}
           </Link>
           <Link href="/login" className={linkClass}>
-            Log in
+            {t.nav.login}
           </Link>
-          <CookieSettingsButton label="Cookie settings" className={linkClass} />
+          <CookieSettingsButton label={t.nav.cookieSettings} className={linkClass} />
         </nav>
       </div>
     </footer>

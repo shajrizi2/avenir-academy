@@ -23,7 +23,9 @@
     "S3_*",
     "MAIL_TRANSPORT",
     "MAIL_FROM",
-    "SMTP_*"
+    "SMTP_*",
+    "STRIPE_*",
+    "CRON_ENABLED"
   ],
   "tasks": {
     "build": {

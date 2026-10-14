@@ -2,6 +2,7 @@ import 'server-only';
 import type {
   CourseDetail,
   CourseSummary,
+  GroupSummary,
   Locale,
   PublicInstructor,
   PublicTestimonial,
@@ -45,6 +46,17 @@ export const getTracks = cache((): Promise<CourseDetail[] | null> =>
     'tracks',
   ),
 );
+
+/** Groups students can still join (open or full, not yet finished), with real seats left. */
+export const getOpenGroups = cache((): Promise<GroupSummary[]> =>
+  safe(() => serverGet<GroupSummary[]>('/groups'), [], 'groups'),
+);
+
+/** The first upcoming group of a course, or null. */
+export async function getNextGroup(courseId: string): Promise<GroupSummary | null> {
+  const groups = await getOpenGroups();
+  return groups.find((g) => g.course.id === courseId) ?? null;
+}
 
 export const getInstructors = cache((): Promise<PublicInstructor[]> =>
   safe(() => serverGet<PublicInstructor[]>('/instructors'), [], 'instructors'),

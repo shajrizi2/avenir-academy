@@ -3,6 +3,7 @@
 import { TriangleAlert } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
+import { t } from '@/i18n/messages';
 
 export default function ErrorPage({
   retry,
@@ -15,9 +16,9 @@ export default function ErrorPage({
       <div className="w-full">
         <EmptyState
           icon={TriangleAlert}
-          title="Something went wrong"
-          description="We couldn't load this page. The service may be temporarily unavailable."
-          action={<Button onClick={retry}>Try again</Button>}
+          title={t.errors.pageTitle}
+          description={t.errors.pageText}
+          action={<Button onClick={retry}>{t.common.retry}</Button>}
         />
       </div>
     </main>

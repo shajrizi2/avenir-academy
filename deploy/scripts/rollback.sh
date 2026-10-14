@@ -17,7 +17,7 @@ CURRENT="$(cat "$DIR/.image-tag" 2>/dev/null || true)"
 export IMAGE_TAG="$TAG"
 
 log "Rolling back to $TAG (current: ${CURRENT:-unknown})"
-"$COMPOSE" pull api web
+pull_images api web
 # --no-deps: skip the migrate job (the old migrations folder may lack the newest ones).
 "$COMPOSE" up -d --no-deps --wait --wait-timeout 300 api web
 "$COMPOSE" up -d --wait caddy
