@@ -80,8 +80,13 @@ services:
       # Requests arrive from Caddy (and the web container's /api/v1 rewrite) on private Docker
       # addresses; trusting them makes rate limits see the real client IP (PLAN D3).
       TRUST_PROXY: loopback, uniquelocal
+      # Only used with STORAGE_DRIVER=local (temporary mode, before R2): materials go to the
+      # uploads-data volume, so they survive redeploys.
+      UPLOAD_DIR: /data/uploads
     depends_on:
       migrate: { condition: service_completed_successfully }
+    volumes:
+      - uploads-data:/data/uploads
     # backend: the database; edge: Caddy, plus outbound access to R2 and Resend.
     networks: [backend, edge]
     deploy:
@@ -158,3 +163,4 @@ volumes:
   postgres-data:
   caddy-data:
   caddy-config:
+  uploads-data:
