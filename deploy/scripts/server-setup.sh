@@ -59,8 +59,11 @@ PasswordAuthentication no
 KbdInteractiveAuthentication no
 PubkeyAuthentication yes
 CONF
+# Ubuntu 24.04 starts sshd from ssh.socket, so this directory may not exist yet and
+# `sshd -t` would fail with "Missing privilege separation directory".
+install -d -m 0755 /run/sshd
 sshd -t
-systemctl reload ssh
+systemctl reload ssh 2>/dev/null || systemctl restart ssh.socket
 
 step "Firewall: only 22, 80 and 443"
 ufw default deny incoming
