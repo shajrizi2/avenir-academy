@@ -64,17 +64,17 @@ All times are stored in UTC and displayed in **Europe/Tirane**, in Albanian (the
 
 ## 3. Tech stack
 
-| Area      | Choice                                                                                                                  |
-| --------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Monorepo  | pnpm workspaces + Turborepo, TypeScript everywhere, ESLint + Prettier                                                   |
-| Web       | Next.js (App Router), Tailwind CSS, shadcn/ui, TanStack Query, react-hook-form + zod                                    |
-| API       | NestJS, Prisma ORM, PostgreSQL, Passport JWT (access + refresh tokens), bcrypt, class-validator DTOs                    |
-| API paths | Global prefix `/api/v1`, Swagger at `/api/docs`                                                                         |
-| Shared    | `packages/shared`: zod schemas, enums, and API types used by both web and api                                           |
-| Local dev | `docker-compose.yml` with PostgreSQL 16, plus a `.env.example` in each app                                              |
-| Tests     | **Vitest** for API unit and e2e tests (see decision D1), Playwright for web (landing, main journeys, axe WCAG 2.1 AA)   |
-| CI        | GitHub Actions: install, format, lint, type-check, unit tests, build, API e2e, Playwright                               |
-| Hosting   | One DigitalOcean Droplet with Docker Compose: Postgres, API, web, Caddy (HTTPS), backups to R2. See docs/DEPLOY.md, D28 |
+| Area      | Choice                                                                                                                         |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Monorepo  | pnpm workspaces + Turborepo, TypeScript everywhere, ESLint + Prettier                                                          |
+| Web       | Next.js (App Router), Tailwind CSS, shadcn/ui, TanStack Query, react-hook-form + zod                                           |
+| API       | NestJS, Prisma ORM, PostgreSQL, Passport JWT (access + refresh tokens), bcrypt, class-validator DTOs                           |
+| API paths | Global prefix `/api/v1`, Swagger at `/api/docs`                                                                                |
+| Shared    | `packages/shared`: zod schemas, enums, and API types used by both web and api                                                  |
+| Local dev | `docker-compose.yml` with PostgreSQL 16, plus a `.env.example` in each app                                                     |
+| Tests     | **Vitest** for API unit and e2e tests (see decision D1), Playwright for web (landing, main journeys, axe WCAG 2.1 AA)          |
+| CI        | GitHub Actions: install, format, lint, type-check, unit tests, build, API e2e, Playwright                                      |
+| Hosting   | One Hetzner Cloud server (CX23) with Docker Compose: Postgres, API, web, Caddy (HTTPS), backups to R2. See docs/DEPLOY.md, D28 |
 
 ## 4. Data model
 
@@ -247,4 +247,4 @@ Monorepo (pnpm + Turborepo), Next.js and NestJS apps, `packages/shared`, Postgre
 - **D31.** Payments (product owner, launch): a `PaymentProvider` interface with `StripeProvider` (hosted Checkout, `price_data` from the course, `locale: auto` because Stripe has no Albanian, 30-minute expiry, `client_reference_id` = our payment id, signed webhooks on a raw-body route with `StripeEvent` dedup, refunds through the API) and `BankTransferProvider` (IBAN + reference `AV-XXXXXXXX`, admin confirmation). Only the webhook confirms a card payment. Each month is paid separately and the next module opens only when the test is passed and the month is paid (`unlockIfReady`). Admins can record manual payments for money received outside the platform. `STRIPE_FAKE=true` (never in production) swaps in a fake client for tests and demos.
 - **D32.** Emails and jobs (launch): every email goes through `MailService.sendLogged` with a unique key stored in `EmailLog`, so cron jobs and restarts never send twice. Jobs run inside the API with `@nestjs/schedule` in Europe/Tirane (`CRON_ENABLED=false` in tests, which call the services with a fixed `now`). Reminders go only to students with a confirmed payment for that month; the offline-learning email goes only on days without a lecture, on the group's configured days (Sundays off), to students who haven't opted out. The timetable email carries an `.ics` built in-house (no library).
 - **D33.** Offline lessons (launch): Markdown rendered with react-markdown without raw HTML (no XSS), YouTube (privacy-enhanced) and Vimeo embeds allowed by the CSP's `frame-src`, completion per student, and a "continue where you left off" card.
-- **D28.** Deployment (product owner, replaces D20): one DigitalOcean Droplet (Ubuntu 24.04, 2 vCPU / 4 GB, FRA1, weekly DO backups). Separate images per app (`apps/web/Dockerfile`, `apps/api/Dockerfile`, `turbo prune`), built by `.github/workflows/deploy.yml` after CI passes on `main`, pushed to GHCR tagged with the git SHA, and deployed over SSH by `deploy/scripts/deploy.sh`, which migrates (`prisma migrate deploy` from the api image), health-checks through Caddy and rolls back to the previous tag on failure. Postgres is on an internal-only Docker network. A backup container dumps the database nightly at 02:30 Europe/Tirane to the private R2 bucket `avenir-backups` (14 daily + 8 weekly). Email goes through Resend's SMTP (D21, no code change). The first admin comes from `node dist/src/cli/seed-admin.js` with `ADMIN_*` variables. Runbook: docs/DEPLOY.md.
+- **D28.** Deployment (product owner, replaces D20): one Hetzner Cloud server (CX23: Ubuntu 24.04, 2 vCPU / 4 GB, Helsinki; a Hetzner firewall allows only 22/80/443 and ICMP; first planned as a DigitalOcean Droplet). Separate images per app (`apps/web/Dockerfile`, `apps/api/Dockerfile`, `turbo prune`), built by `.github/workflows/deploy.yml` after CI passes on `main`, pushed to GHCR tagged with the git SHA, and deployed over SSH by `deploy/scripts/deploy.sh`, which migrates (`prisma migrate deploy` from the api image), health-checks through Caddy and rolls back to the previous tag on failure. Postgres is on an internal-only Docker network. A backup container dumps the database nightly at 02:30 Europe/Tirane to the private R2 bucket `avenir-backups` (14 daily + 8 weekly). Email goes through Resend's SMTP (D21, no code change). The first admin comes from `node dist/src/cli/seed-admin.js` with `ADMIN_*` variables. Runbook: docs/DEPLOY.md. Launched on 2026-10-15 in **temporary mode** (`STRIPE_ENABLED=false`, `STORAGE_DRIVER=local` on a Docker volume, `MAIL_TRANSPORT=console`; DEPLOY.md 6a) until the Stripe, R2 and Resend accounts exist.
