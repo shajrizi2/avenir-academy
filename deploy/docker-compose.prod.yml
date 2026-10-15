@@ -1,4 +1,4 @@
-# Production stack for one DigitalOcean Droplet (docs/DEPLOY.md). Run it through the wrapper,
+# Production stack for one Hetzner Cloud server (docs/DEPLOY.md). Run it through the wrapper,
 # which passes the env file and the image tag:
 #   deploy/scripts/compose.sh up -d
 # Equivalent: docker compose -f docker-compose.prod.yml --env-file .env.production up -d

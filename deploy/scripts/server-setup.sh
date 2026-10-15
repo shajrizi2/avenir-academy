@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# One-time setup of a fresh Ubuntu 24.04 Droplet (docs/DEPLOY.md, step 3). Run as root:
-#   scp deploy/scripts/server-setup.sh root@<droplet-ip>:/root/
-#   ssh -t root@<droplet-ip> bash /root/server-setup.sh     (-t: it asks for a sudo password)
+# One-time setup of a fresh Ubuntu 24.04 server (docs/DEPLOY.md, step 3). Run as root:
+#   scp deploy/scripts/server-setup.sh root@<server-ip>:/root/
+#   ssh -t root@<server-ip> bash /root/server-setup.sh      (-t: it asks for a sudo password)
 # Safe to run again: every step checks what is already there.
 #
-# It creates the sudo user `deploy` with the SSH keys root has (the ones you gave
-# DigitalOcean), then turns off root login and password logins. KEEP THIS ROOT SESSION OPEN
-# until `ssh deploy@<droplet-ip>` works from a second terminal.
+# It creates the sudo user `deploy` with the SSH keys root has (the ones you gave Hetzner),
+# then turns off root login and password logins. KEEP THIS ROOT SESSION OPEN until
+# `ssh deploy@<server-ip>` works from a second terminal.
 set -euo pipefail
 
 DEPLOY_USER=deploy
@@ -38,7 +38,7 @@ fi
 install -d -m 700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "/home/$DEPLOY_USER/.ssh"
 keys="/home/$DEPLOY_USER/.ssh/authorized_keys"
 touch "$keys"
-# Add root's keys (DigitalOcean puts yours there) and, optionally, SSH_PUBLIC_KEY.
+# Add root's keys (Hetzner puts yours there) and, optionally, SSH_PUBLIC_KEY.
 { cat /root/.ssh/authorized_keys 2>/dev/null || true; echo "${SSH_PUBLIC_KEY:-}"; } |
   { grep -E '^(ssh-|ecdsa-|sk-)' || true; } | while read -r key; do
     grep -qxF "$key" "$keys" || echo "$key" >>"$keys"
@@ -139,7 +139,7 @@ install -d -m 750 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$APP_DIR" "$APP_DIR/deplo
 step "Done"
 cat <<DONE
 Now, from a SECOND terminal (keep this one open until it works):
-  ssh $DEPLOY_USER@$(curl -fsS --max-time 3 https://api.ipify.org 2>/dev/null || echo '<droplet-ip>')
+  ssh $DEPLOY_USER@$(curl -fsS --max-time 3 https://api.ipify.org 2>/dev/null || echo '<server-ip>')
   docker ps        # works without sudo (new group membership)
 Root login and password logins are now off.
 DONE

@@ -1,10 +1,10 @@
 # Deploying Avenir Academy
 
-Production runs on **one DigitalOcean Droplet with Docker Compose** (PLAN D20, D26–D28).
+Production runs on **one Hetzner Cloud server (CX23) with Docker Compose** (PLAN D20, D26–D28).
 Follow sections 1–10 once, in order; section 11 is for every day after launch.
 
 ```
-                    ┌──────────────── Droplet (Ubuntu 24.04, FRA1) ─────────────────┐
+                    ┌──────────── Hetzner CX23 (Ubuntu 24.04, Helsinki) ────────────┐
  avenir.academy ───▶│ caddy :443 ──▶ web  (Next.js :3000) ──┐                       │
  www.  (308 → apex) │   HTTPS,       api  (NestJS  :4000) ◀─┘──▶ postgres (internal │
  api.avenir.academy▶│   HSTS                │                     network only)     │
@@ -29,7 +29,7 @@ Follow sections 1–10 once, in order; section 11 is for every day after launch.
 | `Caddyfile`                 | HTTPS, www → apex, headers, 25 MB body limit                      |
 | `.env.production.example`   | Every setting, documented. The real file lives only on the server |
 | `backup/`                   | The backup container (pg_dump → gzip → R2, 14 daily + 8 weekly)   |
-| `scripts/server-setup.sh`   | One-time Droplet setup (user, SSH, firewall, Docker, swap)        |
+| `scripts/server-setup.sh`   | One-time server setup (user, SSH, firewall, Docker, swap)         |
 | `scripts/compose.sh`        | `docker compose` with the right env file and image tag            |
 | `scripts/deploy.sh <tag>`   | Pull, migrate, start, health-check, auto-rollback                 |
 | `scripts/ship.sh <host>`    | (laptop) Build, copy over SSH and deploy, without GitHub Actions  |
@@ -37,32 +37,39 @@ Follow sections 1–10 once, in order; section 11 is for every day after launch.
 | `scripts/restore.sh`        | List / test-restore / restore database backups                    |
 
 Commands below marked **(laptop)** run on your computer, **(server)** in an SSH session as
-`deploy` on the Droplet.
+`deploy` on the server.
 
 ---
 
-## 1. Create the Droplet
+## 1. Create the server
 
-DigitalOcean → **Create → Droplets**:
+Hetzner Cloud Console → your project → **Add Server**:
 
-| Setting        | Value                                                              |
-| -------------- | ------------------------------------------------------------------ |
-| Region         | **Frankfurt, FRA1**                                                |
-| Image          | **Ubuntu 24.04 (LTS) x64**                                         |
-| Size           | **Basic → Regular → 4 GB RAM / 2 vCPUs / 80 GB SSD**               |
-| Backups        | **Enable automated backups → Weekly**                              |
-| Authentication | **SSH Key** (see below; never a password)                          |
-| Advanced       | **Enable IPv6** (free), **Add improved metrics monitoring** (free) |
-| Hostname       | `avenir-prod`                                                      |
+| Setting    | Value                                                                  |
+| ---------- | ---------------------------------------------------------------------- |
+| Location   | **Helsinki (hel1)**                                                    |
+| Image      | **Ubuntu 24.04**                                                       |
+| Type       | **Shared vCPU → x86 (Intel/AMD) → CX23** (2 vCPU, 4 GB RAM, 40 GB SSD) |
+| Networking | **Public IPv4** and **Public IPv6**                                    |
+| SSH keys   | your key (see below; never a root password)                            |
+| Firewalls  | **`avenir-prod`** (create it first, below)                             |
+| Backups    | optional (+20 % of the server price, 7 rolling snapshots)              |
+| Name       | `avenir-prod`                                                          |
+
+**Firewall `avenir-prod`** (Hetzner Cloud → **Firewalls → Create Firewall**). Inbound rules,
+each from `Any IPv4` and `Any IPv6`: **ICMP**, **TCP 22**, **TCP 80**, **TCP 443** (and
+**UDP 443** if you want HTTP/3). No outbound rules (everything out is allowed). The host
+firewall (`ufw`, step 3) opens the same ports, so the server stays closed even without the
+Hetzner firewall.
 
 SSH key **(laptop)**, if you don't have one yet:
 
 ```sh
 ssh-keygen -t ed25519 -C "you@example.com"     # Enter for the default path; set a passphrase
-cat ~/.ssh/id_ed25519.pub                      # paste this into "New SSH Key"
+cat ~/.ssh/id_ed25519.pub                      # paste this into Hetzner → Security → SSH keys
 ```
 
-Write down the Droplet's **IPv4** (and **IPv6**) address from its page.
+Write down the server's **IPv4** (and **IPv6**) address from its page.
 
 ## 2. DNS at Hostinger
 
@@ -75,15 +82,15 @@ hPanel → **Domains → avenir.academy → DNS / Nameservers → DNS records**.
 
 | Type   | Name  | Points to                                                                         |
 | ------ | ----- | --------------------------------------------------------------------------------- |
-| `A`    | `@`   | Droplet IPv4                                                                      |
-| `A`    | `www` | Droplet IPv4                                                                      |
-| `A`    | `api` | Droplet IPv4                                                                      |
-| `AAAA` | `@`   | Droplet IPv6 (only if IPv6 is on)                                                 |
-| `AAAA` | `www` | Droplet IPv6                                                                      |
-| `AAAA` | `api` | Droplet IPv6                                                                      |
+| `A`    | `@`   | server IPv4                                                                       |
+| `A`    | `www` | server IPv4 (or a `CNAME` to `avenir.academy` instead of A/AAAA records)          |
+| `A`    | `api` | server IPv4                                                                       |
+| `AAAA` | `@`   | server IPv6 (only if IPv6 is on)                                                  |
+| `AAAA` | `www` | server IPv6                                                                       |
+| `AAAA` | `api` | server IPv6                                                                       |
 | `CAA`  | `@`   | `0 issue "letsencrypt.org"` (optional: only Let's Encrypt may issue certificates) |
 
-3. Check propagation **(laptop)**. Every line must print the Droplet's address before the
+3. Check propagation **(laptop)**. Every line must print the server's address before the
    first deploy, or Caddy can't get certificates:
 
 ```sh
@@ -100,12 +107,12 @@ hours.
 **(laptop)**:
 
 ```sh
-scp deploy/scripts/server-setup.sh root@<droplet-ip>:/root/
-ssh -t root@<droplet-ip> bash /root/server-setup.sh
+scp deploy/scripts/server-setup.sh root@<server-ip>:/root/
+ssh -t root@<server-ip> bash /root/server-setup.sh
 ```
 
-The script (safe to run again) updates the system; creates the user **`deploy`** (sudo, your
-SSH key, it asks you for a sudo password); turns off root and password logins; allows only
+The script (safe to run again) updates the system; creates the user **`deploy`** (sudo, with
+the SSH key Hetzner installed for root; it asks you for a sudo password, hence `-t`); turns off root and password logins; allows only
 ports 22, 80 and 443 (ufw); sets up fail2ban, automatic security updates, the
 `Europe/Tirane` timezone and a 2 GB swap file; installs Docker Engine and the Compose plugin
 from Docker's repository; and creates `/opt/avenir`.
@@ -113,7 +120,7 @@ from Docker's repository; and creates `/opt/avenir`.
 **Keep the root session open** and test from a second terminal:
 
 ```sh
-ssh deploy@<droplet-ip>
+ssh deploy@<server-ip>
 docker ps             # works without sudo
 sudo -v               # asks for the password you chose
 ```
@@ -169,7 +176,7 @@ port `465`, TLS, user `resend`, password = the API key. From address:
 **(laptop)** copy the template:
 
 ```sh
-scp deploy/.env.production.example deploy@<droplet-ip>:/opt/avenir/deploy/.env.production
+scp deploy/.env.production.example deploy@<server-ip>:/opt/avenir/deploy/.env.production
 ```
 
 **(server)** generate the secrets in place, then fill in the rest:
@@ -196,6 +203,31 @@ grep -nE '^[A-Z_]+=$|<' .env.production    # prints nothing when complete
 Keep a copy of this file in your password manager: without `POSTGRES_PASSWORD` and the R2
 keys you can't restore a backup onto a new server.
 
+## 6a. Temporary mode (before Stripe, R2 and Resend exist)
+
+The site can go live before steps 4, 5 and 8b are done, with three switches in
+`.env.production` (the values after them may stay empty):
+
+| Switch                   | Effect                                                                                                                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `STRIPE_ENABLED=false`   | No card checkout; students see bank transfer only, and admins confirm payments in **Admin → Pagesat**. `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` may be empty.                                                                               |
+| `STORAGE_DRIVER=local`   | Uploaded materials go to the `uploads-data` Docker volume on the server (`/data/uploads` in the api container) instead of R2. `S3_*` may be empty. These files are **not** in the database backups.                                              |
+| `MAIL_TRANSPORT=console` | Nothing is sent. Every email (recipient, subject, body) is written to the api log instead, and **Admin → Email-et** still records it as sent. Students get no timetable, reminder or password-reset emails, so pass that information on by hand. |
+
+Read an email from the log **(server)** with `avenir logs --since 1h api` (the body follows
+the `To:` and `Subject:` lines). The backup container is unaffected and still needs the
+`BACKUP_S3_*` values.
+
+**Leaving temporary mode:** do steps 4, 5 and 8b, put the keys in `.env.production`, set
+`STORAGE_DRIVER=s3`, `MAIL_TRANSPORT=smtp`, `STRIPE_ENABLED=true`, then `avenir up -d api`.
+Materials uploaded in local mode stay in the volume: copy them to the bucket first, with the
+same file names (the storage key is the file name, `<uuid>.<ext>`):
+
+```sh
+docker cp "$(avenir ps -q api)":/data/uploads ./uploads-export
+rclone copy ./uploads-export r2:avenir-materials   # or re-upload them in the admin
+```
+
 ## 7. GitHub and the first deploy
 
 There are two ways to deploy; pick one (you can switch later).
@@ -211,22 +243,22 @@ There are two ways to deploy; pick one (you can switch later).
 
 ```sh
 ssh-keygen -t ed25519 -f ~/.ssh/avenir-ci -C "github-actions" -N ""
-ssh-copy-id -i ~/.ssh/avenir-ci.pub deploy@<droplet-ip>
-ssh-keyscan -t ed25519 <droplet-ip>       # compare with the Droplet console (below), then use it
+ssh-copy-id -i ~/.ssh/avenir-ci.pub deploy@<server-ip>
+ssh-keyscan -t ed25519 <server-ip>       # compare with the server console (below), then use it
 ```
 
-To check the host key, open the Droplet's **Console** in DigitalOcean and run
+To check the host key, open the server's **Console** in the Hetzner Cloud Console and run
 `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`; it must match
-`ssh-keyscan -t ed25519 <droplet-ip> | ssh-keygen -lf -` on your laptop.
+`ssh-keyscan -t ed25519 <server-ip> | ssh-keygen -lf -` on your laptop.
 
 **b) Repository secrets** (GitHub → Settings → Secrets and variables → Actions → **Secrets**):
 
-| Secret               | Value                                          |
-| -------------------- | ---------------------------------------------- |
-| `DEPLOY_HOST`        | the Droplet's IPv4 address                     |
-| `DEPLOY_USER`        | `deploy`                                       |
-| `DEPLOY_SSH_KEY`     | the whole private key: `cat ~/.ssh/avenir-ci`  |
-| `DEPLOY_KNOWN_HOSTS` | the `ssh-keyscan -t ed25519 <droplet-ip>` line |
+| Secret               | Value                                         |
+| -------------------- | --------------------------------------------- |
+| `DEPLOY_HOST`        | the server's IPv4 address                     |
+| `DEPLOY_USER`        | `deploy`                                      |
+| `DEPLOY_SSH_KEY`     | the whole private key: `cat ~/.ssh/avenir-ci` |
+| `DEPLOY_KNOWN_HOSTS` | the `ssh-keyscan -t ed25519 <server-ip>` line |
 
 **Variables** (same page, **Variables** tab), baked into the web image at build time:
 
@@ -250,7 +282,7 @@ docker login ghcr.io -u <github-user>      # paste the token as the password
 
 **d) First deploy.** The workflow `Deploy` (`.github/workflows/deploy.yml`) runs after `CI`
 succeeds on `main`. Merge the `deploy` branch into `main` (a pull request), and watch
-**Actions**: CI, then _Build web image_ / _Build api image_, then _Deploy to the Droplet_.
+**Actions**: CI, then _Build web image_ / _Build api image_, then _Deploy to the server_.
 Later you can also start it by hand: **Actions → Deploy → Run workflow**.
 
 The deploy job copies `deploy/` to `/opt/avenir/deploy` (your `.env.production` is left
@@ -273,7 +305,7 @@ name works; nothing is pulled from it). Then, from the repo on `main` **(laptop)
 
 ```sh
 git checkout main && git pull
-deploy/scripts/ship.sh deploy@<droplet-ip>
+deploy/scripts/ship.sh deploy@<server-ip>
 ```
 
 It refuses to run with uncommitted changes, then:
@@ -377,8 +409,10 @@ every email with its status; a job that runs twice never sends twice.
 - [ ] Log out and back in; reload a signed-in page (the refresh cookie works across
       `avenir.academy` and `api.avenir.academy`).
 - [ ] Email: "Forgot password" for your own account → the email arrives (check spam), the
-      link works. Resend → **Emails** shows it as delivered.
-- [ ] The uploaded PDF is in R2 → `avenir-materials`.
+      link works. Resend → **Emails** shows it as delivered. (Temporary mode: the email is in
+      `avenir logs api` instead.)
+- [ ] The uploaded PDF is in R2 → `avenir-materials` (temporary mode: in the `uploads-data`
+      volume).
 - [ ] Backups: run one now and see it in R2 → `avenir-backups/daily/`:
       `deploy/scripts/compose.sh exec backup avenir-backup backup`
 - [ ] **Test restore** (required before launch) into a scratch database, so production is
@@ -409,8 +443,8 @@ put its ping URL into `BACKUP_PING_URL` in `.env.production` and run
 `deploy/scripts/compose.sh up -d backup`. You then get an email when a nightly backup did
 **not** succeed.
 
-DigitalOcean's free monitoring (enabled in step 1) can alert on CPU, memory and disk: Droplet
-→ **Monitoring → Create alert policy** (for example disk > 80 %, memory > 90 % for 10 min).
+Hetzner Cloud shows CPU, disk and network graphs per server (server → **Graphs**) but sends
+no alerts, so the two UptimeRobot monitors above are the alerting.
 
 ---
 
@@ -424,7 +458,7 @@ alias avenir=/opt/avenir/deploy/scripts/compose.sh     # put it in ~/.bashrc
 ```
 
 **Deploy.** Merge to `main`; CI then Deploy run on their own (option B: run
-`deploy/scripts/ship.sh deploy@<droplet-ip>` from your laptop). By hand: Actions → Deploy → Run
+`deploy/scripts/ship.sh deploy@<server-ip>` from your laptop). By hand: Actions → Deploy → Run
 workflow. On the server: `deploy/scripts/deploy.sh <git-sha>` (the images must be in GHCR or already on the server).
 `cat /opt/avenir/deploy/.image-tag` shows what is running.
 

@@ -71,7 +71,7 @@ apps/web/
 packages/shared/src/   enums.ts, schemas/*.ts (zod), types.ts (API DTO shapes)
 scripts/bootstrap.mjs  first-run local setup
 docs/PLAN.md           spec, roadmap, decisions
-docs/DEPLOY.md         production runbook (Droplet, DNS, R2, Resend, CI/CD, backups, day-2 operations)
+docs/DEPLOY.md         production runbook (Hetzner server, DNS, R2, Resend, CI/CD, backups, day-2 operations)
 deploy/                docker-compose.prod.yml, Caddyfile, backup/ container, scripts/ (setup, deploy, ship, rollback, restore)
 apps/*/Dockerfile      one image per app (build from the repo root); .github/workflows/deploy.yml pushes them to GHCR
 ```
