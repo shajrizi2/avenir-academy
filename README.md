@@ -1,12 +1,43 @@
 # AI Academy
 
-A simple LMS for live, cohort-based courses on **AI** and **digital marketing**.
+A cohort-based learning management application for courses on **AI** and
+**digital marketing**, with enrollment, assessments, payments, and administration.
+The GitHub repository is named `avenir-academy`; the application documentation
+currently uses the product label **AI Academy**. “AI” describes the course subject,
+not a claim that the learning platform itself uses an AI model.
 
 - Classes run live on Google Meet.
 - Students request enrollment and an admin approves it.
 - Each monthly module ends with an online test, and passing it unlocks the next module.
 
 The full spec, sprint roadmap and decisions log are in [`docs/PLAN.md`](docs/PLAN.md). Conventions for contributors (human or AI) are in [`CLAUDE.md`](CLAUDE.md).
+
+## Architecture and business workflow
+
+```mermaid
+flowchart LR
+  Web[Next.js web app] --> API[NestJS REST API]
+  API --> DB[(PostgreSQL / Prisma)]
+  API --> Files[Local or S3-compatible storage]
+  API --> Payments[Stripe or bank transfer]
+  API --> Mail[Console or SMTP email]
+  Shared[Shared Zod schemas and types] -.-> Web
+  Shared -.-> API
+```
+
+The API separates authentication/users, courses/modules, enrollments, lessons,
+assessments/progress, payments, notifications and administration into modules.
+Students request enrollment, admins approve it, and learning/assessment rules
+control progression. Live sessions link to Google Meet; this is not a video
+conferencing implementation.
+
+Payment code includes Stripe checkout/webhooks and bank-transfer administration.
+Provider credentials, enabled site settings and operational setup are required;
+the presence of the integration does not confirm live payment processing. The
+`STRIPE_FAKE` mode is for tests/demos only. Files use local disk in development or
+S3-compatible storage with server-side download access checks. Email uses console
+output locally or a configured SMTP provider. See `apps/api/.env.example` and
+`deploy/.env.production.example` for variable names, never real credentials.
 
 ## Quick start
 
@@ -26,7 +57,7 @@ Once it's running:
 | http://localhost:4000/api/v1   | REST API (the web app proxies it)          |
 | http://localhost:4000/api/docs | Swagger UI                                 |
 
-**Seed accounts** (password `Password123!`):
+**Local development seed accounts only** (password `Password123!`):
 
 | Email                      | Role       | Notes                                       |
 | -------------------------- | ---------- | ------------------------------------------- |
@@ -35,7 +66,10 @@ Once it's running:
 | `student1@aiacademy.dev`   | Student    | Approved in AI Foundations, Module 1 active |
 | `student2@aiacademy.dev`   | Student    | Pending request for Digital Marketing       |
 
-In development, emails such as password reset links are printed in the API log instead of being sent.
+Do not expose these known-password accounts in a public deployment. Review the
+seed and production bootstrap separately, supply unique secrets, and use synthetic
+learners for screenshots. In development, emails such as password reset links are
+printed in the API log instead of being sent.
 
 ### Landing-page content
 
@@ -74,3 +108,27 @@ docs/DEPLOY.md    Production runbook: server, first deploy, email, analytics, ba
 Run `pnpm build` before `pnpm test:e2e`: Playwright starts the built web app and API itself (stop your dev API on :4000 first). Production deployment is described in [docs/DEPLOY.md](docs/DEPLOY.md).
 
 If port 5432 is already taken on your machine, set `POSTGRES_PORT` (for example `POSTGRES_PORT=5433 pnpm bootstrap`) and update the database URLs in `apps/api/.env`.
+
+## Verification and current status
+
+The repository includes Vitest unit tests, API end-to-end tests and Playwright
+browser tests. `.github/workflows/ci.yml` configures formatting, lint, type checks,
+tests and a build with PostgreSQL. Test files and workflow configuration do not
+establish that a revision passes.
+
+At the October 26, 2026 portfolio review, the latest inspected
+[CI run failed](https://github.com/shajrizi2/avenir-academy/actions/runs/38814781305).
+The cause was not diagnosed as part of the documentation update. Check
+[current Actions results](https://github.com/shajrizi2/avenir-academy/actions)
+for newer results before relying on the project.
+
+For local validation, run `pnpm format:check`, `pnpm lint`, `pnpm type-check`,
+`pnpm test` and `pnpm build`. End-to-end tests additionally need isolated
+PostgreSQL databases and a compatible Chrome installation; inspect
+`apps/api/test/setup-env.ts`, `apps/api/test/test-database.ts` and
+`apps/web/playwright.config.ts` before running `pnpm test:e2e`.
+
+Deployment workflows and the runbook describe intended operations, not proof of a
+live deployment. Review TLS, SMTP, storage, payment configuration, backups and
+monitoring for the target environment. Do not publish real learner information,
+assessment submissions or payment records in demos or documentation.
