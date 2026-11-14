@@ -74,7 +74,7 @@ test.describe('job board', () => {
   test('the board has no sign-in or sign-out in its header', async ({ page }) => {
     await page.goto('/?preview');
     await expect(page.getByRole('banner').getByRole('link', { name: 'Hyr' })).toHaveCount(0);
-    await expect(page.getByRole('banner').getByRole('button')).toHaveCount(0);
+    await expect(page.getByRole('banner').getByRole('button', { name: /hyr|dil/i })).toHaveCount(0);
   });
 
   test('the unsubscribe page asks before unsubscribing and explains a broken link', async ({

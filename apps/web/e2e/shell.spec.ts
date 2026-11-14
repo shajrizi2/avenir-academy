@@ -5,8 +5,13 @@ const s = sq.shell;
 
 test('the main menu links the job board and the academy, and marks where you are', async ({
   page,
+  isMobile,
 }) => {
   await page.goto('/training/courses');
+  if (isMobile) {
+    // On phones the menu sits behind a hamburger on the right of the header.
+    await page.getByRole('banner').getByRole('button', { name: s.openMenu }).click();
+  }
   const menu = page.getByRole('navigation', { name: s.mainMenu }).filter({ visible: true });
   await expect(menu.getByRole('link', { name: s.training })).toHaveAttribute(
     'aria-current',

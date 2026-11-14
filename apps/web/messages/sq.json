@@ -1514,7 +1514,9 @@
     "privacy": "Privatësia",
     "footerLinks": "Lidhje në fund të faqes",
     "tagline": "Shpallje pune remote për Kosovën dhe trajnime live në shqip.",
-    "rights": "Të gjitha të drejtat e rezervuara."
+    "rights": "Të gjitha të drejtat e rezervuara.",
+    "openMenu": "Hap menynë",
+    "menuTitle": "Menyja"
   },
   "forCompanies": {
     "metaTitle": "For companies",

@@ -11,7 +11,7 @@ export function Logo({ href = '/', inverse = false }: { href?: string; inverse?:
       aria-label={t.shell.home}
       className={cn('flex items-center rounded-none', inverse ? 'text-background' : 'text-ink')}
     >
-      <Wordmark className="h-7 md:h-8" />
+      <Wordmark className="h-6 md:h-7" />
     </Link>
   );
 }

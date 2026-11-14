@@ -20,7 +20,7 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
 
   return (
     <header className="border-line bg-background/90 sticky top-0 z-40 border-b backdrop-blur-md">
-      <div className="mx-auto grid h-16 w-full max-w-[1200px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 md:h-20 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="mx-auto grid h-14 w-full max-w-[1200px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 md:h-16 lg:grid-cols-[1fr_auto_1fr]">
         <div className="flex items-center gap-6">
           <Logo />
           <MainMenu current="training" className="hidden md:flex" />

@@ -150,7 +150,7 @@ function Runner({
         <h1 className="text-ink text-heading font-extrabold">{session.title}</h1>
       </header>
 
-      <div className="border-line bg-background/95 sticky top-16 z-20 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-none border p-4 backdrop-blur-md">
+      <div className="border-line bg-background/95 sticky top-14 z-20 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-none border p-4 backdrop-blur-md">
         <Countdown remaining={remaining} />
         <p className="text-ink text-sm font-semibold">
           {fmt(t.tests.runner.answered, { answered, total: session.questions.length })}
