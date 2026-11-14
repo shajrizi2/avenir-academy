@@ -114,6 +114,11 @@ export class UpdateSiteSettingsDto {
   @IsBoolean()
   bankTransferEnabled?: boolean;
 
+  @ApiPropertyOptional({ description: 'Show the job board at "/" (PLAN D36)' })
+  @IsOptional()
+  @IsBoolean()
+  jobBoardPublic?: boolean;
+
   @ApiPropertyOptional({ nullable: true })
   @IsOptional()
   @Transform(emptyToNull)

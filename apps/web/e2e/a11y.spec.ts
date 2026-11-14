@@ -19,6 +19,8 @@ async function expectNoViolations(page: Page) {
 test.use({ reducedMotion: 'reduce' });
 
 for (const path of [
+  '/?preview',
+  '/hyr',
   '/training',
   '/for-companies',
   '/privatesia',

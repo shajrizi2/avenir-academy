@@ -39,6 +39,7 @@ function SettingsForm({ settings }: { settings: SiteSettings }) {
   const [error, setError] = useState<string | null>(null);
   const stripeId = useId();
   const bankId = useId();
+  const boardId = useId();
   const s = t.admin.settings;
   const p = t.adminLaunch.settings;
   const form = useForm<SiteSettingsInput, unknown, Values>({
@@ -57,6 +58,7 @@ function SettingsForm({ settings }: { settings: SiteSettings }) {
       whatsappNumber: text(settings.whatsappNumber),
       stripeEnabled: settings.stripeEnabled,
       bankTransferEnabled: settings.bankTransferEnabled,
+      jobBoardPublic: settings.jobBoardPublic,
       bankBeneficiary: text(settings.bankBeneficiary),
       bankIban: text(settings.bankIban),
       bankName: text(settings.bankName),
@@ -83,6 +85,7 @@ function SettingsForm({ settings }: { settings: SiteSettings }) {
           whatsappNumber: orNull(values.whatsappNumber),
           stripeEnabled: values.stripeEnabled,
           bankTransferEnabled: values.bankTransferEnabled,
+          jobBoardPublic: values.jobBoardPublic,
           bankBeneficiary: orNull(values.bankBeneficiary),
           bankIban: orNull(values.bankIban),
           bankName: orNull(values.bankName),
@@ -99,6 +102,36 @@ function SettingsForm({ settings }: { settings: SiteSettings }) {
   return (
     <form onSubmit={(e) => void submit(e)} noValidate className="space-y-6">
       <FormError message={error} />
+      <Card>
+        <CardHeader>
+          <CardTitle as="h2">{p.jobBoard}</CardTitle>
+          <CardDescription>{p.jobBoardHint}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Controller
+            control={form.control}
+            name="jobBoardPublic"
+            render={({ field }) => (
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id={boardId}
+                  checked={field.value ?? false}
+                  onCheckedChange={(checked) => field.onChange(checked === true)}
+                />
+                <Label htmlFor={boardId}>{p.jobBoardPublic}</Label>
+              </div>
+            )}
+          />
+          <a
+            href="/?preview"
+            target="_blank"
+            rel="noopener"
+            className="text-ink text-sm font-semibold underline underline-offset-4"
+          >
+            {p.jobBoardPreview}
+          </a>
+        </CardContent>
+      </Card>
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <Card>
           <CardHeader>

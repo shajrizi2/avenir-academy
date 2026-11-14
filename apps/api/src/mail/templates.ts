@@ -396,7 +396,8 @@ export function offlineLearning(p: {
 // ---- Job board (PLAN D36) ----
 
 export function jobLoginCode(p: { code: string; minutes: number }): Rendered {
-  return render(`${p.code} është kodi yt për Avenir`, 'Përshëndetje,', [
+  // The subject never carries the code: subjects are kept in the email log.
+  return render('Kodi yt për të hyrë në Avenir', 'Përshëndetje,', [
     { kind: 'p', text: 'Ky është kodi për të hyrë në shpalljet e punës në Avenir:' },
     { kind: 'p', text: p.code },
     {

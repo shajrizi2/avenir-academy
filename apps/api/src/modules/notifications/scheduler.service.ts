@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import type { EnvironmentVariables } from '../../config/env.validation.js';
 import { JobsPipelineService } from '../jobs/pipeline.service.js';
+import { JobSeekersService } from '../jobs/seekers/job-seekers.service.js';
 import { PaymentsService } from '../payments/payments.service.js';
 import { NotificationsService } from './notifications.service.js';
 
@@ -22,6 +23,7 @@ export class SchedulerService {
     private readonly notifications: NotificationsService,
     private readonly payments: PaymentsService,
     private readonly jobs: JobsPipelineService,
+    private readonly jobSeekers: JobSeekersService,
   ) {
     this.enabled = config.get('CRON_ENABLED', { infer: true });
   }
@@ -58,6 +60,12 @@ export class SchedulerService {
       const stats = await this.jobs.run(new Date());
       return stats ? stats.created : 0;
     });
+  }
+
+  /** Old login codes, expired sessions and job-board accounts unused for 2 years. */
+  @Cron('15 3 * * *', { timeZone: DEFAULT_TIMEZONE })
+  async cleanJobSeekers(): Promise<void> {
+    await this.run('job-seeker cleanup', () => this.jobSeekers.cleanup(new Date()));
   }
 
   private async run(name: string, job: () => Promise<number | void>): Promise<void> {

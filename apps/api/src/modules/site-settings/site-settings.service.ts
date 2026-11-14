@@ -24,6 +24,7 @@ const settingsSelect = {
   bankIban: true,
   bankName: true,
   bankSwift: true,
+  jobBoardPublic: true,
 } as const satisfies Prisma.SiteSettingsSelect;
 
 export type SiteSettingsRecord = Prisma.SiteSettingsGetPayload<{ select: typeof settingsSelect }>;
@@ -47,6 +48,7 @@ export const EMPTY_SETTINGS: SiteSettingsRecord = {
   bankIban: null,
   bankName: null,
   bankSwift: null,
+  jobBoardPublic: false,
 };
 
 @Injectable()

@@ -155,6 +155,8 @@ export interface SiteSettings {
   bankIban: string | null;
   bankName: string | null;
   bankSwift: string | null;
+  /** The job board shows at "/" only once this is on (PLAN D36). */
+  jobBoardPublic: boolean;
 }
 
 // ---- Sprint 2: enrollments, modules, live sessions, materials ----

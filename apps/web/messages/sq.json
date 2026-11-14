@@ -992,7 +992,11 @@
       "beneficiary": "Përfituesi",
       "iban": "IBAN",
       "bankName": "Banka",
-      "swift": "SWIFT/BIC"
+      "swift": "SWIFT/BIC",
+      "jobBoard": "Shpalljet e punës",
+      "jobBoardHint": "Kur është e ndezur, avenir.academy hap shpalljet e punës. Kur është e fikur, hap faqen e trajnimeve.",
+      "jobBoardPublic": "Shfaq shpalljet në faqen kryesore",
+      "jobBoardPreview": "Shiko listën para se ta ndezësh"
     },
     "courseForm": {
       "price": "Çmimi në muaj (cent)",
@@ -1544,5 +1548,112 @@
         "body": "Te «Shpalljet e ruajtura» gjen butonin «Fshi llogarinë». Ai fshin menjëherë email-in, shpalljet e ruajtura, raportimet dhe të gjitha hyrjet. Për çdo pyetje, na shkruaj në adresën e kontaktit në fund të faqes."
       }
     ]
+  },
+  "jobs": {
+    "metaTitle": "Shpallje pune remote për Kosovën",
+    "metaDescription": "Punë remote që mund t'i aplikosh nga Kosova, të përditësuara çdo mëngjes: inxhinieri, marketing, dizajn, shitje, mbështetje dhe më shumë.",
+    "title": "Shpallje pune remote që mund t'i aplikosh nga Kosova",
+    "counts": "{new} shpallje të reja sot · {total} gjithsej",
+    "warning": "Punëdhënësit e vërtetë nuk kërkojnë kurrë para për të aplikuar. Nëse dikush të kërkon, raporto shpalljen.",
+    "categoriesLabel": "Kategoritë",
+    "all": "Të gjitha",
+    "categories": {
+      "ENGINEERING": "Inxhinieri softuerike",
+      "AI_DATA": "AI dhe të dhëna",
+      "MARKETING": "Marketing",
+      "DESIGN": "Dizajn",
+      "PRODUCT": "Produkt",
+      "SALES": "Shitje",
+      "SUPPORT": "Mbështetje për klientë",
+      "WRITING": "Shkrim dhe përmbajtje",
+      "FINANCE_ADMIN": "Financë dhe administratë",
+      "HR": "Burime njerëzore",
+      "OTHER": "Tjetër"
+    },
+    "regions": {
+      "WORLDWIDE": "E gjithë bota",
+      "EUROPE": "Evropë",
+      "BALKANS": "Ballkan",
+      "CONTRACT_ANYWHERE": "Kontratë nga kudo",
+      "GLOBAL_EMPLOYER": "Punësim global"
+    },
+    "contracts": {
+      "CONTRACTOR": "Kontratë",
+      "EMPLOYEE": "Punësim"
+    },
+    "periods": {
+      "YEAR": "në vit",
+      "MONTH": "në muaj",
+      "HOUR": "në orë"
+    },
+    "posted": {
+      "today": "sot",
+      "yesterday": "dje",
+      "days": "{count} ditë më parë"
+    },
+    "apply": "Apliko",
+    "applyLabel": "Apliko për {title} te {company} (hapet në një skedë të re)",
+    "save": "Ruaj",
+    "saved": "E ruajtur",
+    "saveLabel": "Ruaj {title}",
+    "unsaveLabel": "Hiq {title} nga të ruajturat",
+    "more": "Më shumë",
+    "moreLabel": "Më shumë për {title}",
+    "report": "Raporto",
+    "source": "Burimi: {source}",
+    "closed": "E mbyllur",
+    "showMore": "Shfaq më shumë",
+    "empty": "Nuk ka shpallje në këtë kategori tani. Kontrollo nesër në mëngjes.",
+    "listLabel": "Shpalljet",
+    "loadError": "Shpalljet nuk u ngarkuan. Provo përsëri pas pak.",
+    "notice": "Avenir nuk është punëdhënësi. Shpalljet vijnë nga faqet e karrierës së kompanive dhe nga Remote OK, Jobicy dhe Himalayas. Kontrollo çdo ofertë para se të ndash të dhëna personale.",
+    "creditsLabel": "Burimet e shpalljeve",
+    "reportTitle": "Raporto shpalljen",
+    "reportDescription": "Pse po e raporton këtë shpallje? Dy raportime e fshehin atë nga lista.",
+    "reportReasons": {
+      "SCAM": "Duket mashtrim",
+      "CLOSED": "Është mbyllur",
+      "NOT_ELIGIBLE": "Nuk pranon aplikantë nga Kosova",
+      "OTHER": "Tjetër"
+    },
+    "reportSend": "Dërgo raportimin",
+    "reported": "Faleminderit, e shqyrtojmë.",
+    "signInToSave": "Hyr për të ruajtur shpalljet.",
+    "signIn": "Hyr",
+    "savedLink": "Shpalljet e ruajtura",
+    "accountMenu": "Llogaria",
+    "signOut": "Dil",
+    "login": {
+      "metaTitle": "Hyr",
+      "title": "Hyr me email",
+      "lead": "Të dërgojmë një kod me 6 shifra. Nuk ka fjalëkalim, dhe në këtë pajisje mbetesh i kyçur.",
+      "email": "Email-i",
+      "send": "Dërgo kodin",
+      "sending": "Po dërgohet…",
+      "sent": "Kodin e dërguam te {email}.",
+      "change": "Ndrysho",
+      "didYouMean": "Mos e kishe fjalën për {email}?",
+      "useSuggestion": "Përdor {email}",
+      "code": "Kodi",
+      "codeHint": "Shiko edhe te Spam ose Promotions nëse nuk e gjen.",
+      "verify": "Hyr",
+      "verifying": "Po hyn…",
+      "resend": "Dërgo një kod të ri",
+      "terms": "Duke hyrë, pranon që të ruajmë email-in tënd siç shpjegohet te"
+    },
+    "savedPage": {
+      "metaTitle": "Shpalljet e ruajtura",
+      "title": "Shpalljet e ruajtura",
+      "lead": "Shpalljet që ruan mbeten këtu. Kur një shpallje mbyllet, e shënojmë si të mbyllur.",
+      "empty": "Nuk ke ruajtur ende asnjë shpallje.",
+      "browse": "Shiko shpalljet",
+      "signedInAs": "Je i kyçur si {email}.",
+      "signOutEverywhere": "Dil nga të gjitha pajisjet",
+      "deleteAccount": "Fshi llogarinë",
+      "deleteTitle": "Ta fshijmë llogarinë?",
+      "deleteDescription": "Fshihen menjëherë email-i yt, shpalljet e ruajtura, raportimet dhe të gjitha hyrjet. Kjo nuk kthehet mbrapsht.",
+      "deleted": "Llogaria u fshi.",
+      "signedOutEverywhere": "Dole nga të gjitha pajisjet."
+    }
   }
 }
