@@ -108,3 +108,81 @@ export const jobReportSchema = z.object({ reason: z.enum(JOB_REPORT_REASONS) });
 export interface JobSeekerMe {
   email: string;
 }
+
+// ---- Admin (PLAN D36) ----
+
+export type JobSourceKind = 'GREENHOUSE' | 'LEVER' | 'ASHBY' | 'WORKABLE' | JobFeedSource;
+
+export interface AdminJobRun {
+  id: string;
+  startedAt: string;
+  finishedAt: string | null;
+  status: 'RUNNING' | 'OK' | 'FAILED';
+  stats: {
+    seen?: number;
+    created?: number;
+    published?: number;
+    discovered?: number;
+    linkChecks?: number;
+    rejected?: Record<string, number>;
+    closed?: Record<string, number>;
+    sources?: { name: string; ok: boolean; postings: number; error?: string }[];
+  } | null;
+  errors: string[] | null;
+}
+
+export interface AdminJobFeed {
+  kind: JobFeedSource;
+  enabled: boolean;
+  failCount: number;
+  lastSuccessAt: string | null;
+  lastError: string | null;
+  pausedUntil: string | null;
+}
+
+export interface AdminJobsOverview {
+  runs: AdminJobRun[];
+  feeds: AdminJobFeed[];
+  counts: { open: number; rejected: number; hidden: number; closed: number };
+}
+
+export interface AdminJobCompany {
+  id: string;
+  name: string;
+  ats: JobSourceKind | null;
+  boardToken: string | null;
+  status: 'ACTIVE' | 'DISABLED' | 'BLOCKED';
+  discoveredFrom: string | null;
+  lastFetchedAt: string | null;
+  failCount: number;
+  openJobs: number;
+}
+
+export interface AdminJobBlock {
+  id: string;
+  kind: 'COMPANY' | 'DOMAIN';
+  value: string;
+  reason: string;
+  createdAt: string;
+}
+
+export interface AdminHiddenJob {
+  id: string;
+  title: string;
+  company: string;
+  applyUrl: string;
+  reports: { reason: JobReportReason; count: number }[];
+}
+
+export const addJobCompanySchema = z.object({
+  name: z.string().trim().min(1, 'Shkruaj emrin e kompanisë').max(120),
+  careersUrl: z.url('Ngjit lidhjen e faqes së karrierës'),
+});
+export type AddJobCompanyInput = z.infer<typeof addJobCompanySchema>;
+
+export const addJobBlockSchema = z.object({
+  kind: z.enum(['COMPANY', 'DOMAIN']),
+  value: z.string().trim().min(1).max(200),
+  reason: z.string().trim().min(1).max(200),
+});
+export type AddJobBlockInput = z.infer<typeof addJobBlockSchema>;

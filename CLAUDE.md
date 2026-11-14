@@ -61,6 +61,7 @@ apps/web/
   src/app/(landing)/   ROOT LAYOUT #1: the academy's marketing landing page at /training (+ opengraph-image)
   src/app/(site)/      ROOT LAYOUT #2 (lang="sq"): everything else; "/" is the job board (PLAN D34)
     training/(public)/ catalog, course detail (groups + seats), auth pages (header + footer layout)
+    (board)/          the job board "/" (+ /?preview), /hyr (email-code sign-in), /shpalljet-e-ruajtura, /for-companies, /sourcing, /privatesia
     training/(app)/    dashboard, checkout/*, payments/*, learn/* (incl. lessons), teach/*, admin/* (sidebar, client-side guarded)
   src/app/global-not-found.tsx, sitemap.ts, robots.ts
   src/components/landing/  one component per landing section + header/footer/CTA helpers
@@ -68,7 +69,7 @@ apps/web/
   src/components/ui/   shadcn/ui primitives (generated; edit sparingly)
   src/components/      app components (layout, course, status badge, ...)
   src/lib/             api client, auth context, queries, landing-data (fail-soft loaders), analytics track()
-  src/proxy.ts         /training/login redirect without a session cookie (UX only)
+  src/proxy.ts         "/" → /training until SiteSettings.jobBoardPublic is on; /training/login redirect without a session cookie (UX only)
   src/lib/legacy-redirects.ts  permanent redirects from the old academy paths (/sq, /login, /dashboard, ...) to /training
 packages/shared/src/   enums.ts, schemas/*.ts (zod), types.ts (API DTO shapes)
 scripts/bootstrap.mjs  first-run local setup
@@ -89,6 +90,7 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
 - **Auth:**
   - Every route requires a JWT by default (global `JwtAuthGuard`). Mark public routes with `@Public()` and restrict them with `@Roles(Role.ADMIN, ...)`.
   - Instructors may touch only modules where `module.instructorId === user.id`. Check this in the service with `ModuleAccessService` (`src/modules/course-modules/module-access.service.ts`): `assertStaff()` for writes, `assertCanView()` for reads (students need an APPROVED enrollment and a module that isn't LOCKED).
+- **Job seekers** (PLAN D36) are not `User`s: they sign in with an emailed 6-digit code and hold a one-year `aj_session` httpOnly cookie on the API host (`src/modules/jobs/seekers/`, `JobSeekerGuard`). The web app calls those routes with `jobsFetch` (`lib/job-seeker.ts`), never `apiFetch`.
 - **Tokens:**
   - The access token is a 15-minute JWT returned in the response body; the web app keeps it in memory.
   - The refresh token is a 7-day JWT in the httpOnly `aa_refresh` cookie (path `/`).

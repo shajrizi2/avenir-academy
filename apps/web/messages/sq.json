@@ -369,7 +369,8 @@
       "users": "Përdoruesit",
       "instructors": "Instruktorët",
       "testimonials": "Dëshmitë",
-      "settings": "Cilësimet e faqes"
+      "settings": "Cilësimet e faqes",
+      "jobs": "Shpalljet e punës"
     }
   },
   "common": {
@@ -460,7 +461,8 @@
     "testimonials": "Dëshmitë",
     "settings": "Cilësimet e faqes",
     "cookieSettings": "Cilësimet e cookies",
-    "footerTagline": "Kurse live për AI, kodim, marketing digjital dhe SEO."
+    "footerTagline": "Kurse live për AI, kodim, marketing digjital dhe SEO.",
+    "jobs": "Shpalljet e punës"
   },
   "errors": {
     "generic": "Diçka shkoi keq. Provo sërish.",
@@ -1655,5 +1657,68 @@
       "deleted": "Llogaria u fshi.",
       "signedOutEverywhere": "Dole nga të gjitha pajisjet."
     }
+  },
+  "adminJobs": {
+    "title": "Shpalljet e punës",
+    "description": "Mbledhja e përditshme në 06:00, burimet, kompanitë, shpalljet e raportuara dhe bllokimet.",
+    "runNow": "Nis mbledhjen tani",
+    "counts": {
+      "open": "Të hapura",
+      "rejected": "Të refuzuara",
+      "hidden": "Të fshehura",
+      "closed": "Të mbyllura"
+    },
+    "runs": "Ditari i mbledhjes",
+    "runsEmpty": "Mbledhja nuk ka nisur ende. Nis mbledhjen tani ose prit deri në 06:00.",
+    "runStatus": {
+      "RUNNING": "Në vazhdim",
+      "OK": "Në rregull",
+      "FAILED": "Dështoi"
+    },
+    "runLine": "{seen} të lexuara · {created} të reja · {published} të publikuara · {discovered} kompani të gjetura · {links} lidhje të kontrolluara",
+    "closedLine": "Mbyllur: {closed}",
+    "sourcesFailed": "Burime që dështuan: {sources}",
+    "feeds": "Burimet",
+    "feedOk": "Funksionon",
+    "feedPaused": "I ndalur deri më {date}",
+    "feedFailing": "{count} dështime radhazi",
+    "companies": "Faqet e karrierës",
+    "companiesHint": "Kompanitë që lexohen çdo mëngjes. Shumica shtohen vetë kur një shpallje lidhet me faqen e tyre.",
+    "companiesEmpty": "Nuk ka ende kompani. Shto një ose prit mbledhjen e parë.",
+    "addCompany": "Shto kompani",
+    "companyName": "Emri i kompanisë",
+    "careersUrl": "Lidhja e faqes së karrierës (Greenhouse, Lever, Ashby ose Workable)",
+    "openJobs": "{count} të hapura",
+    "companyStatus": {
+      "ACTIVE": "Aktive",
+      "DISABLED": "E fikur",
+      "BLOCKED": "E bllokuar"
+    },
+    "disable": "Fik",
+    "enable": "Ndiz",
+    "hidden": "Shpalljet e fshehura",
+    "hiddenHint": "Shpallje me dy raportime ose nga një burim i bllokuar.",
+    "hiddenEmpty": "Asnjë shpallje e fshehur.",
+    "restore": "Rikthe",
+    "close": "Mbyll",
+    "reasons": {
+      "SCAM": "Mashtrim",
+      "CLOSED": "E mbyllur",
+      "NOT_ELIGIBLE": "Jo për Kosovën",
+      "OTHER": "Tjetër"
+    },
+    "blocks": "Bllokimet",
+    "blocksHint": "Shpalljet nga këto kompani ose domene nuk publikohen kurrë.",
+    "blocksEmpty": "Asnjë bllokim.",
+    "addBlock": "Blloko",
+    "blockKind": "Lloji",
+    "blockKinds": {
+      "COMPANY": "Kompani",
+      "DOMAIN": "Domen i lidhjes"
+    },
+    "blockValue": "Emri ose domeni",
+    "blockReason": "Arsyeja",
+    "unblock": "Hiq bllokimin",
+    "saved": "U ruajt."
   }
 }

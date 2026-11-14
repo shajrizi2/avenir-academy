@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import sq from '../messages/sq.json' with { type: 'json' };
+import { ADMIN, signIn } from './support';
 
 const j = sq.jobs;
 
@@ -63,4 +64,19 @@ test.describe('job board', () => {
       page.getByRole('banner').getByRole('link', { name: sq.nav.login }),
     ).toHaveAttribute('href', '/training/login');
   });
+});
+
+test('admins add a company by its careers link and can switch the board on', async ({ page }) => {
+  await signIn(page, ADMIN);
+  await page.goto('/training/admin/jobs');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(sq.adminJobs.title);
+  await page.getByLabel(sq.adminJobs.companyName).fill('Widget Works');
+  await page
+    .getByLabel(sq.adminJobs.careersUrl)
+    .fill(`https://jobs.lever.co/widget-works-${Date.now()}`);
+  await page.getByRole('button', { name: sq.adminJobs.addCompany }).click();
+  await expect(page.getByText('Widget Works').first()).toBeVisible();
+
+  await page.goto('/training/admin/settings');
+  await expect(page.getByLabel(sq.adminLaunch.settings.jobBoardPublic)).toBeVisible();
 });
