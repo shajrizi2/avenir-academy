@@ -1,5 +1,6 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
+import { legacyRedirects } from './src/lib/legacy-redirects';
 
 /** Where the Next.js server reaches the API (server components and the /api/v1 rewrite). */
 const apiUrl = process.env.API_INTERNAL_URL || 'http://localhost:4000/api/v1';
@@ -66,6 +67,10 @@ const nextConfig: NextConfig = {
         as: '*.css',
       },
     },
+  },
+  // Old academy addresses (/sq, /login, /dashboard, ...) moved to /training permanently.
+  async redirects() {
+    return legacyRedirects();
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];

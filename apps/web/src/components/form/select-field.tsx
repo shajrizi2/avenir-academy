@@ -38,7 +38,7 @@ export function SelectField<T extends FieldValues, TOutput>({
         id={id}
         aria-invalid={Boolean(error)}
         className={cn(
-          'border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 aria-invalid:border-destructive h-11 w-full rounded-lg border px-3 text-base outline-none focus-visible:ring-3 md:text-sm',
+          'border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 aria-invalid:border-destructive h-11 w-full rounded-none border px-3 text-base outline-none focus-visible:ring-3 md:text-sm',
         )}
         {...form.register(name)}
       >

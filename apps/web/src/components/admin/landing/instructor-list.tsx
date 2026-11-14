@@ -45,7 +45,7 @@ type ProfileInput = Pick<
 export function InstructorList() {
   const { data, isPending, error } = useQuery(instructorsQuery);
 
-  if (isPending) return <Skeleton className="rounded-card h-48 w-full" />;
+  if (isPending) return <Skeleton className="h-48 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   if (data.length === 0) {
     return (
@@ -55,7 +55,7 @@ export function InstructorList() {
         description={t.admin.instructors.emptyText}
         action={
           <Button asChild variant="chunky">
-            <Link href="/admin/users?role=STUDENT">{t.admin.instructors.openUsers}</Link>
+            <Link href="/training/admin/users?role=STUDENT">{t.admin.instructors.openUsers}</Link>
           </Button>
         }
       />
@@ -69,7 +69,7 @@ export function InstructorList() {
         return (
           <li
             key={instructor.id}
-            className="border-line rounded-card bg-background flex gap-4 border p-5"
+            className="border-line bg-background flex gap-4 rounded-none border p-5"
           >
             <PersonAvatar name={name} src={instructor.avatarUrl} size={64} className="shrink-0" />
             <div className="min-w-0 flex-1 space-y-1">

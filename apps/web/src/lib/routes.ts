@@ -2,7 +2,7 @@ import type { Role } from '@ai-academy/shared';
 
 /** Where each role lands after logging in. */
 export function homeFor(role: Role): string {
-  return role === 'ADMIN' ? '/admin' : '/dashboard';
+  return role === 'ADMIN' ? '/training/admin' : '/training/dashboard';
 }
 
 /** Only allow same-site relative redirects (prevents open redirects via ?next=). */

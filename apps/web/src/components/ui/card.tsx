@@ -24,7 +24,7 @@ function Card({
       data-size={size}
       data-variant={variant}
       className={cn(
-        'group/card bg-card text-card-foreground rounded-card *:[img:first-child]:rounded-t-card *:[img:last-child]:rounded-b-card flex flex-col gap-(--card-spacing) overflow-hidden py-(--card-spacing) text-sm [--card-spacing:--spacing(6)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] data-[size=sm]:has-data-[slot=card-footer]:pb-0',
+        'group/card bg-card text-card-foreground rounded-none *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none flex flex-col gap-(--card-spacing) overflow-hidden py-(--card-spacing) text-sm [--card-spacing:--spacing(6)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] data-[size=sm]:has-data-[slot=card-footer]:pb-0',
         cardVariants[variant],
         className,
       )}
@@ -38,7 +38,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-header"
       className={cn(
-        'group/card-header rounded-t-card @container/card-header grid auto-rows-min items-start gap-1 px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)',
+        'group/card-header rounded-none @container/card-header grid auto-rows-min items-start gap-1 px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)',
         className,
       )}
       {...props}
@@ -95,7 +95,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-footer"
       className={cn(
-        'bg-soft rounded-b-card flex items-center border-t p-(--card-spacing)',
+        'bg-soft rounded-none flex items-center border-t p-(--card-spacing)',
         className,
       )}
       {...props}

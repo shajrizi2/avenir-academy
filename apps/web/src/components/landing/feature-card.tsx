@@ -23,10 +23,10 @@ interface FeatureCardProps {
  */
 export function FeatureCard({ icon: Icon, title, text, tone = 0 }: FeatureCardProps) {
   return (
-    <div className="reveal border-line rounded-card bg-background flex h-full gap-4 border p-5 sm:flex-col sm:gap-0 sm:p-6">
+    <div className="reveal border-line bg-background flex h-full gap-4 rounded-none border p-5 sm:flex-col sm:gap-0 sm:p-6">
       <span
         className={cn(
-          'flex size-12 shrink-0 items-center justify-center rounded-xl',
+          'flex size-12 shrink-0 items-center justify-center rounded-none',
           TONES[tone % TONES.length],
         )}
       >

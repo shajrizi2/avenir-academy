@@ -58,7 +58,7 @@ export function createFakeStripeClient(webUrl: string): StripeClient {
     ({
       id,
       object: 'checkout.session',
-      url: `${webUrl}/checkout/success?payment=${params.client_reference_id ?? ''}&fake=1`,
+      url: `${webUrl}/training/checkout/success?payment=${params.client_reference_id ?? ''}&fake=1`,
       client_reference_id: params.client_reference_id ?? null,
       payment_status: 'unpaid',
       payment_intent: `pi_fake_${id}`,

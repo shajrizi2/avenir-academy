@@ -52,21 +52,21 @@ export function GroupDetail() {
       await apiFetch(`/groups/${id}`, { method: 'DELETE' });
       toast.success(g.deleted);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'groups'] });
-      router.push('/admin/groups');
+      router.push('/training/admin/groups');
     } catch (e) {
       toast.error(errorMessage(e));
       throw e;
     }
   }
 
-  if (group.isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (group.isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (group.error) return <FormError message={errorMessage(group.error)} />;
   const data = group.data;
 
   return (
     <>
       <Link
-        href="/admin/groups"
+        href="/training/admin/groups"
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {g.title}
@@ -164,7 +164,7 @@ export function GroupDetail() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-line rounded-card bg-background border p-4">
+    <div className="border-line bg-background rounded-none border p-4">
       <dt className="text-ink-soft text-sm">{label}</dt>
       <dd className="text-ink mt-1 font-bold">{value}</dd>
     </div>
@@ -174,7 +174,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 function StudentRow({ student }: { student: GroupStudent }) {
   const e = t.adminLaunch.enrollments;
   return (
-    <li className="border-line rounded-card flex flex-col gap-2 border p-4 sm:flex-row sm:items-center sm:justify-between">
+    <li className="border-line flex flex-col gap-2 rounded-none border p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <p className="text-ink font-bold">
           {student.user.firstName} {student.user.lastName}

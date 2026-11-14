@@ -19,7 +19,7 @@ export function CourseCard({ course }: { course: CourseSummary }) {
       <div className="flex flex-1 flex-col gap-3 p-6">
         <h2 className="text-ink text-subheading font-extrabold">
           <Link
-            href={`/courses/${course.slug}`}
+            href={`/training/courses/${course.slug}`}
             className="after:absolute after:inset-0 focus-visible:outline-none"
           >
             {course.title}

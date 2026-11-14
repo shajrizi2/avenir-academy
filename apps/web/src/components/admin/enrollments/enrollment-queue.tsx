@@ -66,7 +66,7 @@ export function EnrollmentQueue() {
       />
 
       {isPending ? (
-        <Skeleton className="rounded-card h-64 w-full" />
+        <Skeleton className="h-64 w-full rounded-none" />
       ) : error ? (
         <FormError message={errorMessage(error)} />
       ) : data.items.length === 0 ? (
@@ -80,7 +80,7 @@ export function EnrollmentQueue() {
           {data.items.map((enrollment) => (
             <li
               key={enrollment.id}
-              className="border-line rounded-card bg-background flex flex-col gap-4 border p-5 md:flex-row md:items-center md:justify-between"
+              className="border-line bg-background flex flex-col gap-4 rounded-none border p-5 md:flex-row md:items-center md:justify-between"
             >
               <div className="min-w-0 space-y-1">
                 <p className="text-ink font-bold">

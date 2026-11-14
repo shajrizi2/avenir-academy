@@ -28,13 +28,13 @@ export async function Offer() {
       title={t.offer.title}
       intro={t.offer.intro}
     >
-      <div className="reveal border-ink rounded-card bg-background mx-auto max-w-3xl border-2 p-6 shadow-[0_6px_0_var(--ink)] sm:p-10">
+      <div className="reveal border-ink bg-background mx-auto max-w-3xl rounded-none border-2 p-6 shadow-[0_6px_0_var(--ink)] sm:p-10">
         <Suspense fallback={<Skeleton className="h-40 w-full" />}>
           <OfferDetails />
         </Suspense>
         <div className="border-line mt-8 flex flex-col items-center gap-4 border-t pt-8 text-center">
           <CtaLink
-            href="/courses"
+            href="/training/courses"
             cta="offer_reserve"
             locale={locale}
             variant="chunky"
@@ -108,7 +108,7 @@ async function OfferDetails() {
         // dt/dd must be direct children of the group div, so the icon lives inside <dt>.
         <div key={label} className="relative min-h-11 pl-15">
           <dt className="text-ink-soft text-sm">
-            <span className="bg-track-ai-tint text-track-ai-ink absolute top-0 left-0 flex size-11 items-center justify-center rounded-xl">
+            <span className="bg-track-ai-tint text-track-ai-ink absolute top-0 left-0 flex size-11 items-center justify-center rounded-none">
               <Icon className="size-5" aria-hidden />
             </span>
             {label}

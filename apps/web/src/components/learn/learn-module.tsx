@@ -24,13 +24,13 @@ export function LearnModule() {
   const { data: module, isPending, error } = useQuery(moduleQuery(moduleId));
   const now = useNow();
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) {
     return (
       <div className="space-y-4">
         <FormError message={errorMessage(error)} />
         <Link
-          href={`/learn/${courseSlug}`}
+          href={`/training/learn/${courseSlug}`}
           className="text-ink font-semibold underline underline-offset-4"
         >
           {t.learn.backToCourse}
@@ -49,12 +49,12 @@ export function LearnModule() {
   return (
     <>
       <Link
-        href={`/learn/${module.course.slug}`}
+        href={`/training/learn/${module.course.slug}`}
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {module.course.title}
       </Link>
-      <header className={cn('rounded-card space-y-3 p-6 sm:p-8', theme.tint)}>
+      <header className={cn('space-y-3 rounded-none p-6 sm:p-8', theme.tint)}>
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-ink text-sm font-bold">
             {fmt(t.common.module, { number: module.order })}
@@ -137,8 +137,8 @@ export function LearnModule() {
               return (
                 <li key={lesson.id}>
                   <Link
-                    href={`/learn/${module.course.slug}/${module.id}/lessons/${lesson.id}`}
-                    className="pressable border-line-strong rounded-card bg-background hover:border-ink focus-visible:ring-ring/50 flex items-center gap-4 p-4 outline-none [--press:var(--border-strong)] hover:[--press:var(--ink)] focus-visible:ring-3"
+                    href={`/training/learn/${module.course.slug}/${module.id}/lessons/${lesson.id}`}
+                    className="pressable border-line-strong bg-background hover:border-ink focus-visible:ring-ring/50 flex items-center gap-4 rounded-none p-4 outline-none [--press:var(--border-strong)] hover:[--press:var(--ink)] focus-visible:ring-3"
                   >
                     <Icon
                       className={cn('size-6 shrink-0', done ? 'text-passed-ink' : 'text-ink-soft')}

@@ -12,7 +12,7 @@ import { UserMenu } from './user-menu';
 export function HeaderAuth() {
   const { status, user } = useAuth();
 
-  if (status === 'loading') return <Skeleton className="rounded-button h-10 w-32" />;
+  if (status === 'loading') return <Skeleton className="h-10 w-32 rounded-none" />;
 
   if (user) {
     return (
@@ -30,13 +30,13 @@ export function HeaderAuth() {
   return (
     <div className="flex items-center gap-2">
       <Link
-        href="/login"
-        className="text-ink rounded-lg px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline"
+        href="/training/login"
+        className="text-ink rounded-none px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline"
       >
         {t.nav.login}
       </Link>
       <Button asChild variant="chunky">
-        <Link href="/register">{t.nav.startNow}</Link>
+        <Link href="/training/register">{t.nav.startNow}</Link>
       </Button>
     </div>
   );

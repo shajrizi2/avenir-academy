@@ -23,12 +23,12 @@ export function TestPanel({ moduleId, test }: { moduleId: string; test: ModuleTe
         {test && (
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link href={`/teach/modules/${moduleId}/test`}>
+              <Link href={`/training/teach/modules/${moduleId}/test`}>
                 <Pencil data-icon="inline-start" /> {m.edit}
               </Link>
             </Button>
             <Button asChild variant="chunky" size="sm">
-              <Link href={`/teach/modules/${moduleId}/results`}>
+              <Link href={`/training/teach/modules/${moduleId}/results`}>
                 <BarChart3 data-icon="inline-start" /> {m.results}
               </Link>
             </Button>
@@ -63,7 +63,7 @@ export function TestPanel({ moduleId, test }: { moduleId: string; test: ModuleTe
             description={m.emptyText}
             action={
               <Button asChild variant="chunky">
-                <Link href={`/teach/modules/${moduleId}/test`}>
+                <Link href={`/training/teach/modules/${moduleId}/test`}>
                   <FilePlus2 data-icon="inline-start" /> {m.create}
                 </Link>
               </Button>

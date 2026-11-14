@@ -68,6 +68,20 @@ export class EnvironmentVariables {
   @Max(15)
   BCRYPT_ROUNDS = 12;
 
+  /** Campaign emails sent per day at most (PLAN D37); keep under the email provider's daily limit. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  CAMPAIGN_DAILY_LIMIT = 80;
+
+  /** Campaign emails sent per minute at most. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  CAMPAIGN_PER_MINUTE = 10;
+
   /** Requests per minute per IP for the global rate limit. */
   @IsOptional()
   @Type(() => Number)

@@ -36,7 +36,7 @@ export default defineConfig({
     },
     {
       command: `pnpm exec next start --port ${PORT}`,
-      url: `${baseURL}/sq`,
+      url: `${baseURL}/training`,
       // The browser reaches the API directly (NEXT_PUBLIC_API_URL baked at build time, as in
       // production); the server reaches it through API_INTERNAL_URL. Build with
       // NEXT_PUBLIC_API_URL=http://localhost:<api port>/api/v1 when the ports are moved.

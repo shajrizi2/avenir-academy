@@ -27,7 +27,7 @@ export function EnrollPanel({ courseId, courseSlug, groups }: EnrollPanelProps) 
   const d = t.catalog.detail;
 
   if (status === 'loading' || (isStudent && enrollments.isPending)) {
-    return <Skeleton className="rounded-button h-24 w-full" />;
+    return <Skeleton className="h-24 w-full rounded-none" />;
   }
   if (user && !isStudent) {
     return <p className="text-ink-soft text-sm">{d.staffOnly}</p>;
@@ -41,7 +41,7 @@ export function EnrollPanel({ courseId, courseSlug, groups }: EnrollPanelProps) 
           <CheckCircle2 className="size-4" aria-hidden /> {d.enrolled}
         </p>
         <Button asChild variant="chunky" size="lg" className="w-full">
-          <Link href={`/learn/${courseSlug}`}>{d.openCourse}</Link>
+          <Link href={`/training/learn/${courseSlug}`}>{d.openCourse}</Link>
         </Button>
       </div>
     );
@@ -51,7 +51,7 @@ export function EnrollPanel({ courseId, courseSlug, groups }: EnrollPanelProps) 
       <div className="space-y-3">
         <p className="text-active-ink font-semibold">{d.pendingPayment}</p>
         <Button asChild variant="chunky" size="lg" className="w-full">
-          <Link href={`/checkout/${existing.group.id}`}>{d.continuePayment}</Link>
+          <Link href={`/training/checkout/${existing.group.id}`}>{d.continuePayment}</Link>
         </Button>
       </div>
     );
@@ -77,10 +77,10 @@ export function EnrollPanel({ courseId, courseSlug, groups }: EnrollPanelProps) 
         {groups.map((group) => {
           const full = group.seatsLeft === 0;
           const href = user
-            ? `/checkout/${group.id}`
-            : `/register?next=${encodeURIComponent(`/checkout/${group.id}`)}`;
+            ? `/training/checkout/${group.id}`
+            : `/training/register?next=${encodeURIComponent(`/training/checkout/${group.id}`)}`;
           return (
-            <li key={group.id} className="border-line rounded-card space-y-2 border p-4">
+            <li key={group.id} className="border-line space-y-2 rounded-none border p-4">
               <p className="text-ink font-bold">{group.name}</p>
               <dl className="text-ink-soft space-y-1 text-sm">
                 <div className="flex items-center gap-2">

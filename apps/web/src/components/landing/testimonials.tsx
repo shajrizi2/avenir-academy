@@ -18,7 +18,7 @@ export async function Testimonials() {
       <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {testimonials.map((item) => (
           <li key={item.id}>
-            <figure className="reveal border-line rounded-card bg-background flex h-full flex-col border p-6 sm:p-8">
+            <figure className="reveal border-line bg-background flex h-full flex-col rounded-none border p-6 sm:p-8">
               <Quote className="text-track-ai size-8" aria-hidden />
               <blockquote className="text-ink mt-4 flex-1 text-lg leading-8">
                 <p>{item.quote}</p>

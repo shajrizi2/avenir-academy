@@ -17,6 +17,8 @@ export interface MailMessage {
   text: string;
   html?: string;
   attachments?: MailAttachment[];
+  /** Extra headers, e.g. List-Unsubscribe on campaign emails. */
+  headers?: Record<string, string>;
 }
 
 /** A logged, idempotent send: the same `uniqueKey` is never sent twice. */

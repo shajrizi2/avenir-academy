@@ -24,7 +24,7 @@ export function VideoEmbed({ url, title }: { url: string; title: string }) {
   const src = embedUrl(url);
   if (!src) return null;
   return (
-    <div className="rounded-card border-line aspect-video overflow-hidden border bg-black">
+    <div className="border-line aspect-video overflow-hidden rounded-none border bg-black">
       <iframe
         src={src}
         title={title}

@@ -33,7 +33,7 @@ export function CourseList() {
     <div className="space-y-6">
       <NewCourseButton />
       {isPending ? (
-        <Skeleton className="rounded-card h-48 w-full" />
+        <Skeleton className="h-48 w-full rounded-none" />
       ) : error ? (
         <FormError message={errorMessage(error)} />
       ) : data.length === 0 ? (
@@ -46,12 +46,12 @@ export function CourseList() {
         <ul className="grid gap-4 md:grid-cols-2">
           {data.map((course) => (
             <li key={course.id} className="relative">
-              <div className="border-line rounded-card bg-background hover:border-ink flex h-full flex-col gap-3 border-2 p-5 transition-colors">
+              <div className="border-line bg-background hover:border-ink flex h-full flex-col gap-3 rounded-none border-2 p-5 transition-colors">
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="text-ink text-lg font-bold">
                     <Link
-                      href={`/admin/courses/${course.id}`}
-                      className="after:rounded-card after:absolute after:inset-0 focus-visible:outline-none"
+                      href={`/training/admin/courses/${course.id}`}
+                      className="after:absolute after:inset-0 after:rounded-none focus-visible:outline-none"
                     >
                       {course.title}
                     </Link>
@@ -93,7 +93,7 @@ function NewCourseButton() {
     toast.success(t.admin.courses.created);
     void queryClient.invalidateQueries({ queryKey: ['courses'] });
     setOpen(false);
-    router.push(`/admin/courses/${course.id}`);
+    router.push(`/training/admin/courses/${course.id}`);
   }
 
   return (

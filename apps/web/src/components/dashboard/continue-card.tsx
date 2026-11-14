@@ -12,13 +12,13 @@ export function ContinueCard() {
   const { data } = useQuery(nextLessonQuery);
   if (!data) return null;
   const d = t.dashboard;
-  const href = `/learn/${data.module.course.slug}/${data.module.id}/lessons/${data.lesson.id}`;
+  const href = `/training/learn/${data.module.course.slug}/${data.module.id}/lessons/${data.lesson.id}`;
   return (
     <section
       aria-labelledby="continue-title"
-      className="border-ink rounded-card bg-track-ai-tint flex flex-col gap-4 border-2 p-6 shadow-[0_4px_0_var(--ink)] sm:flex-row sm:items-center"
+      className="border-ink bg-track-ai-tint flex flex-col gap-4 rounded-none border-2 p-6 shadow-[0_4px_0_var(--ink)] sm:flex-row sm:items-center"
     >
-      <span className="bg-background border-ink text-ink flex size-14 shrink-0 items-center justify-center rounded-2xl border-2">
+      <span className="bg-background border-ink text-ink flex size-14 shrink-0 items-center justify-center rounded-none border-2">
         <BookOpenCheck className="size-6" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">

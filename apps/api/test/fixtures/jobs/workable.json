@@ -1,0 +1,19 @@
+{
+  "name": "Sprocket",
+  "jobs": [
+    {
+      "title": "Customer Support Specialist",
+      "shortcode": "AB12CD",
+      "employment_type": "Full-time",
+      "telecommuting": true,
+      "department": "Support",
+      "url": "https://apply.workable.com/sprocket/j/AB12CD/",
+      "application_url": "https://apply.workable.com/sprocket/j/AB12CD/apply",
+      "published_on": "2026-11-09",
+      "country": "Kosovo",
+      "city": "",
+      "locations": [{ "country": "Kosovo", "city": "Prishtina" }],
+      "description": "<p>Help our customers by chat and email.</p>"
+    }
+  ]
+}

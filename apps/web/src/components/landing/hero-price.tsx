@@ -20,7 +20,7 @@ export async function HeroPrice() {
         <>
           {format(t.hero.priceLine, { price, listPrice: '' }).replace(/\s+$/, '')}{' '}
           <s className="text-ink-soft font-medium">{listPrice}</s>
-          <span className="bg-track-marketing-tint text-track-marketing-ink ml-2 rounded-full px-2 py-0.5 text-sm">
+          <span className="bg-track-marketing-tint text-track-marketing-ink ml-2 rounded-none px-2 py-0.5 text-sm">
             {format(t.tracks.discount, { percent })}
           </span>
         </>

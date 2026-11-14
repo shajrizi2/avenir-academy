@@ -1,4 +1,4 @@
-import type { CourseSummary } from '@ai-academy/shared';
+import { type CourseSummary, JOB_CATEGORY_SLUGS } from '@ai-academy/shared';
 import type { MetadataRoute } from 'next';
 import { unstable_rethrow } from 'next/navigation';
 import { connection } from 'next/server';
@@ -18,14 +18,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   return [
-    { url: `${SITE_URL}/sq`, changeFrequency: 'weekly', priority: 1 },
-    { url: `${SITE_URL}/courses`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${SITE_URL}/`, changeFrequency: 'daily', priority: 1 },
+    ...Object.values(JOB_CATEGORY_SLUGS).map((slug) => ({
+      url: `${SITE_URL}/?kategoria=${slug}`,
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    })),
+    { url: `${SITE_URL}/training`, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${SITE_URL}/training/courses`, changeFrequency: 'weekly', priority: 0.8 },
     ...courses.map((course) => ({
-      url: `${SITE_URL}/courses/${course.slug}`,
+      url: `${SITE_URL}/training/courses/${course.slug}`,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     })),
-    { url: `${SITE_URL}/register`, changeFrequency: 'yearly', priority: 0.6 },
-    { url: `${SITE_URL}/login`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${SITE_URL}/training/register`, changeFrequency: 'yearly', priority: 0.6 },
+    { url: `${SITE_URL}/training/login`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${SITE_URL}/for-companies`, changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${SITE_URL}/privatesia`, changeFrequency: 'yearly', priority: 0.2 },
   ];
 }

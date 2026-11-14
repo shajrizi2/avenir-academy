@@ -4,6 +4,7 @@ import type { Role } from '@ai-academy/shared';
 import { Menu } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Logo } from '@/components/logo';
+import { MainMenu } from './main-menu';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { t } from '@/i18n/messages';
@@ -26,7 +27,7 @@ export function AppShell({ role, children }: { role: Role; children: React.React
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="border-line bg-background/90 sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b px-4 backdrop-blur-md sm:px-6">
+        <header className="border-line bg-background/90 sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b px-4 backdrop-blur-md sm:px-6">
           <div className="flex items-center gap-2 md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
@@ -49,6 +50,7 @@ export function AppShell({ role, children }: { role: Role; children: React.React
             </Sheet>
             <Logo />
           </div>
+          <MainMenu current="training" className="hidden md:flex" />
           <div className="ml-auto">
             <UserMenu />
           </div>

@@ -54,7 +54,7 @@ export function MaterialsPanel({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="bg-soft rounded-card space-y-4 p-4">
+        <div className="bg-soft space-y-4 rounded-none p-4">
           <FilterPills
             label={m.typeLabel}
             options={[

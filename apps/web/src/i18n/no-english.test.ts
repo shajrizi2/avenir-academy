@@ -13,7 +13,7 @@ const ROOT = join(__dirname, '..');
 const SKIP = [
   'components/ui/',
   'app/(site)/design/',
-  'app/[locale]/opengraph-image.tsx',
+  'app/(landing)/training/opengraph-image.tsx',
   'components/illustrations/',
 ];
 

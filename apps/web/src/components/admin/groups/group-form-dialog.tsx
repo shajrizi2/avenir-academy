@@ -245,7 +245,7 @@ function WeekdayPicker({
             aria-pressed={value.includes(day)}
             onClick={() => toggle(day)}
             className={cn(
-              'focus-visible:ring-ring/50 h-10 min-w-12 rounded-full border-2 px-3 text-sm font-bold outline-none focus-visible:ring-3',
+              'focus-visible:ring-ring/50 h-10 min-w-12 rounded-none border-2 px-3 text-sm font-bold outline-none focus-visible:ring-3',
               value.includes(day)
                 ? 'border-ink bg-ink text-primary-foreground'
                 : 'border-line-strong bg-background text-ink hover:border-ink',

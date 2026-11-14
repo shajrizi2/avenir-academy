@@ -154,7 +154,7 @@ describe('AuthService', () => {
       expect(mail.sendLogged).toHaveBeenCalledOnce();
       const message = mail.sendLogged.mock.calls[0][0] as { to: string; text: string };
       expect(message.to).toBe('ada@example.com');
-      expect(message.text).toContain('http://localhost:3000/reset-password?token=');
+      expect(message.text).toContain('http://localhost:3000/training/reset-password?token=');
       expect(res.message).toMatch(/Nëse ekziston një llogari/);
     });
 

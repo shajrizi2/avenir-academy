@@ -26,7 +26,7 @@ export function UserMenu() {
 
   async function handleLogout() {
     await logout();
-    router.replace('/');
+    router.replace('/training');
   }
 
   return (
@@ -35,7 +35,7 @@ export function UserMenu() {
         <Button
           variant="ghost"
           size="icon-lg"
-          className="rounded-full"
+          className="rounded-none"
           aria-label={t.nav.accountMenu}
         >
           <Avatar>
@@ -58,7 +58,7 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/profile">
+          <Link href="/training/profile">
             <UserRound />
             {t.nav.profile}
           </Link>

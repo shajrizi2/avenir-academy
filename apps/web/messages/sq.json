@@ -369,7 +369,10 @@
       "users": "Përdoruesit",
       "instructors": "Instruktorët",
       "testimonials": "Dëshmitë",
-      "settings": "Cilësimet e faqes"
+      "settings": "Cilësimet e faqes",
+      "jobs": "Shpalljet e punës",
+      "subscribers": "Email-et e kandidatëve",
+      "campaigns": "Fushatat me email"
     }
   },
   "common": {
@@ -460,7 +463,10 @@
     "testimonials": "Dëshmitë",
     "settings": "Cilësimet e faqes",
     "cookieSettings": "Cilësimet e cookies",
-    "footerTagline": "Kurse live për AI, kodim, marketing digjital dhe SEO."
+    "footerTagline": "Kurse live për AI, kodim, marketing digjital dhe SEO.",
+    "jobs": "Shpalljet e punës",
+    "subscribers": "Email-et e kandidatëve",
+    "campaigns": "Fushatat me email"
   },
   "errors": {
     "generic": "Diçka shkoi keq. Provo sërish.",
@@ -992,7 +998,11 @@
       "beneficiary": "Përfituesi",
       "iban": "IBAN",
       "bankName": "Banka",
-      "swift": "SWIFT/BIC"
+      "swift": "SWIFT/BIC",
+      "jobBoard": "Shpalljet e punës",
+      "jobBoardHint": "Kur është e ndezur, avenir.academy hap shpalljet e punës. Kur është e fikur, hap faqen e trajnimeve.",
+      "jobBoardPublic": "Shfaq shpalljet në faqen kryesore",
+      "jobBoardPreview": "Shiko listën para se ta ndezësh"
     },
     "courseForm": {
       "price": "Çmimi në muaj (cent)",
@@ -1494,5 +1504,243 @@
     "deleteAria": "Fshi {title}",
     "preview": "Pamja paraprake",
     "manage": "Menaxho mësimet"
+  },
+  "shell": {
+    "home": "Avenir, faqja kryesore",
+    "mainMenu": "Menyja kryesore",
+    "jobs": "Shpalljet",
+    "training": "Trajnohu",
+    "forCompanies": "For companies",
+    "privacy": "Privatësia",
+    "footerLinks": "Lidhje në fund të faqes",
+    "tagline": "Shpallje pune remote për Kosovën dhe trajnime live në shqip.",
+    "rights": "Të gjitha të drejtat e rezervuara.",
+    "openMenu": "Hap menynë",
+    "menuTitle": "Menyja"
+  },
+  "forCompanies": {
+    "metaTitle": "For companies",
+    "metaDescription": "Hire remote talent from Kosovo through Avenir. Coming soon.",
+    "title": "Hire remote talent from Kosovo",
+    "lead": "We're building a simple way for companies to reach job seekers in Kosovo. Coming soon.",
+    "contact": "Questions? Write to us at {email}.",
+    "contactSoon": "Contact details will be published soon."
+  },
+  "sourcing": {
+    "title": "Sourcing"
+  },
+  "privacy": {
+    "metaTitle": "Privatësia",
+    "metaDescription": "Çfarë të dhënash ruan Avenir për ata që kërkojnë punë, pse, për sa kohë dhe si i fshin.",
+    "title": "Privatësia",
+    "updated": "Përditësuar më {date}",
+    "sections": [
+      {
+        "title": "Çfarë ruajmë",
+        "body": "Kur hyn me email te shpalljet, ruajmë adresën tënde të email-it, nëse ke pranuar email-e nga Avenir (dhe kur), dhe pajisjet ku je i kyçur. Nuk ruajmë CV, fjalëkalime apo aplikime: aplikimi bëhet gjithmonë në faqen e punëdhënësit."
+      },
+      {
+        "title": "Pse i ruajmë",
+        "body": "Email-in e përdorim për të të dërguar kodin e hyrjes. Nëse e ke lënë të shënuar kutinë «Pranoj të marr email-e», të dërgojmë herë pas here email-e për mundësi pune dhe trajnime. Nuk i shesim dhe nuk ua japim të dhënat të tjerëve."
+      },
+      {
+        "title": "Si çregjistrohesh",
+        "body": "Çdo email nga Avenir ka në fund lidhjen «Çregjistrohu». Një klik mjafton dhe nuk të dërgojmë më email-e. Mund të vazhdosh t'i shohësh shpalljet si më parë."
+      },
+      {
+        "title": "Për sa kohë",
+        "body": "Kodi i hyrjes vlen 10 minuta. Hyrja në një pajisje zgjat një vit dhe rinovohet sa herë që e viziton faqen. Llogaritë që nuk përdoren për 2 vjet fshihen automatikisht."
+      },
+      {
+        "title": "Cookies",
+        "body": "Cookie e hyrjes është e domosdoshme që të mbetesh i kyçur, ndaj nuk kërkon pëlqim. Google Analytics ngarkohet vetëm nëse e pranon në banerin e cookies."
+      },
+      {
+        "title": "Si i fshin",
+        "body": "Na shkruaj në adresën e kontaktit në fund të faqes dhe fshijmë menjëherë email-in tënd dhe gjithçka që lidhet me të."
+      }
+    ]
+  },
+  "jobs": {
+    "metaTitle": "Shpallje pune remote për Kosovën",
+    "metaDescription": "Punë remote që mund t'i aplikosh nga Kosova, të përditësuara çdo mëngjes: inxhinieri, marketing, dizajn, shitje, mbështetje dhe më shumë.",
+    "title": "Shpallje pune remote që mund t'i aplikosh nga Kosova",
+    "counts": "{new} shpallje të reja sot · {total} gjithsej",
+    "categories": {
+      "ENGINEERING": "Inxhinieri softuerike",
+      "AI_DATA": "AI dhe të dhëna",
+      "MARKETING": "Marketing",
+      "DESIGN": "Dizajn",
+      "PRODUCT": "Produkt",
+      "SALES": "Shitje",
+      "SUPPORT": "Mbështetje për klientë",
+      "WRITING": "Shkrim dhe përmbajtje",
+      "FINANCE_ADMIN": "Financë dhe administratë",
+      "HR": "Burime njerëzore",
+      "OTHER": "Tjetër"
+    },
+    "regions": {
+      "WORLDWIDE": "E gjithë bota",
+      "EUROPE": "Evropë",
+      "BALKANS": "Ballkan",
+      "CONTRACT_ANYWHERE": "Kontratë nga kudo",
+      "GLOBAL_EMPLOYER": "Punësim global"
+    },
+    "contracts": {
+      "CONTRACTOR": "Kontratë",
+      "EMPLOYEE": "Punësim"
+    },
+    "periods": {
+      "YEAR": "në vit",
+      "MONTH": "në muaj",
+      "HOUR": "në orë"
+    },
+    "posted": {
+      "today": "sot",
+      "yesterday": "dje",
+      "days": "{count} ditë më parë"
+    },
+    "apply": "Apliko",
+    "applyLabel": "Apliko për {title} te {company} (hapet në një skedë të re)",
+    "source": "Burimi: {source}",
+    "closed": "E mbyllur",
+    "showMore": "Shfaq më shumë",
+    "empty": "Nuk gjetëm shpallje. Provo fjalë të tjera ose një lloj tjetër pune.",
+    "listLabel": "Shpalljet",
+    "loadError": "Shpalljet nuk u ngarkuan. Provo përsëri pas pak.",
+    "login": {
+      "title": "Hyr për të parë të gjitha shpalljet",
+      "lead": "Shkruaj email-in dhe të dërgojmë një kod me 6 shifra. Pa fjalëkalim, dhe në këtë pajisje mbetesh i kyçur.",
+      "email": "Email-i",
+      "consent": "Pranoj të marr email-e nga Avenir për mundësi pune dhe trajnime.",
+      "send": "Dërgo kodin",
+      "sending": "Po dërgohet…",
+      "sent": "Kodin e dërguam te {email}.",
+      "change": "Ndrysho",
+      "didYouMean": "Mos e kishe fjalën për {email}?",
+      "useSuggestion": "Përdor {email}",
+      "code": "Kodi",
+      "codeHint": "Shiko edhe te Spam ose Promotions nëse nuk e gjen.",
+      "verify": "Vazhdo",
+      "verifying": "Po vazhdon…",
+      "resend": "Dërgo një kod të ri",
+      "terms": "Si i ruajmë të dhënat:"
+    },
+    "search": {
+      "label": "Kërko shpallje",
+      "placeholder": "Kërko sipas punës ose kompanisë",
+      "type": "Lloji i punës",
+      "allTypes": "Të gjitha llojet",
+      "submit": "Kërko",
+      "results": "{count} shpallje për “{q}”",
+      "clear": "Pastro kërkimin"
+    }
+  },
+  "adminJobs": {
+    "title": "Shpalljet e punës",
+    "description": "Mbledhja e përditshme në 06:00, burimet, kompanitë, shpalljet e raportuara dhe bllokimet.",
+    "runNow": "Nis mbledhjen tani",
+    "counts": {
+      "open": "Të hapura",
+      "rejected": "Të refuzuara",
+      "hidden": "Të fshehura",
+      "closed": "Të mbyllura"
+    },
+    "runs": "Ditari i mbledhjes",
+    "runsEmpty": "Mbledhja nuk ka nisur ende. Nis mbledhjen tani ose prit deri në 06:00.",
+    "runStatus": {
+      "RUNNING": "Në vazhdim",
+      "OK": "Në rregull",
+      "FAILED": "Dështoi"
+    },
+    "runLine": "{seen} të lexuara · {created} të reja · {published} të publikuara · {discovered} kompani të gjetura · {links} lidhje të kontrolluara",
+    "closedLine": "Mbyllur: {closed}",
+    "sourcesFailed": "Burime që dështuan: {sources}",
+    "feeds": "Burimet",
+    "feedOk": "Funksionon",
+    "feedPaused": "I ndalur deri më {date}",
+    "feedFailing": "{count} dështime radhazi",
+    "companies": "Faqet e karrierës",
+    "companiesHint": "Kompanitë që lexohen çdo mëngjes. Shumica shtohen vetë kur një shpallje lidhet me faqen e tyre.",
+    "companiesEmpty": "Nuk ka ende kompani. Shto një ose prit mbledhjen e parë.",
+    "addCompany": "Shto kompani",
+    "companyName": "Emri i kompanisë",
+    "careersUrl": "Lidhja e faqes së karrierës (Greenhouse, Lever, Ashby ose Workable)",
+    "openJobs": "{count} të hapura",
+    "companyStatus": {
+      "ACTIVE": "Aktive",
+      "DISABLED": "E fikur",
+      "BLOCKED": "E bllokuar"
+    },
+    "disable": "Fik",
+    "enable": "Ndiz",
+    "hidden": "Shpalljet e fshehura",
+    "hiddenHint": "Shpallje nga një kompani ose domen i bllokuar.",
+    "hiddenEmpty": "Asnjë shpallje e fshehur.",
+    "restore": "Rikthe",
+    "close": "Mbyll",
+    "blocks": "Bllokimet",
+    "blocksHint": "Shpalljet nga këto kompani ose domene nuk publikohen kurrë.",
+    "blocksEmpty": "Asnjë bllokim.",
+    "addBlock": "Blloko",
+    "blockKind": "Lloji",
+    "blockKinds": {
+      "COMPANY": "Kompani",
+      "DOMAIN": "Domen i lidhjes"
+    },
+    "blockValue": "Emri ose domeni",
+    "blockReason": "Arsyeja",
+    "unblock": "Hiq bllokimin",
+    "saved": "U ruajt."
+  },
+  "unsubscribe": {
+    "metaTitle": "Çregjistrohu",
+    "title": "Çregjistrohu nga email-et e Avenir",
+    "lead": "Nuk do të marrësh më email-e për mundësi pune dhe trajnime. Shpalljet mbeten të hapura për ty si më parë.",
+    "button": "Çregjistrohu",
+    "done": "U çregjistrove. Nuk do të marrësh më email-e nga Avenir.",
+    "invalid": "Kjo lidhje nuk është e plotë. Hap lidhjen «Çregjistrohu» nga email-i që të dërguam."
+  },
+  "adminSubscribers": {
+    "title": "Email-et e kandidatëve",
+    "description": "Kushdo që hyn te shpalljet. «Po» do të thotë që ka pranuar email-e nga Avenir.",
+    "counts": "{total} email-e · {consenting} pranojnë email-e",
+    "export": "Shkarko CSV",
+    "email": "Email-i",
+    "consent": "Pranon email-e",
+    "joined": "Regjistruar",
+    "yes": "Po",
+    "no": "Jo",
+    "unsubscribed": "Jo (u çregjistrua)",
+    "delete": "Fshi",
+    "deleteTitle": "Ta fshijmë këtë email?",
+    "deleteDescription": "Fshihen menjëherë email-i dhe hyrjet e tij. Kjo nuk kthehet mbrapsht.",
+    "deleted": "Email-i u fshi.",
+    "empty": "Askush nuk ka hyrë ende te shpalljet."
+  },
+  "adminCampaigns": {
+    "title": "Fushatat me email",
+    "description": "Dërgo një email te të gjithë që kanë pranuar email-e nga Avenir. Dërgohet pak nga pak, brenda kufirit ditor të email-eve.",
+    "new": "Fushatë e re",
+    "subject": "Titulli i email-it",
+    "body": "Teksti",
+    "bodyHint": "Një rresht bosh fillon paragraf të ri. Lidhja për t'u çregjistruar shtohet vetë në fund.",
+    "save": "Ruaj draftin",
+    "saved": "Drafti u ruajt.",
+    "test": "Dërgo provë te unë",
+    "send": "Dërgo te të gjithë",
+    "sendTitle": "Ta dërgojmë fushatën?",
+    "sendDescription": "Dërgohet te {count} persona që kanë pranuar email-e. Pasi nis, nuk ndryshohet më.",
+    "cancel": "Ndalo dërgimin",
+    "delete": "Fshi draftin",
+    "status": {
+      "DRAFT": "Skicë",
+      "SENDING": "Po dërgohet",
+      "SENT": "U dërgua",
+      "CANCELLED": "U ndal"
+    },
+    "progress": "{sent} nga {recipients} të dërguara",
+    "failed": "{count} dështuan",
+    "empty": "Nuk ka ende fushata."
   }
 }

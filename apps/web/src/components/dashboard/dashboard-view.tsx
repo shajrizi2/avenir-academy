@@ -29,7 +29,7 @@ export function DashboardView() {
           description={t.dashboard.adminText}
           action={
             <Button asChild>
-              <Link href="/admin">{t.dashboard.openAdmin}</Link>
+              <Link href="/training/admin">{t.dashboard.openAdmin}</Link>
             </Button>
           }
         />

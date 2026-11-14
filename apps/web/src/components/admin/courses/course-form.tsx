@@ -90,7 +90,7 @@ export function CourseForm({ course, submitLabel, onSubmit }: CourseFormProps) {
         <TextField form={form} name="slug" label={f.slug} description={f.slugHint} />
         <TextareaField form={form} name="summary" label={f.summary} rows={2} />
         <TextareaField form={form} name="description" label={f.descriptionField} rows={6} />
-        <fieldset className="border-line rounded-card space-y-6 border p-4 sm:p-5">
+        <fieldset className="border-line space-y-6 rounded-none border p-4 sm:p-5">
           <legend className="text-ink px-1 text-sm font-bold">{f.albanianVersion}</legend>
           <p className="text-ink-soft -mt-2 text-sm">{f.albanianHint}</p>
           <TextField form={form} name="titleSq" label={f.titleSq} />

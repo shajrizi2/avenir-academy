@@ -22,7 +22,7 @@ export async function Instructors() {
           return (
             <li
               key={person.id}
-              className="reveal border-line rounded-card bg-background flex w-full flex-col items-center border p-8 text-center sm:w-80"
+              className="reveal border-line bg-background flex w-full flex-col items-center rounded-none border p-8 text-center sm:w-80"
             >
               <PersonAvatar name={name} src={person.avatarUrl} size={96} />
               <h3 className="text-ink mt-5 text-lg font-bold">{name}</h3>

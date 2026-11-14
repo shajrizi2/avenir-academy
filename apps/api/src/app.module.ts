@@ -14,6 +14,7 @@ import { CourseModulesModule } from './modules/course-modules/course-modules.mod
 import { CoursesModule } from './modules/courses/courses.module.js';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module.js';
 import { GroupsModule } from './modules/groups/groups.module.js';
+import { JobsModule } from './modules/jobs/jobs.module.js';
 import { LessonsModule } from './modules/lessons/lessons.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
@@ -53,6 +54,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
     PaymentsModule,
     EnrollmentsModule,
     LessonsModule,
+    JobsModule,
     NotificationsModule,
     CourseModulesModule,
     SessionsModule,

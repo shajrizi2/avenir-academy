@@ -38,7 +38,7 @@ export function TestimonialList() {
         }
       />
       {isPending ? (
-        <Skeleton className="rounded-card h-48 w-full" />
+        <Skeleton className="h-48 w-full rounded-none" />
       ) : error ? (
         <FormError message={errorMessage(error)} />
       ) : data.length === 0 ? (
@@ -52,7 +52,7 @@ export function TestimonialList() {
           {data.map((item) => (
             <li
               key={item.id}
-              className="border-line rounded-card bg-background flex flex-col gap-4 border p-5"
+              className="border-line bg-background flex flex-col gap-4 rounded-none border p-5"
             >
               <div className="flex flex-wrap gap-2">
                 <Badge variant={item.isPublished ? 'ai' : 'secondary'}>

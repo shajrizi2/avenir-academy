@@ -31,7 +31,7 @@ export function TestResultsView() {
 
   const back = (
     <Link
-      href={`/teach/modules/${moduleId}`}
+      href={`/training/teach/modules/${moduleId}`}
       className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
     >
       <ArrowLeft className="size-4" aria-hidden /> {m.back}
@@ -39,7 +39,7 @@ export function TestResultsView() {
   );
 
   if (builder.isPending || (testId && results.isPending)) {
-    return <Skeleton className="rounded-card h-96 w-full" />;
+    return <Skeleton className="h-96 w-full rounded-none" />;
   }
   if (builder.error) return <FormError message={errorMessage(builder.error)} />;
   if (!testId) {
@@ -52,7 +52,7 @@ export function TestResultsView() {
           description={m.noTestText}
           action={
             <Button asChild variant="chunky">
-              <Link href={`/teach/modules/${moduleId}/test`}>{m.createTest}</Link>
+              <Link href={`/training/teach/modules/${moduleId}/test`}>{m.createTest}</Link>
             </Button>
           }
         />
@@ -94,7 +94,7 @@ export function TestResultsView() {
             <Stat label={m.passed} value={passed} />
             <Stat label={m.outOfAttempts} value={failed} />
           </ul>
-          <ul className="border-line rounded-card bg-background divide-line divide-y border">
+          <ul className="border-line bg-background divide-line divide-y rounded-none border">
             {rows.map((row) => (
               <ResultRow key={row.user.id} row={row} testId={test.id} />
             ))}
@@ -107,7 +107,7 @@ export function TestResultsView() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <li className="border-line rounded-card bg-background border p-3 sm:p-5">
+    <li className="border-line bg-background rounded-none border p-3 sm:p-5">
       <p className="text-ink-soft text-xs font-semibold sm:text-sm">{label}</p>
       <p className="text-ink text-subheading sm:text-heading font-extrabold">{value}</p>
     </li>

@@ -103,13 +103,13 @@ export function PlatformStats() {
               <li
                 key={label}
                 className={cn(
-                  'rounded-card flex items-start gap-4 border p-5',
+                  'flex items-start gap-4 rounded-none border p-5',
                   alert ? 'bg-failed-tint border-transparent' : 'bg-background border-line',
                 )}
               >
                 <span
                   className={cn(
-                    'flex size-11 shrink-0 items-center justify-center rounded-xl',
+                    'flex size-11 shrink-0 items-center justify-center rounded-none',
                     alert ? 'bg-background text-failed-ink' : 'bg-soft text-ink',
                   )}
                 >
@@ -124,7 +124,7 @@ export function PlatformStats() {
             ))
           : Array.from({ length: 9 }, (_, i) => (
               <li key={i}>
-                <Skeleton className="rounded-card h-32 w-full" />
+                <Skeleton className="h-32 w-full rounded-none" />
               </li>
             ))}
       </ul>

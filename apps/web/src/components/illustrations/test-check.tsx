@@ -1,4 +1,4 @@
-import { IllustrationSvg, type IllustrationProps, Sparkle } from './svg';
+import { IllustrationSvg, type IllustrationProps } from './svg';
 
 /** A clipboard of ticked answers with a score badge: progress proven by tests. */
 export function TestCheck({ className }: IllustrationProps) {
@@ -39,8 +39,6 @@ export function TestCheck({ className }: IllustrationProps) {
       >
         70%
       </text>
-      <Sparkle x={206} y={86} r={12} className="fill-track-marketing" />
-      <Sparkle x={38} y={60} r={9} className="fill-active" />
     </IllustrationSvg>
   );
 }

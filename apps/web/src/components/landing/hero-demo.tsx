@@ -3,12 +3,7 @@
 import type { Locale } from '@ai-academy/shared';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
-import {
-  ChatSparkles,
-  LaptopCode,
-  MegaphoneChart,
-  NeuralNetwork,
-} from '@/components/illustrations';
+import { LaptopCode, MegaphoneChart, PathUnlock, TestCheck } from '@/components/illustrations';
 import type { LandingMessages } from '@/i18n/messages';
 import { track } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
@@ -17,7 +12,7 @@ import { CtaLink } from './cta-link';
 type Demo = LandingMessages['hero']['demo'];
 
 /** One illustration per topic tab, in the order of `demo.topics`. */
-const ILLUSTRATIONS = [NeuralNetwork, LaptopCode, MegaphoneChart, ChatSparkles];
+const ILLUSTRATIONS = [TestCheck, LaptopCode, MegaphoneChart, PathUnlock];
 
 /**
  * The hero's "learn by doing" demo: pick a topic, answer one question, get instant
@@ -61,7 +56,7 @@ export function HeroDemo({ demo, locale }: { demo: Demo; locale: Locale }) {
               else if (e.key === 'End') selectTab(demo.topics.length - 1);
             }}
             className={cn(
-              'focus-visible:ring-ring/50 h-11 shrink-0 rounded-full border-2 px-5 text-sm font-bold whitespace-nowrap transition-colors outline-none focus-visible:ring-3',
+              'focus-visible:ring-ring/50 h-11 shrink-0 rounded-none border-2 px-5 text-sm font-bold whitespace-nowrap transition-colors outline-none focus-visible:ring-3',
               active === i
                 ? 'border-ink bg-ink text-primary-foreground'
                 : 'border-line-strong bg-background text-ink hover:border-ink',
@@ -76,7 +71,7 @@ export function HeroDemo({ demo, locale }: { demo: Demo; locale: Locale }) {
         role="tabpanel"
         id={`${baseId}-panel`}
         aria-labelledby={`${baseId}-tab-${active}`}
-        className="border-ink rounded-card bg-background mt-4 grid overflow-hidden border-2 shadow-[0_6px_0_var(--ink)] md:grid-cols-[2fr_3fr]"
+        className="border-ink bg-background mt-4 grid overflow-hidden rounded-none border-2 shadow-[0_6px_0_var(--ink)] md:grid-cols-[2fr_3fr]"
       >
         {/* Remount per topic so the answer state resets when the tab changes. */}
         <Question key={active} index={active} demo={demo} locale={locale} />
@@ -120,7 +115,7 @@ function Question({ index, demo, locale }: { index: number; demo: Demo; locale: 
                   aria-pressed={picked === i}
                   onClick={() => pick(i)}
                   className={cn(
-                    'rounded-card focus-visible:ring-ring/50 flex w-full items-start gap-3 p-4 text-left font-semibold outline-none focus-visible:ring-3',
+                    'focus-visible:ring-ring/50 flex w-full items-start gap-3 rounded-none p-4 text-left font-semibold outline-none focus-visible:ring-3',
                     state === 'correct' &&
                       'border-passed bg-passed-tint text-ink animate-pop border-2 shadow-[0_4px_0_var(--passed-ink)]',
                     state === 'wrong' &&
@@ -133,7 +128,7 @@ function Question({ index, demo, locale }: { index: number; demo: Demo; locale: 
                   <span
                     aria-hidden
                     className={cn(
-                      'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-extrabold',
+                      'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-none border-2 text-xs font-extrabold',
                       state === 'correct' && 'border-passed-ink bg-passed text-primary-foreground',
                       state === 'wrong' && 'border-failed-ink bg-failed text-primary-foreground',
                       (state === 'open' || state === 'idle') && 'border-line-strong',
@@ -169,7 +164,7 @@ function Question({ index, demo, locale }: { index: number; demo: Demo; locale: 
               <div className="border-line flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-ink-soft text-sm font-medium">{demo.outro}</p>
                 <CtaLink
-                  href="/register"
+                  href="/training/register"
                   cta="hero_demo_start"
                   locale={locale}
                   variant="chunky"

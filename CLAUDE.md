@@ -52,22 +52,25 @@ apps/api/
   src/common/i18n/     Albanian messages for class-validator errors
   src/mail/            MailService (console transport in dev; sendLogged = idempotent), templates.ts (every email), ics.ts
   src/modules/groups, payments, lessons, notifications (cron jobs + email log)
+  src/modules/jobs/    the job board (PLAN D36, D37): campaigns/ (admin email campaigns, minute cron), seekers/, sources/ (career pages + job-board feeds), rules/ (remote, Kosovo eligibility, scam, category), dedupe.ts, pipeline.service.ts (06:00 run)
   src/modules/         auth, users, courses, enrollments, ... (one Nest module per folder)
   test/                e2e tests (*.e2e-spec.ts)
 apps/web/
   messages/sq.json     landing copy (Albanian, source of truth); en.json mirrors its keys
   e2e/                 Playwright tests
-  src/app/[locale]/    ROOT LAYOUT #1: marketing landing page /sq (+ opengraph-image)
-  src/app/(site)/      ROOT LAYOUT #2 (lang="sq"): everything else
-    (public)/          catalog, course detail (groups + seats), auth pages (header + footer layout)
-    (app)/             dashboard, checkout/*, payments/*, learn/* (incl. lessons), teach/*, admin/* (sidebar, client-side guarded)
+  src/app/(landing)/   ROOT LAYOUT #1: the academy's marketing landing page at /training (+ opengraph-image)
+  src/app/(site)/      ROOT LAYOUT #2 (lang="sq"): everything else; "/" is the job board (PLAN D34)
+    training/(public)/ catalog, course detail (groups + seats), auth pages (header + footer layout)
+    (board)/          the job board "/" (+ /?preview; search, job-type dropdown, sign-in pop-up after 10 s), /cregjistrohu (unsubscribe), /for-companies, /sourcing, /privatesia
+    training/(app)/    dashboard, checkout/*, payments/*, learn/* (incl. lessons), teach/*, admin/* (sidebar, client-side guarded)
   src/app/global-not-found.tsx, sitemap.ts, robots.ts
   src/components/landing/  one component per landing section + header/footer/CTA helpers
   src/i18n/            messages.ts (t, fmt, plural), server.ts (landing), no-english.test.ts (flags English JSX)
   src/components/ui/   shadcn/ui primitives (generated; edit sparingly)
   src/components/      app components (layout, course, status badge, ...)
   src/lib/             api client, auth context, queries, landing-data (fail-soft loaders), analytics track()
-  src/proxy.ts         "/" → /sq or /en (aa_locale cookie); /login redirect without a session cookie (UX only)
+  src/proxy.ts         "/" → /training until SiteSettings.jobBoardPublic is on; /training/login redirect without a session cookie (UX only)
+  src/lib/legacy-redirects.ts  permanent redirects from the old academy paths (/sq, /login, /dashboard, ...) to /training
 packages/shared/src/   enums.ts, schemas/*.ts (zod), types.ts (API DTO shapes)
 scripts/bootstrap.mjs  first-run local setup
 docs/PLAN.md           spec, roadmap, decisions
@@ -87,6 +90,7 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
 - **Auth:**
   - Every route requires a JWT by default (global `JwtAuthGuard`). Mark public routes with `@Public()` and restrict them with `@Roles(Role.ADMIN, ...)`.
   - Instructors may touch only modules where `module.instructorId === user.id`. Check this in the service with `ModuleAccessService` (`src/modules/course-modules/module-access.service.ts`): `assertStaff()` for writes, `assertCanView()` for reads (students need an APPROVED enrollment and a module that isn't LOCKED).
+- **Job seekers** (PLAN D36, D37) are not `User`s: they sign in with an emailed 6-digit code (only through the board's 10-second pop-up; there is no sign-in or sign-out link) and hold a one-year `aj_session` httpOnly cookie on the API host (`src/modules/jobs/seekers/`, `JobSeekerGuard`). The web app calls those routes with `jobsFetch` (`lib/job-seeker.ts`), never `apiFetch`.
 - **Tokens:**
   - The access token is a 15-minute JWT returned in the response body; the web app keeps it in memory.
   - The refresh token is a 7-day JWT in the httpOnly `aa_refresh` cookie (path `/`).
@@ -120,18 +124,19 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
   - The hero demo (`hero-demo.tsx`) is the main "learn by doing" signal: one quiz question per topic tab, from `hero.demo` in the messages. Every question's `answer` index must match in both languages (unit-tested).
   - The proof band (`social-proof.tsx`) shows only facts that hold for every cohort (4 modules, live classes, 70% pass mark). Never learner counts.
   - Motion is CSS-only (`.reveal` scroll-driven fade-in; `.animate-pop` / `.animate-shake` on demo answers) and is disabled under `prefers-reduced-motion`. Targets: Lighthouse Performance ≥ 90, Accessibility ≥ 95, SEO 100.
-- **UI (design system; review it all at `/design`, dev only):** clean, bright, playful, "learn by doing". Light mode only.
+- **UI (design system; review it all at `/design`, dev only):** clean and simple. **Black, white and greys only, no AI-style decoration** (no sparkles, robots, glows or "AI-powered" labels; PLAN D35). Light mode only. The logo is the Avenir wordmark (`components/brand/wordmark.tsx`, files in `public/brand/`): black on white, white on black, never recoloured.
   - **Tokens only.** Every colour comes from `globals.css`. Never use Tailwind palette colours (`slate-*`, `indigo-*`, `white`, …) or hex values in components. The one exception is `opengraph-image.tsx`, because `ImageResponse` can't read CSS variables.
-    - Neutrals: `bg-background` (white), `bg-soft` (#F7F6F3 warm off-white, the app's page background), `text-ink` (#141414), `text-ink-soft` (#5B5B5B secondary text), `border-line` / `border-line-strong`.
+    - Neutrals: `bg-background` (white), `bg-soft` (#F5F5F5 light grey, the app's page background), `text-ink` (#111111), `text-ink-soft` (#555555 secondary text), `border-line` / `border-line-strong`.
     - Primary is ink: black buttons with white text (`text-primary-foreground`).
-    - Track accents: `track-ai` (violet) and `track-marketing` (orange), each with `-tint` (backgrounds), `-ink` (text and icons) and `-shadow`. The plain accent fails text contrast, so use it only for fills and decoration. Pick a course's accent with `trackTheme(slug)` from `components/course/track-theme.ts`.
-    - Status: `passed` / `active` / `locked` / `failed`, each with `-tint` and `-ink`.
+    - Track accents: `track-ai` and `track-marketing` exist as tokens but are greys now; courses are told apart by name and icon. Pick them with `trackTheme(slug)` from `components/course/track-theme.ts`.
+    - Status: `passed` / `active` / `locked` / `failed`, each with `-tint` and `-ink`, all greys: the badge's icon and word carry the meaning.
   - **Type:** Plus Jakarta Sans (`app/fonts.ts`). Headings are 700–800 with `tracking-heading`; body is 400–500. The scale is 14 / 16 / 18 / 24 / 32 / 44 / 64: `text-sm`, `text-base`, `text-lg`, `text-subheading`, `text-heading`, `text-title`, `text-display` (plus `text-display-sm` = 40 for the mobile hero). When you add a token class, register it in `lib/utils.ts` (`createCn`), or `cn` will drop it.
-  - **Shapes:** cards use `rounded-card` (16px), buttons `rounded-button` (14px), pills `rounded-full`.
+  - **Shapes:** everything is square (PLAN D37): use `rounded-none`, never another `rounded-*`; the radius tokens are 0 and `globals.css` removes any radius left over.
   - **Pressable:** primary actions use `<Button variant="chunky">` (black) or `variant="chunky-outline"` (white, also on dark bands). Clickable cards use `<Card variant="pressable">`. Both are built on the `pressable` utility (2px border plus a solid bottom shadow in `--press`: lifts 1px on hover, sinks 3px when pressed). Don't make static content pressable.
   - **Layout:** 8px grid; landing sections use `py-16 lg:py-28` and alternate `bg-background` / `bg-soft`; content is `max-w-[1200px]` with `px-4 sm:px-6`; every page must work at 375px with no horizontal scroll. Tap targets are at least 44px (`h-11` inputs).
-  - **Illustrations:** original inline SVG components in `components/illustrations/` (flat track-colour shapes with a 2px ink outline, `aria-hidden`). Never download or copy third-party art.
-  - Show a learner's module status everywhere with `<ModuleStatusBadge>` (green PASSED, amber ACTIVE, slate LOCKED + lock icon, red FAILED). Show a course's public module order with `<ModulePath>`.
+  - **Illustrations:** original inline SVG components in `components/illustrations/` (flat grey shapes with a 2px ink outline, `aria-hidden`, no sparkles). Never download or copy third-party art.
+  - **Main menu:** every header shows `<MainMenu current="jobs" | "training">` (Shpalljet → `/`, Trajnohu → `/training`); every footer ends with `<BrandFooter>` (black band, white wordmark, "For companies", Privatësia).
+  - Show a learner's module status everywhere with `<ModuleStatusBadge>` (icon + word: check PASSED, dot ACTIVE, lock LOCKED, cross FAILED). Show a course's public module order with `<ModulePath>`.
 - **Business rules that must hold (see PLAN §2):**
   - Grading runs only on the server, and `isCorrect` never reaches students.
   - A passed attempt sets the module to PASSED and the next module (order + 1) to ACTIVE in one `$transaction`.
@@ -141,6 +146,7 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
   - **Seats:** count and take a seat only inside a transaction after `GroupsService.lockAndCountFree()` (row lock on the group). Seats taken = APPROVED enrollments + PENDING_PAYMENT holds not yet expired.
   - **Payments:** only `applyConfirmed` confirms a payment (Stripe webhook, admin confirm, manual). The success redirect proves nothing. Every outcome is idempotent (status checks, `StripeEvent` ids, email unique keys).
 - **Email:** every email is an Albanian template in `src/mail/templates.ts` and goes through `MailService.sendLogged()` with a `uniqueKey` (`EmailLog` makes repeats no-ops). `send()` never throws; don't `await` it where timing could reveal whether an account exists (PLAN D21). Cron jobs live in `src/modules/notifications/scheduler.service.ts` and only call service methods that take `now`, so tests drive them directly (`CRON_ENABLED=false`).
+- **Job board rules** (PLAN D36) are pure functions in `src/modules/jobs/rules/` with example postings in `rules.spec.ts`: when a decision is wrong, add the posting as a test case first, then fix the pattern. The sources never reach the internet in tests (`FakeJobsHttp` + `test/fixtures/jobs/`).
 - **Tests:** the Playwright journeys (`apps/web/e2e/`) create their own users, courses and groups through the API (`e2e/support.ts`) and simulate Stripe with a signed webhook against the fake client, so they can run in parallel; don't depend on seed users' state beyond logging in. `a11y.spec.ts` must stay at zero axe violations. API e2e suites boot through `test/support.ts` (`bootApp`, `captureMail`, `signStripeEvent`).
 - **Don't** add paid services or change `schema.prisma` without asking the product owner. Don't leave TODO stubs in shipped scope.
 - **Commits:** small, imperative subject lines, one milestone per commit.

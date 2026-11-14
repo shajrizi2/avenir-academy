@@ -4,6 +4,7 @@ import type { Locale } from '@ai-academy/shared';
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { MainMenu } from '@/components/layout/main-menu';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -30,26 +31,33 @@ export function MobileMenu({ locale, links, nav }: MobileMenuProps) {
       <SheetContent side="right" className="w-[85vw] max-w-sm gap-0 p-6">
         <SheetHeader className="p-0 pb-6">
           <SheetTitle className="sr-only">{nav.menuTitle}</SheetTitle>
-          <Logo href={`/${locale}`} />
+          <Logo />
         </SheetHeader>
+        <MainMenu current="training" className="mb-4" />
         <nav aria-label={nav.label} className="flex flex-col gap-1">
           {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={close}
-              className="text-ink hover:bg-soft rounded-xl px-4 py-3 text-lg font-bold"
+              className="text-ink hover:bg-soft rounded-none px-4 py-3 text-lg font-bold"
             >
               {link.label}
             </a>
           ))}
         </nav>
         <div className="mt-6 flex flex-col gap-4 border-t pt-6">
-          <CtaLink href="/register" cta="menu_register" locale={locale} variant="chunky" size="lg">
+          <CtaLink
+            href="/training/register"
+            cta="menu_register"
+            locale={locale}
+            variant="chunky"
+            size="lg"
+          >
             {nav.cta}
           </CtaLink>
           <Button asChild variant="chunky-outline" size="lg">
-            <Link href="/login">{nav.login}</Link>
+            <Link href="/training/login">{nav.login}</Link>
           </Button>
         </div>
       </SheetContent>

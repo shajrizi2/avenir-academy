@@ -1,4 +1,4 @@
-import { IllustrationSvg, type IllustrationProps, Sparkle } from './svg';
+import { IllustrationSvg, type IllustrationProps } from './svg';
 
 /** A winding path of stepping stones that ends at an open lock: one module at a time. */
 export function PathUnlock({ className }: IllustrationProps) {
@@ -32,8 +32,6 @@ export function PathUnlock({ className }: IllustrationProps) {
       <rect x="172" y="56" width="44" height="38" rx="8" className="fill-track-ai" />
       <circle cx="194" cy="72" r="5" className="fill-background" />
       <line x1="194" y1="76" x2="194" y2="84" className="stroke-background" strokeWidth={3} />
-      <Sparkle x={222} y={30} r={12} className="fill-track-marketing" />
-      <Sparkle x={150} y={36} r={7} className="fill-active" />
     </IllustrationSvg>
   );
 }

@@ -29,7 +29,7 @@ export function TestBuilder() {
   const moduleInfo = useQuery(moduleQuery(moduleId));
 
   if (builder.isPending || moduleInfo.isPending) {
-    return <Skeleton className="rounded-card h-96 w-full" />;
+    return <Skeleton className="h-96 w-full rounded-none" />;
   }
   if (builder.error || moduleInfo.error) {
     return <FormError message={errorMessage(builder.error ?? moduleInfo.error)} />;
@@ -61,7 +61,7 @@ export function TestBuilder() {
   return (
     <>
       <Link
-        href={`/teach/modules/${moduleId}`}
+        href={`/training/teach/modules/${moduleId}`}
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden />{' '}
@@ -73,7 +73,7 @@ export function TestBuilder() {
         actions={
           test && (
             <Button asChild variant="chunky-outline">
-              <Link href={`/teach/modules/${moduleId}/results`}>
+              <Link href={`/training/teach/modules/${moduleId}/results`}>
                 <BarChart3 data-icon="inline-start" /> {m.results}
               </Link>
             </Button>
@@ -108,7 +108,7 @@ export function TestBuilder() {
           </div>
           {test.attemptCount > 0 ? (
             <>
-              <p className="border-line rounded-card bg-locked-tint text-locked-ink flex items-start gap-2 border p-4 text-sm font-semibold">
+              <p className="border-line bg-locked-tint text-locked-ink flex items-start gap-2 rounded-none border p-4 text-sm font-semibold">
                 <Lock className="mt-0.5 size-4 shrink-0" aria-hidden />
                 {m.lockedHint}
               </p>
@@ -155,7 +155,7 @@ function PublishCard({
       await apiFetch(`/tests/${test.id}`, { method: 'DELETE' });
       toast.success(m.deleted);
       await queryClient.invalidateQueries({ queryKey: ['modules', test.moduleId] });
-      router.push(`/teach/modules/${test.moduleId}`);
+      router.push(`/training/teach/modules/${test.moduleId}`);
     } catch (e) {
       toast.error(errorMessage(e));
       throw e;

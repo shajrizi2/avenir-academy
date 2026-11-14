@@ -13,7 +13,7 @@ import { upcomingSessionsQuery } from '@/lib/queries';
 export function UpcomingSessions() {
   const { data, isPending, error } = useQuery(upcomingSessionsQuery);
 
-  if (isPending) return <Skeleton className="rounded-card h-28 w-full" />;
+  if (isPending) return <Skeleton className="h-28 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   if (data.length === 0) return null;
 
@@ -29,7 +29,7 @@ export function UpcomingSessions() {
             session={session}
             context={
               <Link
-                href={`/learn/${session.module.course.slug}/${session.module.id}`}
+                href={`/training/learn/${session.module.course.slug}/${session.module.id}`}
                 className="hover:text-ink underline-offset-4 hover:underline"
               >
                 {fmt(t.learn.session.contextModule, {

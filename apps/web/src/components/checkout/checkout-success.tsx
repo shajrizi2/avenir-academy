@@ -41,7 +41,11 @@ export function CheckoutSuccess() {
         description={firstMonth ? s.confirmedText : s.confirmedModule}
         action={
           <Button asChild variant="chunky">
-            <Link href={payment.data ? `/learn/${payment.data.course.slug}` : '/dashboard'}>
+            <Link
+              href={
+                payment.data ? `/training/learn/${payment.data.course.slug}` : '/training/dashboard'
+              }
+            >
               {s.goToCourse}
             </Link>
           </Button>
@@ -57,7 +61,7 @@ export function CheckoutSuccess() {
       action={
         slow ? (
           <Button asChild variant="chunky-outline">
-            <Link href="/dashboard">{s.goToDashboard}</Link>
+            <Link href="/training/dashboard">{s.goToDashboard}</Link>
           </Button>
         ) : undefined
       }

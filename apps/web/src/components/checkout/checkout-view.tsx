@@ -75,7 +75,7 @@ export function CheckoutView() {
       if (result.kind === 'STRIPE') {
         window.location.assign(result.url);
       } else if (result.kind === 'BANK_TRANSFER') {
-        router.push(`/payments/${result.paymentId}`);
+        router.push(`/training/payments/${result.paymentId}`);
       } else {
         setWaitlisted(result.group.name);
       }
@@ -87,7 +87,7 @@ export function CheckoutView() {
     return <EmptyState icon={Users} title={t.catalog.detail.staffOnly} description="" />;
   }
   if (group.isPending || methods.isPending || enrollments.isPending) {
-    return <Skeleton className="rounded-card h-96 w-full" />;
+    return <Skeleton className="h-96 w-full rounded-none" />;
   }
   if (group.error) return <FormError message={errorMessage(group.error)} />;
   if (waitlisted) {
@@ -98,7 +98,7 @@ export function CheckoutView() {
         description={fmt(c.waitlisted, { group: waitlisted })}
         action={
           <Button asChild variant="chunky">
-            <Link href="/dashboard">{t.checkout.success.goToDashboard}</Link>
+            <Link href="/training/dashboard">{t.checkout.success.goToDashboard}</Link>
           </Button>
         }
       />
@@ -116,17 +116,27 @@ export function CheckoutView() {
   // States that don't need a payment right now.
   if (first && existing?.status === 'APPROVED') {
     return (
-      <Notice text={c.alreadyEnrolled} href={`/learn/${g.course.slug}`} label={c.backToCourse} />
+      <Notice
+        text={c.alreadyEnrolled}
+        href={`/training/learn/${g.course.slug}`}
+        label={c.backToCourse}
+      />
     );
   }
   if (moduleId && month?.paid) {
-    return <Notice text={c.alreadyPaid} href={`/learn/${g.course.slug}`} label={c.backToCourse} />;
+    return (
+      <Notice
+        text={c.alreadyPaid}
+        href={`/training/learn/${g.course.slug}`}
+        label={c.backToCourse}
+      />
+    );
   }
 
   return (
     <>
       <Link
-        href={`/courses/${g.course.slug}`}
+        href={`/training/courses/${g.course.slug}`}
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {c.backToCourse}
@@ -249,13 +259,13 @@ function MethodCard({
       aria-checked={checked}
       onClick={onSelect}
       className={cn(
-        'rounded-card focus-visible:ring-ring/50 flex w-full items-start gap-4 border-2 p-4 text-left outline-none focus-visible:ring-3',
+        'focus-visible:ring-ring/50 flex w-full items-start gap-4 rounded-none border-2 p-4 text-left outline-none focus-visible:ring-3',
         checked
           ? 'border-ink bg-track-ai-tint'
           : 'border-line-strong bg-background hover:border-ink',
       )}
     >
-      <span className="bg-background border-ink text-ink flex size-11 shrink-0 items-center justify-center rounded-xl border-2">
+      <span className="bg-background border-ink text-ink flex size-11 shrink-0 items-center justify-center rounded-none border-2">
         <Icon className="size-5" aria-hidden />
       </span>
       <span>

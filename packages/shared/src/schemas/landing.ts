@@ -72,6 +72,7 @@ export const siteSettingsSchema = z.object({
     .optional(),
   stripeEnabled: z.boolean().optional(),
   bankTransferEnabled: z.boolean().optional(),
+  jobBoardPublic: z.boolean().optional(),
   bankBeneficiary: optionalText(120),
   bankIban: z.union([z.literal(''), ibanSchema]).optional(),
   bankName: optionalText(120),

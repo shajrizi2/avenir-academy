@@ -13,9 +13,9 @@ export function SessionCard({
   context?: React.ReactNode;
 }) {
   return (
-    <li className="border-line rounded-card bg-background flex flex-col gap-4 border p-5 sm:flex-row sm:items-center sm:justify-between">
+    <li className="border-line bg-background flex flex-col gap-4 rounded-none border p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 gap-4">
-        <span className="bg-track-ai-tint text-track-ai-ink flex size-11 shrink-0 items-center justify-center rounded-xl">
+        <span className="bg-track-ai-tint text-track-ai-ink flex size-11 shrink-0 items-center justify-center rounded-none">
           <CalendarClock className="size-5" aria-hidden />
         </span>
         <div className="min-w-0">

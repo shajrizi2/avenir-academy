@@ -1,0 +1,35 @@
+{
+  "totalCount": 2,
+  "offset": 0,
+  "limit": 20,
+  "jobs": [
+    {
+      "title": "Data Analyst",
+      "excerpt": "Analyse product data.",
+      "companyName": "Numbers Ltd",
+      "companySlug": "numbers",
+      "employmentType": "Full Time",
+      "minSalary": 45000,
+      "maxSalary": 65000,
+      "currency": "EUR",
+      "locationRestrictions": [],
+      "categories": ["Data-Analysis"],
+      "parentCategories": ["Data"],
+      "description": "<p>Turn product data into decisions.</p>",
+      "pubDate": 1794528000,
+      "applicationLink": "https://himalayas.app/companies/numbers/jobs/data-analyst",
+      "guid": "https://himalayas.app/companies/numbers/jobs/data-analyst"
+    },
+    {
+      "title": "Frontend Developer",
+      "companyName": "Pixel GmbH",
+      "employmentType": "Contractor",
+      "locationRestrictions": ["Germany", "United States"],
+      "categories": ["Software-Engineering"],
+      "description": "<p>React and TypeScript, B2B contract.</p>",
+      "pubDate": 1794528000,
+      "applicationLink": "https://himalayas.app/companies/pixel/jobs/frontend-developer",
+      "guid": "https://himalayas.app/companies/pixel/jobs/frontend-developer"
+    }
+  ]
+}

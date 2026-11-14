@@ -64,7 +64,7 @@ function render(subject: string, greeting: string, blocks: Block[]): Rendered {
       case 'button':
         text.push(`${block.label}: ${block.url}`, '');
         html.push(
-          `<p><a href="${esc(block.url)}" style="display:inline-block;padding:12px 20px;background:#141414;color:#ffffff;border-radius:14px;font-weight:700;text-decoration:none">${esc(block.label)}</a></p>`,
+          `<p><a href="${esc(block.url)}" style="display:inline-block;padding:12px 20px;background:#141414;color:#ffffff;font-weight:700;text-decoration:none">${esc(block.label)}</a></p>`,
         );
         break;
       case 'link':
@@ -390,5 +390,53 @@ export function offlineLearning(p: {
     ...(p.nextSession
       ? [{ kind: 'p' as const, text: `Leksioni tjetër live: ${sessionLine(p.nextSession)}.` }]
       : []),
+  ]);
+}
+
+// ---- Job board (PLAN D36) ----
+
+export function jobLoginCode(p: { code: string; minutes: number }): Rendered {
+  // The subject never carries the code: subjects are kept in the email log.
+  return render('Kodi yt për të hyrë në Avenir', 'Përshëndetje,', [
+    { kind: 'p', text: 'Ky është kodi për të hyrë në shpalljet e punës në Avenir:' },
+    { kind: 'p', text: p.code },
+    {
+      kind: 'p',
+      text: `Kodi vlen ${p.minutes} minuta dhe mund të përdoret vetëm një herë. Mos ia jep askujt.`,
+    },
+    { kind: 'p', text: 'Nëse nuk e kërkove ti, mund ta shpërfillësh këtë email.' },
+  ]);
+}
+
+export function jobsAlert(p: { problems: string[]; adminUrl: string }): Rendered {
+  return render('Shpalljet e punës: diçka nuk funksionoi sot', 'Përshëndetje,', [
+    { kind: 'p', text: 'Mbledhja e përditshme e shpalljeve pati këto probleme:' },
+    { kind: 'list', items: p.problems },
+    {
+      kind: 'p',
+      text: 'Pjesa tjetër e faqes vazhdon të punojë. Burimet që dështojnë ndalen automatikisht për një javë.',
+    },
+    { kind: 'button', label: 'Hap ditarin e mbledhjes', url: p.adminUrl },
+  ]);
+}
+
+/** A campaign email (PLAN D37): the admin's text, paragraph by paragraph, and the way out. */
+export function campaignEmail(p: {
+  subject: string;
+  body: string;
+  unsubscribeUrl: string;
+}): Rendered {
+  const paragraphs = p.body
+    .split(/\n\s*\n/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((text): Block => ({ kind: 'p', text }));
+  return render(p.subject, 'Përshëndetje,', [
+    ...paragraphs,
+    {
+      kind: 'p',
+      text: 'E merr këtë email sepse pranove të marrësh njoftime për mundësi nga Avenir.',
+    },
+    { kind: 'link', label: 'Çregjistrohu', url: p.unsubscribeUrl },
   ]);
 }

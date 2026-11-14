@@ -1,5 +1,5 @@
-import { Megaphone, Sparkles } from 'lucide-react';
-import { MegaphoneChart, NeuralNetwork } from '@/components/illustrations';
+import { Code2, Megaphone } from 'lucide-react';
+import { LaptopCode, MegaphoneChart } from '@/components/illustrations';
 
 export type TrackKind = 'ai' | 'marketing';
 
@@ -15,8 +15,8 @@ export const TRACK_THEME = {
     fill: 'bg-track-ai',
     ink: 'text-track-ai-ink',
     badge: 'ai',
-    Icon: Sparkles,
-    Illustration: NeuralNetwork,
+    Icon: Code2,
+    Illustration: LaptopCode,
   },
   marketing: {
     tint: 'bg-track-marketing-tint',

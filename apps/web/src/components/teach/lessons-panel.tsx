@@ -154,8 +154,8 @@ function LessonRow({
   }
 
   return (
-    <li className="border-line rounded-card flex flex-col gap-3 border p-4 sm:flex-row sm:items-center">
-      <span className="border-ink text-ink flex size-10 shrink-0 items-center justify-center rounded-full border-2 font-extrabold">
+    <li className="border-line flex flex-col gap-3 rounded-none border p-4 sm:flex-row sm:items-center">
+      <span className="border-ink text-ink flex size-10 shrink-0 items-center justify-center rounded-none border-2 font-extrabold">
         {lesson.order}
       </span>
       <div className="min-w-0 flex-1">
@@ -302,7 +302,7 @@ function LessonFormDialog({
               <TextField form={form} name="estimatedMin" label={l.estimatedMin} type="number" />
             </div>
             {preview ? (
-              <div className="border-line rounded-card max-h-96 overflow-y-auto border p-4">
+              <div className="border-line max-h-96 overflow-y-auto rounded-none border p-4">
                 <Markdown content={form.getValues('content') || ''} />
               </div>
             ) : (

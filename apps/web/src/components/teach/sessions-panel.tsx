@@ -130,7 +130,7 @@ function SessionRow({
   }
 
   return (
-    <li className="border-line rounded-card flex flex-col gap-3 border p-4 lg:flex-row lg:items-center">
+    <li className="border-line flex flex-col gap-3 rounded-none border p-4 lg:flex-row lg:items-center">
       <div className="min-w-0 flex-1 space-y-1">
         <p className="text-ink font-bold">{session.title}</p>
         <p className="text-ink-soft text-sm">
@@ -145,7 +145,7 @@ function SessionRow({
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button asChild variant={past ? 'chunky' : 'outline'} size="sm">
-          <Link href={`/teach/sessions/${session.id}`}>
+          <Link href={`/training/teach/sessions/${session.id}`}>
             <UserCheck data-icon="inline-start" /> {m.attendance}
           </Link>
         </Button>

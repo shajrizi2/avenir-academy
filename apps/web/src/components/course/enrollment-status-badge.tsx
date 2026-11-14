@@ -16,7 +16,7 @@ export function EnrollmentStatusBadge({ status }: { status: EnrollmentStatus }) 
   return (
     <span
       className={cn(
-        'inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold whitespace-nowrap',
+        'inline-flex h-6 items-center rounded-none px-2.5 text-xs font-semibold whitespace-nowrap',
         STYLES[status],
       )}
     >

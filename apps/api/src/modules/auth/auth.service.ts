@@ -1,3 +1,4 @@
+import { TRAINING_PATH } from '@ai-academy/shared';
 import type { AuthResponse, MessageResponse } from '@ai-academy/shared';
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -87,7 +88,10 @@ export class AuthService {
     });
     if (user) {
       const { token, expiresIn } = await this.tokens.signReset(user);
-      const link = new URL('/reset-password', this.config.get('WEB_URL', { infer: true }));
+      const link = new URL(
+        `${TRAINING_PATH}/reset-password`,
+        this.config.get('WEB_URL', { infer: true }),
+      );
       link.searchParams.set('token', token);
       // Not awaited: the response must take the same time whether or not the account exists.
       const rendered = passwordReset({

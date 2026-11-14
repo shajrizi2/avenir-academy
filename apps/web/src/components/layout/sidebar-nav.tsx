@@ -29,7 +29,7 @@ export function SidebarNav({ role, onNavigate }: SidebarNavProps) {
           onClick={onNavigate}
           aria-current={active?.href === href ? 'page' : undefined}
           className={cn(
-            'text-ink-soft hover:bg-soft hover:text-ink flex min-h-11 items-center gap-3 rounded-xl border-2 border-transparent px-3 py-2 text-sm font-semibold',
+            'text-ink-soft hover:bg-soft hover:text-ink flex min-h-11 items-center gap-3 rounded-none border-2 border-transparent px-3 py-2 text-sm font-semibold',
             active?.href === href &&
               'border-ink bg-track-ai-tint text-ink hover:bg-track-ai-tint font-bold',
           )}

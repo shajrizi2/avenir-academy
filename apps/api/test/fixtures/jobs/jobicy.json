@@ -1,0 +1,31 @@
+{
+  "jobs": [
+    {
+      "id": 155928,
+      "url": "https://jobicy.com/jobs/155928-content-writer",
+      "jobTitle": "Content Writer",
+      "companyName": "Wordsmith &amp; Co",
+      "jobIndustry": ["Copywriting &amp; Content"],
+      "jobType": ["full-time"],
+      "jobGeo": "EMEA",
+      "jobLevel": "Midweight",
+      "jobExcerpt": "Write about remote work.",
+      "jobDescription": "<p>Write two articles a week about remote work.</p>",
+      "pubDate": "2026-11-12 09:30:00",
+      "annualSalaryMin": "30000",
+      "annualSalaryMax": "40000",
+      "salaryCurrency": "EUR"
+    },
+    {
+      "id": 155929,
+      "url": "https://jobicy.com/jobs/155929-sales-rep",
+      "jobTitle": "Sales Representative",
+      "companyName": "USOnly Inc",
+      "jobIndustry": ["Sales"],
+      "jobType": ["full-time"],
+      "jobGeo": "USA",
+      "jobDescription": "<p>Sell to US customers.</p>",
+      "pubDate": "2026-11-12 09:30:00"
+    }
+  ]
+}

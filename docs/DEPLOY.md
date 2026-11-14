@@ -501,6 +501,36 @@ again on their own).
 
 ---
 
+## 12. Job board (PLAN D34–D37)
+
+The first deploy with the job board moves the academy to `/training` (every old address
+redirects there permanently) and adds the job tables (migration `20261114120000_job_board`, run by
+the deploy like any other). Nothing else needs configuring: the sources are public and free.
+
+1. **Wait for the first runs.** The API collects jobs every morning at 06:00 (Europe/Tirane). To
+   start one now: admin → **Shpalljet e punës** → **Nis mbledhjen tani**, then refresh after a
+   few minutes. The run log shows what was read, published, rejected and closed.
+2. **Add companies.** The list starts empty and grows by itself whenever a job on Remote OK,
+   Jobicy or Himalayas links to a company's Greenhouse, Lever, Ashby or Workable page. Add
+   companies you know by pasting their careers link on the same page.
+3. **Look before launch.** Open `https://avenir.academy/?preview`: the board as visitors will
+   see it. Until it is switched on, `https://avenir.academy` still opens the academy.
+4. **Switch it on.** Admin → **Cilësimet e faqes** → **Shfaq shpalljet në faqen kryesore**.
+   Within a minute `https://avenir.academy` opens the job board.
+5. **Email limit.** Each sign-in sends one code email through Resend, on the same quota as the
+   academy's emails. The free plan stops at 100 emails a day and 3,000 a month; upgrade before
+   promoting the board.
+6. **Email campaigns.** Admin → **Email-et** lists everyone who signed in (CSV export);
+   admin → **Fushatat me email** writes a campaign, sends a test to you, then sends it to everyone who
+   ticked the consent box. It goes out slowly in the background: at most `CAMPAIGN_PER_MINUTE`
+   (default 10) a minute and `CAMPAIGN_DAILY_LIMIT` (default 80) a day, continuing the next day,
+   so sign-in codes still get through on the free plan. After upgrading Resend, raise
+   `CAMPAIGN_DAILY_LIMIT` in `deploy/.env` and redeploy. Every email has an unsubscribe link.
+
+If a source keeps failing, it pauses itself for a week and every admin gets one email. A wrong
+decision (a job that should or shouldn't be on the board) is fixed in
+`apps/api/src/modules/jobs/rules/` with the posting added to `rules.spec.ts` first.
+
 ## Test the stack on your laptop
 
 The production compose file runs locally with `localhost` names, Caddy's local CA, and a

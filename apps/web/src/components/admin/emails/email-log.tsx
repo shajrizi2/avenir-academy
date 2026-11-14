@@ -52,7 +52,7 @@ export function EmailLog() {
         <select
           value={type ?? ''}
           onChange={(ev) => update({ type: ev.target.value })}
-          className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 rounded-lg border px-3 outline-none focus-visible:ring-3"
+          className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 rounded-none border px-3 outline-none focus-visible:ring-3"
         >
           <option value="">{e.allTypes}</option>
           {EMAIL_TYPES.map((x) => (
@@ -63,7 +63,7 @@ export function EmailLog() {
         </select>
       </label>
       {isPending ? (
-        <Skeleton className="rounded-card h-64 w-full" />
+        <Skeleton className="h-64 w-full rounded-none" />
       ) : error ? (
         <FormError message={errorMessage(error)} />
       ) : data.items.length === 0 ? (
@@ -73,7 +73,7 @@ export function EmailLog() {
           {data.items.map((row) => (
             <li
               key={row.id}
-              className="border-line rounded-card bg-background flex flex-col gap-2 border p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="border-line bg-background flex flex-col gap-2 rounded-none border p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="min-w-0">
                 <p className="text-ink font-bold">{row.subject}</p>
@@ -87,7 +87,7 @@ export function EmailLog() {
               </div>
               <span
                 className={cn(
-                  'inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-bold',
+                  'inline-flex h-7 shrink-0 items-center rounded-none px-3 text-xs font-bold',
                   STATUS_CLASS[row.status],
                 )}
               >

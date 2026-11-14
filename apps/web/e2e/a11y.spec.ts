@@ -18,7 +18,17 @@ async function expectNoViolations(page: Page) {
 
 test.use({ reducedMotion: 'reduce' });
 
-for (const path of ['/sq', '/courses', '/courses/vibe-coding-ai', '/login', '/register']) {
+for (const path of [
+  '/?preview',
+  '/hyr',
+  '/training',
+  '/for-companies',
+  '/privatesia',
+  '/training/courses',
+  '/training/courses/vibe-coding-ai',
+  '/training/login',
+  '/training/register',
+]) {
   test(`${path} has no accessibility violations`, async ({ page }) => {
     await page.goto(path);
     await expectNoViolations(page);
@@ -26,13 +36,13 @@ for (const path of ['/sq', '/courses', '/courses/vibe-coding-ai', '/login', '/re
 }
 
 const signedIn: [string, string, string][] = [
-  ['student', STUDENT, '/dashboard'],
-  ['student', STUDENT, '/learn/vibe-coding-ai'],
-  ['instructor', INSTRUCTOR, '/teach'],
-  ['admin', ADMIN, '/admin'],
-  ['admin', ADMIN, '/admin/enrollments'],
-  ['admin', ADMIN, '/admin/payments'],
-  ['admin', ADMIN, '/admin/groups'],
+  ['student', STUDENT, '/training/dashboard'],
+  ['student', STUDENT, '/training/learn/vibe-coding-ai'],
+  ['instructor', INSTRUCTOR, '/training/teach'],
+  ['admin', ADMIN, '/training/admin'],
+  ['admin', ADMIN, '/training/admin/enrollments'],
+  ['admin', ADMIN, '/training/admin/payments'],
+  ['admin', ADMIN, '/training/admin/groups'],
 ];
 
 for (const [role, email, path] of signedIn) {

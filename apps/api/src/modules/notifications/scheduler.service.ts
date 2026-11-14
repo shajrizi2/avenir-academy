@@ -3,6 +3,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import type { EnvironmentVariables } from '../../config/env.validation.js';
+import { CampaignsService } from '../jobs/campaigns/campaigns.service.js';
+import { JobsPipelineService } from '../jobs/pipeline.service.js';
+import { JobSeekersService } from '../jobs/seekers/job-seekers.service.js';
 import { PaymentsService } from '../payments/payments.service.js';
 import { NotificationsService } from './notifications.service.js';
 
@@ -20,6 +23,9 @@ export class SchedulerService {
     config: ConfigService<EnvironmentVariables, true>,
     private readonly notifications: NotificationsService,
     private readonly payments: PaymentsService,
+    private readonly jobs: JobsPipelineService,
+    private readonly jobSeekers: JobSeekersService,
+    private readonly campaigns: CampaignsService,
   ) {
     this.enabled = config.get('CRON_ENABLED', { infer: true });
   }
@@ -47,6 +53,27 @@ export class SchedulerService {
   @Cron('5 0 * * *', { timeZone: DEFAULT_TIMEZONE })
   async groupStatuses(): Promise<void> {
     await this.run('group statuses', () => this.notifications.refreshGroupStatuses());
+  }
+
+  /** The job board's daily collection (PLAN D36). */
+  @Cron('0 6 * * *', { timeZone: DEFAULT_TIMEZONE })
+  async collectJobs(): Promise<void> {
+    await this.run('job collection', async () => {
+      const stats = await this.jobs.run(new Date());
+      return stats ? stats.created : 0;
+    });
+  }
+
+  /** Old login codes, expired sessions and job-board accounts unused for 2 years. */
+  @Cron('15 3 * * *', { timeZone: DEFAULT_TIMEZONE })
+  async cleanJobSeekers(): Promise<void> {
+    await this.run('job-seeker cleanup', () => this.jobSeekers.cleanup(new Date()));
+  }
+
+  /** The next few campaign emails, within the per-minute and daily limits (PLAN D37). */
+  @Cron(CronExpression.EVERY_MINUTE, { timeZone: DEFAULT_TIMEZONE })
+  async sendCampaigns(): Promise<void> {
+    await this.run('campaign emails', () => this.campaigns.tick(new Date()));
   }
 
   private async run(name: string, job: () => Promise<number | void>): Promise<void> {

@@ -11,7 +11,7 @@ export async function Hero() {
   return (
     <section aria-labelledby="hero-title" className="bg-background overflow-hidden">
       <div className="mx-auto w-full max-w-[1200px] px-4 pt-12 pb-16 text-center sm:px-6 lg:pt-20 lg:pb-28">
-        <Suspense fallback={<Skeleton className="mx-auto h-9 w-64 rounded-full" />}>
+        <Suspense fallback={<Skeleton className="mx-auto h-9 w-64 rounded-none" />}>
           <CohortBadge />
         </Suspense>
         <h1
@@ -24,7 +24,13 @@ export async function Hero() {
           {t.hero.subtitle}
         </p>
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-          <CtaLink href="/register" cta="hero_register" locale={locale} variant="chunky" size="xl">
+          <CtaLink
+            href="/training/register"
+            cta="hero_register"
+            locale={locale}
+            variant="chunky"
+            size="xl"
+          >
             {t.hero.ctaPrimary}
           </CtaLink>
           <CtaLink

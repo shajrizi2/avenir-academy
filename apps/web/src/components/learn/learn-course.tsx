@@ -20,13 +20,13 @@ export function LearnCourse() {
   const { courseSlug } = useParams<{ courseSlug: string }>();
   const { data: course, isPending, error } = useQuery(learnCourseQuery(courseSlug));
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   const theme = trackTheme(course.slug);
 
   return (
     <>
-      <header className={cn('rounded-card flex items-center gap-6 p-6 sm:p-8', theme.tint)}>
+      <header className={cn('flex items-center gap-6 rounded-none p-6 sm:p-8', theme.tint)}>
         <div className="min-w-0 flex-1">
           <p className="text-ink text-sm font-bold">{t.learn.yourCourse}</p>
           <h1 className="text-ink text-heading mt-1 font-extrabold">{course.title}</h1>
@@ -54,7 +54,7 @@ export function LearnCourse() {
               <>
                 <span
                   className={cn(
-                    'border-ink flex size-11 shrink-0 items-center justify-center rounded-full border-2 font-extrabold',
+                    'border-ink flex size-11 shrink-0 items-center justify-center rounded-none border-2 font-extrabold',
                     locked ? 'bg-background text-ink-soft' : cn(theme.fill, 'text-ink'),
                   )}
                   aria-hidden
@@ -87,13 +87,13 @@ export function LearnCourse() {
               <li key={module.id} className="space-y-2">
                 {/* Locked: muted by a dashed outline and soft fill, not opacity, so text keeps its contrast. */}
                 {locked ? (
-                  <div className="border-line-strong rounded-card bg-soft flex items-start gap-4 border border-dashed p-5">
+                  <div className="border-line-strong bg-soft flex items-start gap-4 rounded-none border border-dashed p-5">
                     {content}
                   </div>
                 ) : (
                   <Link
-                    href={`/learn/${course.slug}/${module.id}`}
-                    className="pressable border-line-strong rounded-card bg-background hover:border-ink focus-visible:ring-ring/50 flex items-start gap-4 p-5 outline-none [--press:var(--border-strong)] hover:[--press:var(--ink)] focus-visible:ring-3"
+                    href={`/training/learn/${course.slug}/${module.id}`}
+                    className="pressable border-line-strong bg-background hover:border-ink focus-visible:ring-ring/50 flex items-start gap-4 rounded-none p-5 outline-none [--press:var(--border-strong)] hover:[--press:var(--ink)] focus-visible:ring-3"
                   >
                     {content}
                   </Link>
@@ -101,7 +101,7 @@ export function LearnCourse() {
                 {!module.paid && !module.paymentPending && course.group && (
                   <div className="flex justify-end">
                     <Button asChild variant="chunky-outline" size="sm">
-                      <Link href={`/checkout/${course.group.id}?module=${module.id}`}>
+                      <Link href={`/training/checkout/${course.group.id}?module=${module.id}`}>
                         <CreditCard data-icon="inline-start" />{' '}
                         {fmt(t.learn.payModule, { number: module.order })}
                       </Link>
@@ -124,7 +124,7 @@ function PaymentPill({ paid, pending }: { paid: boolean; pending: boolean }) {
   return (
     <span
       className={cn(
-        'inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold whitespace-nowrap',
+        'inline-flex h-6 items-center rounded-none px-2.5 text-xs font-semibold whitespace-nowrap',
         paid
           ? 'bg-passed-tint text-passed-ink'
           : pending

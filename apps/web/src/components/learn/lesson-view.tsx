@@ -40,10 +40,10 @@ export function LessonView() {
     onError: (e) => toast.error(errorMessage(e)),
   });
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
 
-  const backHref = `/learn/${courseSlug}/${moduleId}`;
+  const backHref = `/training/learn/${courseSlug}/${moduleId}`;
   const done = Boolean(lesson.completedAt);
 
   return (
@@ -77,7 +77,7 @@ export function LessonView() {
 
       {lesson.videoUrl && <VideoEmbed url={lesson.videoUrl} title={l.video} />}
 
-      <article className="rounded-card bg-background border-line border p-6 sm:p-8">
+      <article className="bg-background border-line rounded-none border p-6 sm:p-8">
         <Markdown content={lesson.content} />
       </article>
 
@@ -98,7 +98,9 @@ export function LessonView() {
         <div>
           {lesson.previous ? (
             <Button asChild variant="outline">
-              <Link href={`/learn/${courseSlug}/${moduleId}/lessons/${lesson.previous.id}`}>
+              <Link
+                href={`/training/learn/${courseSlug}/${moduleId}/lessons/${lesson.previous.id}`}
+              >
                 <ArrowLeft data-icon="inline-start" /> {l.previous}
               </Link>
             </Button>
@@ -118,7 +120,7 @@ export function LessonView() {
           )}
           {lesson.next ? (
             <Button asChild variant={done ? 'chunky' : 'outline'}>
-              <Link href={`/learn/${courseSlug}/${moduleId}/lessons/${lesson.next.id}`}>
+              <Link href={`/training/learn/${courseSlug}/${moduleId}/lessons/${lesson.next.id}`}>
                 {l.next} <ArrowRight data-icon="inline-end" />
               </Link>
             </Button>

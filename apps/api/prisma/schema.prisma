@@ -65,6 +65,9 @@ enum EmailType {
   REFUND_ISSUED
   WAITLIST_JOINED
   SEAT_OFFERED
+  JOB_LOGIN_CODE
+  JOBS_ALERT
+  CAMPAIGN
 }
 
 enum EmailStatus {
@@ -449,5 +452,263 @@ model SiteSettings {
   bankIban            String?
   bankName            String?
   bankSwift           String?
+  /// The job board is visible at "/" only once this is on (PLAN D36); until then "/" shows /training.
+  jobBoardPublic      Boolean   @default(false)
   updatedAt           DateTime  @updatedAt
+}
+
+// ---- Job board (PLAN D36) ----
+
+/// Where a job was read from: a company's career-page system, or a remote job board's feed.
+enum JobSourceKind {
+  GREENHOUSE
+  LEVER
+  ASHBY
+  WORKABLE
+  REMOTEOK
+  JOBICY
+  HIMALAYAS
+}
+
+enum JobCompanyStatus {
+  ACTIVE
+  DISABLED
+  BLOCKED
+}
+
+/// OPEN: shown on the board. CLOSED: gone from its sources, a dead link or too old. HIDDEN:
+/// reported by users. REJECTED: failed the remote, Kosovo-eligibility or scam rules.
+enum JobStatus {
+  OPEN
+  CLOSED
+  HIDDEN
+  REJECTED
+}
+
+enum JobCategory {
+  ENGINEERING
+  AI_DATA
+  MARKETING
+  DESIGN
+  PRODUCT
+  SALES
+  SUPPORT
+  WRITING
+  FINANCE_ADMIN
+  HR
+  OTHER
+}
+
+enum JobContract {
+  EMPLOYEE
+  CONTRACTOR
+  UNKNOWN
+}
+
+/// Why someone in Kosovo can apply: the tag shown under the job.
+enum JobRegion {
+  WORLDWIDE
+  EUROPE
+  BALKANS
+  CONTRACT_ANYWHERE
+  GLOBAL_EMPLOYER
+}
+
+enum JobCloseReason {
+  MISSING_FROM_SOURCE
+  DEAD_LINK
+  TOO_OLD
+  MANUAL
+}
+
+enum JobBlockKind {
+  COMPANY
+  DOMAIN
+}
+
+/// A company whose jobs appear on the board. With `ats` + `boardToken` its career page is read
+/// directly every morning; companies seen only on job boards have neither.
+model JobCompany {
+  id             String           @id @default(cuid())
+  /// Normalised name ("acme labs"), unique: how jobs from different sources meet.
+  key            String           @unique
+  name           String
+  ats            JobSourceKind?
+  boardToken     String?
+  website        String?
+  status         JobCompanyStatus @default(ACTIVE)
+  /// "seed", "admin" or the source that revealed the career page (e.g. "REMOTEOK").
+  discoveredFrom String?
+  lastFetchedAt  DateTime?
+  failCount      Int              @default(0)
+  createdAt      DateTime         @default(now())
+  jobs           Job[]
+
+  @@unique([ats, boardToken])
+  @@index([status, ats])
+}
+
+/// Health of each job-board feed. A feed failing 3 runs in a row is switched off for a week.
+model JobFeed {
+  kind          JobSourceKind @id
+  enabled       Boolean       @default(true)
+  failCount     Int           @default(0)
+  lastSuccessAt DateTime?
+  lastError     String?
+  pausedUntil   DateTime?
+}
+
+model Job {
+  id             String          @id @default(cuid())
+  companyId      String
+  company        JobCompany      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title          String
+  /// company key | cleaned title | region: the same job seen on several sources.
+  fingerprint    String
+  category       JobCategory
+  contract       JobContract     @default(UNKNOWN)
+  region         JobRegion
+  /// Location text as the source gave it (shown nowhere, kept to explain decisions).
+  locationText   String?
+  salaryMin      Int?
+  salaryMax      Int?
+  salaryCurrency String?
+  /// YEAR, MONTH or HOUR.
+  salaryPeriod   String?
+  applyUrl       String
+  applySource    JobSourceKind
+  status         JobStatus
+  /// Which rule rejected the job, or which made it eligible (e.g. "eligible:worldwide").
+  rule           String
+  scamScore      Int             @default(0)
+  scamReasons    String[]
+  postedAt       DateTime
+  firstSeenAt    DateTime        @default(now())
+  lastSeenAt     DateTime        @default(now())
+  linkCheckedAt  DateTime?
+  closedAt       DateTime?
+  closeReason    JobCloseReason?
+  listings       JobListing[]
+
+  @@index([status, postedAt])
+  @@index([status, category, postedAt])
+  @@index([fingerprint])
+  @@index([companyId])
+}
+
+/// One place a job was seen. A job closes when every listing has been missing for 2 runs.
+model JobListing {
+  id         String        @id @default(cuid())
+  jobId      String
+  job        Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  source     JobSourceKind
+  externalId String
+  sourceUrl  String
+  lastSeenAt DateTime      @default(now())
+  missedRuns Int           @default(0)
+
+  @@unique([source, externalId])
+  @@index([jobId])
+}
+
+/// A job-board account: an email, signed in with a code (PLAN D36). Separate from User.
+model JobSeeker {
+  id               String                   @id @default(cuid())
+  email            String                   @unique
+  /// Agreed to emails about opportunities from Avenir (the tick in the sign-in pop-up).
+  marketingConsent Boolean                  @default(false)
+  consentAt        DateTime?
+  unsubscribedAt   DateTime?
+  createdAt        DateTime                 @default(now())
+  lastSeenAt       DateTime                 @default(now())
+  sessions         JobSeekerSession[]
+  campaignEmails   EmailCampaignRecipient[]
+
+  @@index([lastSeenAt])
+}
+
+/// A 6-digit login code, stored hashed. Valid 10 minutes, once, 5 wrong tries.
+model JobSeekerCode {
+  id        String    @id @default(cuid())
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int       @default(0)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email, createdAt])
+}
+
+/// A signed-in device. The cookie holds the token; only its hash is stored.
+model JobSeekerSession {
+  id          String    @id @default(cuid())
+  jobSeekerId String
+  jobSeeker   JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  lastUsedAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+
+  @@index([jobSeekerId])
+}
+
+/// Companies (by key) and apply-link domains whose jobs are never published.
+model JobBlock {
+  id        String       @id @default(cuid())
+  kind      JobBlockKind
+  value     String
+  reason    String
+  createdAt DateTime     @default(now())
+
+  @@unique([kind, value])
+}
+
+/// The log of each daily run.
+model JobRun {
+  id         String    @id @default(cuid())
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  /// RUNNING, OK or FAILED.
+  status     String
+  stats      Json?
+  errors     Json?
+
+  @@index([startedAt])
+}
+
+enum CampaignStatus {
+  DRAFT
+  SENDING
+  SENT
+  CANCELLED
+}
+
+/// An email to every job seeker who agreed to hear from Avenir (PLAN D37). Sent a little at a
+/// time by the scheduler, within the daily email limit.
+model EmailCampaign {
+  id          String                   @id @default(cuid())
+  subject     String
+  body        String
+  status      CampaignStatus           @default(DRAFT)
+  createdById String?
+  createdAt   DateTime                 @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  recipients  EmailCampaignRecipient[]
+
+  @@index([status])
+}
+
+/// Who a campaign goes to, fixed when sending starts; `sentAt` marks each one done.
+model EmailCampaignRecipient {
+  campaignId  String
+  jobSeekerId String
+  sentAt      DateTime?
+  failed      Boolean       @default(false)
+  campaign    EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  jobSeeker   JobSeeker     @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+
+  @@id([campaignId, jobSeekerId])
+  @@index([campaignId, sentAt])
 }

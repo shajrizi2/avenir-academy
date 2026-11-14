@@ -1,0 +1,29 @@
+[
+  {
+    "id": "7f1e2c3d-1111-2222-3333-444455556666",
+    "text": "Backend Engineer (Contract)",
+    "hostedUrl": "https://jobs.lever.co/widgets/7f1e2c3d-1111-2222-3333-444455556666",
+    "applyUrl": "https://jobs.lever.co/widgets/7f1e2c3d-1111-2222-3333-444455556666/apply",
+    "createdAt": 1794441600000,
+    "workplaceType": "remote",
+    "categories": {
+      "commitment": "Contract",
+      "location": "Remote - US",
+      "team": "Engineering",
+      "allLocations": ["Remote - US"]
+    },
+    "descriptionPlain": "Build APIs in Go. This is a 6-month contract.",
+    "lists": [{ "text": "Requirements", "content": "<li>5 years of Go</li>" }],
+    "additionalPlain": "We pay contractors monthly.",
+    "salaryRange": { "currency": "USD", "interval": "per-year-salary", "min": 90000, "max": 120000 }
+  },
+  {
+    "id": "8a2b3c4d-1111-2222-3333-444455556666",
+    "text": "Account Executive",
+    "hostedUrl": "https://jobs.lever.co/widgets/8a2b3c4d-1111-2222-3333-444455556666",
+    "createdAt": 1794441600000,
+    "workplaceType": "hybrid",
+    "categories": { "commitment": "Full-time", "location": "New York, NY", "team": "Sales" },
+    "descriptionPlain": "Sell to mid-market customers from our New York office."
+  }
+]

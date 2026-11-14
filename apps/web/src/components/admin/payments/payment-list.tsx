@@ -121,7 +121,7 @@ export function PaymentList() {
       </div>
 
       {isPending ? (
-        <Skeleton className="rounded-card h-64 w-full" />
+        <Skeleton className="h-64 w-full rounded-none" />
       ) : error ? (
         <FormError message={errorMessage(error)} />
       ) : data.items.length === 0 ? (
@@ -163,7 +163,7 @@ function Filter({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 max-w-full rounded-lg border px-3 outline-none focus-visible:ring-3"
+        className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 max-w-full rounded-none border px-3 outline-none focus-visible:ring-3"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -197,7 +197,7 @@ function PaymentRow({ payment }: { payment: AdminPayment }) {
   const name = `${payment.user.firstName} ${payment.user.lastName}`;
 
   return (
-    <li className="border-line rounded-card bg-background flex flex-col gap-4 border p-5 lg:flex-row lg:items-center lg:justify-between">
+    <li className="border-line bg-background flex flex-col gap-4 rounded-none border p-5 lg:flex-row lg:items-center lg:justify-between">
       <div className="min-w-0 space-y-1">
         <p className="text-ink font-bold">
           {name}
@@ -220,7 +220,7 @@ function PaymentRow({ payment }: { payment: AdminPayment }) {
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         <span
           className={cn(
-            'inline-flex h-7 items-center rounded-full px-3 text-xs font-bold',
+            'inline-flex h-7 items-center rounded-none px-3 text-xs font-bold',
             STATUS_CLASS[payment.status],
           )}
         >

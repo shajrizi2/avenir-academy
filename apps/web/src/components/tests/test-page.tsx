@@ -38,12 +38,15 @@ export function TestPage() {
     },
   });
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) {
     return (
       <div className="space-y-4">
         <FormError message={errorMessage(error)} />
-        <Link href="/dashboard" className="text-ink font-semibold underline underline-offset-4">
+        <Link
+          href="/training/dashboard"
+          className="text-ink font-semibold underline underline-offset-4"
+        >
           {t.tests.page.backToDashboard}
         </Link>
       </div>
@@ -84,7 +87,7 @@ function Overview({
 }) {
   const state = useWindowState(test);
   const finished = test.attempts.filter((a) => a.status !== 'IN_PROGRESS');
-  const moduleHref = `/learn/${test.module.course.slug}/${test.module.id}`;
+  const moduleHref = `/training/learn/${test.module.course.slug}/${test.module.id}`;
 
   return (
     <>
@@ -123,7 +126,7 @@ function Overview({
 
       <section
         aria-labelledby="start-title"
-        className="border-ink rounded-card bg-background space-y-4 border-2 p-6 sm:p-8"
+        className="border-ink bg-background space-y-4 rounded-none border-2 p-6 sm:p-8"
       >
         <h2 id="start-title" className="text-ink text-subheading font-extrabold">
           {test.activeAttemptId ? t.tests.page.inProgressTitle : t.tests.page.beforeStart}
@@ -138,7 +141,7 @@ function Overview({
               {t.tests.page.yourAttempts}
             </h2>
             <Link
-              href={`/tests/${test.id}/result`}
+              href={`/training/tests/${test.id}/result`}
               className="text-ink text-sm font-semibold underline underline-offset-4"
             >
               {t.tests.page.latestResult}
@@ -180,7 +183,7 @@ function StartArea({
         </p>
         {test.nextModule && (
           <Button asChild variant="chunky" size="lg">
-            <Link href={`/learn/${test.nextModule.course.slug}/${test.nextModule.id}`}>
+            <Link href={`/training/learn/${test.nextModule.course.slug}/${test.nextModule.id}`}>
               {fmt(t.tests.page.goToModule, {
                 number: test.nextModule.order,
                 title: test.nextModule.title,
@@ -227,8 +230,8 @@ function StartArea({
 
 function Rule({ icon: Icon, label, value }: { icon: typeof Clock; label: string; value: string }) {
   return (
-    <li className="border-line rounded-card bg-background flex items-center gap-4 border p-5">
-      <span className="bg-soft text-ink flex size-11 shrink-0 items-center justify-center rounded-xl">
+    <li className="border-line bg-background flex items-center gap-4 rounded-none border p-5">
+      <span className="bg-soft text-ink flex size-11 shrink-0 items-center justify-center rounded-none">
         <Icon className="size-5" aria-hidden />
       </span>
       <div>

@@ -20,7 +20,7 @@ export function AuthCard({
   return (
     <div className="mx-auto w-full max-w-md px-4 py-10 sm:py-16">
       <Illustration className="mx-auto w-40" />
-      <div className="border-line-strong rounded-card bg-background mt-6 border-2 p-6 shadow-[0_4px_0_var(--border-strong)] sm:p-8">
+      <div className="border-line-strong bg-background mt-6 rounded-none border-2 p-6 shadow-[0_4px_0_var(--border-strong)] sm:p-8">
         <div className="mb-6 space-y-2 text-center">
           <h1 className="text-ink text-subheading sm:text-heading font-extrabold">{title}</h1>
           <p className="text-ink-soft">{description}</p>

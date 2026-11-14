@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 const STATUS_STYLES: Record<ModuleStatus, { className: string; Icon: typeof Lock }> = {
   PASSED: { className: 'bg-passed-tint text-passed-ink', Icon: CheckCircle2 },
-  ACTIVE: { className: 'bg-active-tint text-active-ink', Icon: CircleDot },
+  ACTIVE: { className: 'bg-active-tint text-active-ink border-ink border', Icon: CircleDot },
   LOCKED: { className: 'bg-locked-tint text-locked-ink', Icon: Lock },
   FAILED: { className: 'bg-failed-tint text-failed-ink', Icon: XCircle },
 };
@@ -23,7 +23,7 @@ export function ModuleStatusBadge({ status, label, className }: ModuleStatusBadg
   return (
     <span
       className={cn(
-        'inline-flex h-6 items-center gap-1 rounded-full px-2.5 text-xs font-semibold',
+        'inline-flex h-6 items-center gap-1 rounded-none px-2.5 text-xs font-semibold',
         tone,
         className,
       )}
