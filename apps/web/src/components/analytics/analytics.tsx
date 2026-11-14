@@ -40,7 +40,7 @@ export function Analytics({ copy }: { copy: ConsentCopy }) {
   return (
     <section
       aria-label={copy.label}
-      className="border-ink bg-background rounded-card fixed inset-x-4 bottom-4 z-50 mx-auto max-w-xl border-2 p-5 shadow-[0_4px_0_var(--ink)] sm:p-6"
+      className="border-ink bg-background fixed inset-x-4 bottom-4 z-50 mx-auto max-w-xl rounded-none border-2 p-5 shadow-[0_4px_0_var(--ink)] sm:p-6"
     >
       <p className="text-ink text-sm sm:text-base">{copy.text}</p>
       {/* Both choices get the same weight: declining must be as easy as accepting. */}

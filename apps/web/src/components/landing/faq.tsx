@@ -17,7 +17,7 @@ export async function Faq() {
           <AccordionItem
             key={item.question}
             value={`faq-${i}`}
-            className="border-line rounded-card bg-background data-[state=open]:border-ink border-2 px-5 transition-colors sm:px-6"
+            className="border-line bg-background data-[state=open]:border-ink rounded-none border-2 px-5 transition-colors sm:px-6"
           >
             <AccordionTrigger className="text-ink min-h-16 items-center py-5 text-lg font-bold hover:no-underline">
               {item.question}

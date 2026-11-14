@@ -13,7 +13,7 @@ import { upcomingSessionsQuery } from '@/lib/queries';
 export function UpcomingSessions() {
   const { data, isPending, error } = useQuery(upcomingSessionsQuery);
 
-  if (isPending) return <Skeleton className="rounded-card h-28 w-full" />;
+  if (isPending) return <Skeleton className="h-28 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   if (data.length === 0) return null;
 

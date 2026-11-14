@@ -64,7 +64,7 @@ export function MoveDialog({ enrollment }: { enrollment: AdminEnrollment }) {
             id={`move-${enrollment.id}`}
             value={groupId}
             onChange={(e) => setGroupId(e.target.value)}
-            className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 w-full rounded-lg border px-3 outline-none focus-visible:ring-3"
+            className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 w-full rounded-none border px-3 outline-none focus-visible:ring-3"
           >
             <option value="">—</option>
             {(groups.data ?? [])

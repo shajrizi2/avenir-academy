@@ -29,7 +29,7 @@ export function TestBuilder() {
   const moduleInfo = useQuery(moduleQuery(moduleId));
 
   if (builder.isPending || moduleInfo.isPending) {
-    return <Skeleton className="rounded-card h-96 w-full" />;
+    return <Skeleton className="h-96 w-full rounded-none" />;
   }
   if (builder.error || moduleInfo.error) {
     return <FormError message={errorMessage(builder.error ?? moduleInfo.error)} />;
@@ -108,7 +108,7 @@ export function TestBuilder() {
           </div>
           {test.attemptCount > 0 ? (
             <>
-              <p className="border-line rounded-card bg-locked-tint text-locked-ink flex items-start gap-2 border p-4 text-sm font-semibold">
+              <p className="border-line bg-locked-tint text-locked-ink flex items-start gap-2 rounded-none border p-4 text-sm font-semibold">
                 <Lock className="mt-0.5 size-4 shrink-0" aria-hidden />
                 {m.lockedHint}
               </p>

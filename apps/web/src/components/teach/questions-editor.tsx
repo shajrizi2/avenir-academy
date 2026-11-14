@@ -171,7 +171,7 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
   });
 
   return (
-    <li className="border-line rounded-card bg-background space-y-5 border p-4 sm:p-6">
+    <li className="border-line bg-background space-y-5 rounded-none border p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-ink text-lg font-extrabold">
           {fmt(m.question, { number: index + 1 })}
@@ -215,7 +215,7 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
           <FieldLabel htmlFor={typeId}>{m.type}</FieldLabel>
           <select
             id={typeId}
-            className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 w-full rounded-lg border px-3 text-base outline-none focus-visible:ring-3 md:text-sm"
+            className="border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 w-full rounded-none border px-3 text-base outline-none focus-visible:ring-3 md:text-sm"
             {...typeField}
           >
             {Object.entries(QUESTION_TYPE_LABELS).map(([value, label]) => (
@@ -244,7 +244,7 @@ function QuestionCard({ form, index, count, onMove, onRemove }: QuestionCardProp
                 <div className="flex items-center gap-2">
                   <label
                     className={cn(
-                      'flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-lg border-2',
+                      'flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-none border-2',
                       correct
                         ? 'border-passed-ink bg-passed-tint text-passed-ink'
                         : 'border-line-strong text-ink-soft',
@@ -308,7 +308,7 @@ export function QuestionsPreview({ questions }: { questions: StaffQuestion[] }) 
       {questions.map((q) => (
         <li
           key={q.id}
-          className="border-line rounded-card bg-background space-y-3 border p-4 sm:p-6"
+          className="border-line bg-background space-y-3 rounded-none border p-4 sm:p-6"
         >
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-ink font-extrabold">{fmt(m.question, { number: q.order })}</h3>

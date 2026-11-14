@@ -67,6 +67,7 @@ enum EmailType {
   SEAT_OFFERED
   JOB_LOGIN_CODE
   JOBS_ALERT
+  CAMPAIGN
 }
 
 enum EmailStatus {
@@ -520,13 +521,6 @@ enum JobCloseReason {
   MANUAL
 }
 
-enum JobReportReason {
-  SCAM
-  CLOSED
-  NOT_ELIGIBLE
-  OTHER
-}
-
 enum JobBlockKind {
   COMPANY
   DOMAIN
@@ -595,8 +589,6 @@ model Job {
   closedAt       DateTime?
   closeReason    JobCloseReason?
   listings       JobListing[]
-  saves          SavedJob[]
-  reports        JobReport[]
 
   @@index([status, postedAt])
   @@index([status, category, postedAt])
@@ -621,13 +613,16 @@ model JobListing {
 
 /// A job-board account: an email, signed in with a code (PLAN D36). Separate from User.
 model JobSeeker {
-  id         String             @id @default(cuid())
-  email      String             @unique
-  createdAt  DateTime           @default(now())
-  lastSeenAt DateTime           @default(now())
-  sessions   JobSeekerSession[]
-  saves      SavedJob[]
-  reports    JobReport[]
+  id               String                   @id @default(cuid())
+  email            String                   @unique
+  /// Agreed to emails about opportunities from Avenir (the tick in the sign-in pop-up).
+  marketingConsent Boolean                  @default(false)
+  consentAt        DateTime?
+  unsubscribedAt   DateTime?
+  createdAt        DateTime                 @default(now())
+  lastSeenAt       DateTime                 @default(now())
+  sessions         JobSeekerSession[]
+  campaignEmails   EmailCampaignRecipient[]
 
   @@index([lastSeenAt])
 }
@@ -658,29 +653,6 @@ model JobSeekerSession {
   @@index([jobSeekerId])
 }
 
-model SavedJob {
-  jobSeekerId String
-  jobId       String
-  createdAt   DateTime  @default(now())
-  jobSeeker   JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
-  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
-
-  @@id([jobSeekerId, jobId])
-  @@index([jobId])
-}
-
-model JobReport {
-  jobSeekerId String
-  jobId       String
-  reason      JobReportReason
-  createdAt   DateTime        @default(now())
-  jobSeeker   JobSeeker       @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
-  job         Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
-
-  @@id([jobSeekerId, jobId])
-  @@index([jobId])
-}
-
 /// Companies (by key) and apply-link domains whose jobs are never published.
 model JobBlock {
   id        String       @id @default(cuid())
@@ -703,4 +675,40 @@ model JobRun {
   errors     Json?
 
   @@index([startedAt])
+}
+
+enum CampaignStatus {
+  DRAFT
+  SENDING
+  SENT
+  CANCELLED
+}
+
+/// An email to every job seeker who agreed to hear from Avenir (PLAN D37). Sent a little at a
+/// time by the scheduler, within the daily email limit.
+model EmailCampaign {
+  id          String                   @id @default(cuid())
+  subject     String
+  body        String
+  status      CampaignStatus           @default(DRAFT)
+  createdById String?
+  createdAt   DateTime                 @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  recipients  EmailCampaignRecipient[]
+
+  @@index([status])
+}
+
+/// Who a campaign goes to, fixed when sending starts; `sentAt` marks each one done.
+model EmailCampaignRecipient {
+  campaignId  String
+  jobSeekerId String
+  sentAt      DateTime?
+  failed      Boolean       @default(false)
+  campaign    EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  jobSeeker   JobSeeker     @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+
+  @@id([campaignId, jobSeekerId])
+  @@index([campaignId, sentAt])
 }

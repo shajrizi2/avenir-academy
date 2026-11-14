@@ -63,13 +63,13 @@ function CallOut({
     <Link
       href={href}
       className={cn(
-        'pressable rounded-card focus-visible:ring-ring/50 flex items-center gap-5 p-6 outline-none focus-visible:ring-3',
+        'pressable focus-visible:ring-ring/50 flex items-center gap-5 rounded-none p-6 outline-none focus-visible:ring-3',
         count
           ? 'border-ink bg-active-tint [--press:var(--ink)]'
           : 'border-line-strong bg-background [--press:var(--border-strong)]',
       )}
     >
-      <span className="bg-background border-ink text-ink flex size-14 shrink-0 items-center justify-center rounded-2xl border-2">
+      <span className="bg-background border-ink text-ink flex size-14 shrink-0 items-center justify-center rounded-none border-2">
         <Icon className="size-6" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">

@@ -30,7 +30,7 @@ export function UserStats() {
           <li key={role}>
             <Link
               href={`/training/admin/users?role=${role}`}
-              className="rounded-card focus-visible:ring-ring/50 block h-full outline-none focus-visible:ring-3"
+              className="focus-visible:ring-ring/50 block h-full rounded-none outline-none focus-visible:ring-3"
             >
               <Card variant="pressable" className="h-full">
                 <CardHeader>

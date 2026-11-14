@@ -27,7 +27,7 @@ export function CourseEditor() {
   const { id } = useParams<{ id: string }>();
   const { data: course, isPending, error } = useQuery(adminCourseQuery(id));
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
 
   return (
@@ -194,8 +194,8 @@ function ModuleRow({
   }
 
   return (
-    <li className="border-line rounded-card flex flex-col gap-3 border p-4 sm:flex-row sm:items-center">
-      <span className="border-ink text-ink flex size-10 shrink-0 items-center justify-center rounded-full border-2 font-extrabold">
+    <li className="border-line flex flex-col gap-3 rounded-none border p-4 sm:flex-row sm:items-center">
+      <span className="border-ink text-ink flex size-10 shrink-0 items-center justify-center rounded-none border-2 font-extrabold">
         {module.order}
       </span>
       <div className="min-w-0 flex-1">

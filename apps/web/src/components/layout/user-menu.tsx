@@ -35,7 +35,7 @@ export function UserMenu() {
         <Button
           variant="ghost"
           size="icon-lg"
-          className="rounded-full"
+          className="rounded-none"
           aria-label={t.nav.accountMenu}
         >
           <Avatar>

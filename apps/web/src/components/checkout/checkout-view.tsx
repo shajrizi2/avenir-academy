@@ -87,7 +87,7 @@ export function CheckoutView() {
     return <EmptyState icon={Users} title={t.catalog.detail.staffOnly} description="" />;
   }
   if (group.isPending || methods.isPending || enrollments.isPending) {
-    return <Skeleton className="rounded-card h-96 w-full" />;
+    return <Skeleton className="h-96 w-full rounded-none" />;
   }
   if (group.error) return <FormError message={errorMessage(group.error)} />;
   if (waitlisted) {
@@ -259,13 +259,13 @@ function MethodCard({
       aria-checked={checked}
       onClick={onSelect}
       className={cn(
-        'rounded-card focus-visible:ring-ring/50 flex w-full items-start gap-4 border-2 p-4 text-left outline-none focus-visible:ring-3',
+        'focus-visible:ring-ring/50 flex w-full items-start gap-4 rounded-none border-2 p-4 text-left outline-none focus-visible:ring-3',
         checked
           ? 'border-ink bg-track-ai-tint'
           : 'border-line-strong bg-background hover:border-ink',
       )}
     >
-      <span className="bg-background border-ink text-ink flex size-11 shrink-0 items-center justify-center rounded-xl border-2">
+      <span className="bg-background border-ink text-ink flex size-11 shrink-0 items-center justify-center rounded-none border-2">
         <Icon className="size-5" aria-hidden />
       </span>
       <span>

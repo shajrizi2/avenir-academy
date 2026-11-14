@@ -23,7 +23,7 @@ export function MainMenu({ current, className }: { current: Section; className?:
             href={item.href}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'inline-flex h-11 items-center rounded-full px-4 text-sm font-semibold',
+              'inline-flex h-11 items-center rounded-none px-4 text-sm font-semibold',
               active
                 ? 'bg-ink text-primary-foreground'
                 : 'text-ink-soft hover:bg-soft hover:text-ink',

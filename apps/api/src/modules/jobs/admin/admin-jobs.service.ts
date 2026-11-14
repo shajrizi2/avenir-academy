@@ -157,34 +157,23 @@ export class AdminJobsService {
       where: { status: 'HIDDEN' },
       orderBy: { lastSeenAt: 'desc' },
       take: 200,
-      include: { company: { select: { name: true } }, reports: { select: { reason: true } } },
+      include: { company: { select: { name: true } } },
     });
-    return rows.map((j) => {
-      const counts = new Map<string, number>();
-      for (const r of j.reports) counts.set(r.reason, (counts.get(r.reason) ?? 0) + 1);
-      return {
-        id: j.id,
-        title: j.title,
-        company: j.company.name,
-        applyUrl: j.applyUrl,
-        reports: [...counts].map(([reason, count]) => ({
-          reason: reason as AdminHiddenJob['reports'][number]['reason'],
-          count,
-        })),
-      };
-    });
+    return rows.map((j) => ({
+      id: j.id,
+      title: j.title,
+      company: j.company.name,
+      applyUrl: j.applyUrl,
+    }));
   }
 
-  /** Puts a hidden job back (its reports are cleared) or closes it for good. */
+  /** Puts a hidden job back on the board or closes it for good. */
   async setHiddenJob(id: string, status: 'OPEN' | 'CLOSED', now: Date): Promise<void> {
     const job = await this.prisma.job.findFirst({ where: { id, status: 'HIDDEN' } });
     if (!job) throw new NotFoundException('Shpallja nuk u gjet mes të fshehurave.');
-    await this.prisma.$transaction([
-      this.prisma.jobReport.deleteMany({ where: { jobId: id } }),
-      this.prisma.job.update({
-        where: { id },
-        data: status === 'OPEN' ? { status } : { status, closedAt: now, closeReason: 'MANUAL' },
-      }),
-    ]);
+    await this.prisma.job.update({
+      where: { id },
+      data: status === 'OPEN' ? { status } : { status, closedAt: now, closeReason: 'MANUAL' },
+    });
   }
 }

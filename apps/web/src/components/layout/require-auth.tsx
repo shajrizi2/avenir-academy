@@ -25,7 +25,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     return (
       <div className="mx-auto w-full max-w-[1200px] space-y-4 p-8" aria-busy="true">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="rounded-card h-40 w-full" />
+        <Skeleton className="h-40 w-full rounded-none" />
       </div>
     );
   }

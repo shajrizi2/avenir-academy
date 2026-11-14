@@ -23,7 +23,7 @@ export function ModuleStatusBadge({ status, label, className }: ModuleStatusBadg
   return (
     <span
       className={cn(
-        'inline-flex h-6 items-center gap-1 rounded-full px-2.5 text-xs font-semibold',
+        'inline-flex h-6 items-center gap-1 rounded-none px-2.5 text-xs font-semibold',
         tone,
         className,
       )}

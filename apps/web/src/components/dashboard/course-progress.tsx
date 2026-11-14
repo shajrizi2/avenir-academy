@@ -25,13 +25,13 @@ export function CourseProgressBlock({ progress }: { progress: CourseProgress }) 
           aria-valuemax={totalModules}
           aria-valuenow={passedModules}
           aria-valuetext={label}
-          className="bg-soft border-line h-3 overflow-hidden rounded-full border"
+          className="bg-soft border-line h-3 overflow-hidden rounded-none border"
         >
-          <div className="bg-passed h-full rounded-full" style={{ width: `${pct}%` }} />
+          <div className="bg-passed h-full rounded-none" style={{ width: `${pct}%` }} />
         </div>
       </div>
       {current ? (
-        <div className="bg-soft rounded-xl p-3 text-sm">
+        <div className="bg-soft rounded-none p-3 text-sm">
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/training/learn/${course.slug}/${current.id}`}

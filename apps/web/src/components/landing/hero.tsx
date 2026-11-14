@@ -11,7 +11,7 @@ export async function Hero() {
   return (
     <section aria-labelledby="hero-title" className="bg-background overflow-hidden">
       <div className="mx-auto w-full max-w-[1200px] px-4 pt-12 pb-16 text-center sm:px-6 lg:pt-20 lg:pb-28">
-        <Suspense fallback={<Skeleton className="mx-auto h-9 w-64 rounded-full" />}>
+        <Suspense fallback={<Skeleton className="mx-auto h-9 w-64 rounded-none" />}>
           <CohortBadge />
         </Suspense>
         <h1

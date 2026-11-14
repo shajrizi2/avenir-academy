@@ -38,7 +38,7 @@ export function AttemptRunner({ attemptId, testId, onFinished }: AttemptRunnerPr
     router.replace(`/training/tests/${testId}/result`);
   }, [finished, onFinished, router, testId]);
 
-  if (isPending || finished) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending || finished) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   return <Runner key={data.id} session={data} testId={testId} onFinished={onFinished} />;
 }
@@ -150,7 +150,7 @@ function Runner({
         <h1 className="text-ink text-heading font-extrabold">{session.title}</h1>
       </header>
 
-      <div className="border-line bg-background/95 rounded-card sticky top-16 z-20 flex flex-wrap items-center gap-x-6 gap-y-3 border p-4 backdrop-blur-md">
+      <div className="border-line bg-background/95 sticky top-16 z-20 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-none border p-4 backdrop-blur-md">
         <Countdown remaining={remaining} />
         <p className="text-ink text-sm font-semibold">
           {fmt(t.tests.runner.answered, { answered, total: session.questions.length })}
@@ -226,7 +226,7 @@ function QuestionBlock({
 }) {
   const multi = question.type === 'MULTI_CHOICE';
   return (
-    <li className="border-line rounded-card bg-background border p-5 sm:p-6">
+    <li className="border-line bg-background rounded-none border p-5 sm:p-6">
       <fieldset className="space-y-4" disabled={disabled}>
         <legend className="contents">
           <span className="text-ink-soft block text-sm font-bold">
@@ -245,7 +245,7 @@ function QuestionBlock({
               <label
                 key={option.id}
                 className={cn(
-                  'rounded-button text-ink flex min-h-12 cursor-pointer items-center gap-3 border-2 px-4 py-3 font-semibold transition-colors',
+                  'text-ink flex min-h-12 cursor-pointer items-center gap-3 rounded-none border-2 px-4 py-3 font-semibold transition-colors',
                   'has-focus-visible:ring-ring/50 has-focus-visible:ring-3',
                   checked ? 'border-ink bg-track-ai-tint' : 'border-line-strong hover:bg-soft',
                 )}
@@ -286,7 +286,7 @@ function Countdown({ remaining }: { remaining: number | null }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-2 rounded-full px-3 py-1 text-lg font-extrabold tabular-nums',
+        'flex items-center gap-2 rounded-none px-3 py-1 text-lg font-extrabold tabular-nums',
         urgent
           ? 'bg-failed-tint text-failed-ink'
           : soon

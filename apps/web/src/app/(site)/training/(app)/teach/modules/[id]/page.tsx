@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: t.meta.pages.manageModule };
 
 export default function ManageModulePage() {
   return (
-    <Suspense fallback={<Skeleton className="rounded-card h-96 w-full" />}>
+    <Suspense fallback={<Skeleton className="h-96 w-full rounded-none" />}>
       <ModuleManager />
     </Suspense>
   );

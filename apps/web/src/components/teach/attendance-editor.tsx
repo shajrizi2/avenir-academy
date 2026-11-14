@@ -24,7 +24,7 @@ export function AttendanceEditor() {
   const { id } = useParams<{ id: string }>();
   const { data, isPending, error } = useQuery(attendanceQuery(id));
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   // Remount when the server data changes so the checkboxes start from the saved state.
   return <Roster key={JSON.stringify(data.records)} attendance={data} />;
@@ -100,7 +100,7 @@ function Roster({ attendance }: { attendance: SessionAttendance }) {
               </Button>
             </div>
           </div>
-          <ul className="border-line rounded-card bg-background divide-line divide-y border">
+          <ul className="border-line bg-background divide-line divide-y rounded-none border">
             {records.map(({ user }) => {
               const checkboxId = `present-${user.id}`;
               return (

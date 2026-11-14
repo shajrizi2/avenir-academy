@@ -40,7 +40,7 @@ export function MobileMenu({ locale, links, nav }: MobileMenuProps) {
               key={link.href}
               href={link.href}
               onClick={close}
-              className="text-ink hover:bg-soft rounded-xl px-4 py-3 text-lg font-bold"
+              className="text-ink hover:bg-soft rounded-none px-4 py-3 text-lg font-bold"
             >
               {link.label}
             </a>

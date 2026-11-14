@@ -21,7 +21,7 @@ import { fmt, t } from '@/i18n/messages';
 import { apiFetch, errorMessage } from '@/lib/api';
 
 const selectClass =
-  'border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 w-full rounded-lg border px-3 outline-none focus-visible:ring-3';
+  'border-input bg-background text-ink focus-visible:border-ink focus-visible:ring-ring/40 h-11 w-full rounded-none border px-3 outline-none focus-visible:ring-3';
 
 /** Records a payment received outside the platform (cash, a transfer without a reference). */
 export function ManualPaymentDialog() {

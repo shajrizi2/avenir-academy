@@ -370,7 +370,9 @@
       "instructors": "Instruktorët",
       "testimonials": "Dëshmitë",
       "settings": "Cilësimet e faqes",
-      "jobs": "Shpalljet e punës"
+      "jobs": "Shpalljet e punës",
+      "subscribers": "Email-et e kandidatëve",
+      "campaigns": "Fushatat me email"
     }
   },
   "common": {
@@ -462,7 +464,9 @@
     "settings": "Cilësimet e faqes",
     "cookieSettings": "Cilësimet e cookies",
     "footerTagline": "Kurse live për AI, kodim, marketing digjital dhe SEO.",
-    "jobs": "Shpalljet e punës"
+    "jobs": "Shpalljet e punës",
+    "subscribers": "Email-et e kandidatëve",
+    "campaigns": "Fushatat me email"
   },
   "errors": {
     "generic": "Diçka shkoi keq. Provo sërish.",
@@ -1531,11 +1535,15 @@
     "sections": [
       {
         "title": "Çfarë ruajmë",
-        "body": "Kur hyn me email, ruajmë adresën tënde të email-it, shpalljet që ruan, shpalljet që raporton dhe pajisjet ku je i kyçur. Nuk ruajmë CV, fjalëkalime apo aplikime: aplikimi bëhet gjithmonë në faqen e punëdhënësit."
+        "body": "Kur hyn me email te shpalljet, ruajmë adresën tënde të email-it, nëse ke pranuar email-e nga Avenir (dhe kur), dhe pajisjet ku je i kyçur. Nuk ruajmë CV, fjalëkalime apo aplikime: aplikimi bëhet gjithmonë në faqen e punëdhënësit."
       },
       {
         "title": "Pse i ruajmë",
-        "body": "Email-in e përdorim vetëm për të të dërguar kodin e hyrjes. Shpalljet e ruajtura dhe raportimet i ruajmë që t'i shohësh përsëri dhe që të heqim shpalljet e rreme ose të mbyllura. Nuk dërgojmë reklama dhe nuk i shesim të dhënat."
+        "body": "Email-in e përdorim për të të dërguar kodin e hyrjes. Nëse e ke lënë të shënuar kutinë «Pranoj të marr email-e», të dërgojmë herë pas here email-e për mundësi pune dhe trajnime. Nuk i shesim dhe nuk ua japim të dhënat të tjerëve."
+      },
+      {
+        "title": "Si çregjistrohesh",
+        "body": "Çdo email nga Avenir ka në fund lidhjen «Çregjistrohu». Një klik mjafton dhe nuk të dërgojmë më email-e. Mund të vazhdosh t'i shohësh shpalljet si më parë."
       },
       {
         "title": "Për sa kohë",
@@ -1547,7 +1555,7 @@
       },
       {
         "title": "Si i fshin",
-        "body": "Te «Shpalljet e ruajtura» gjen butonin «Fshi llogarinë». Ai fshin menjëherë email-in, shpalljet e ruajtura, raportimet dhe të gjitha hyrjet. Për çdo pyetje, na shkruaj në adresën e kontaktit në fund të faqes."
+        "body": "Na shkruaj në adresën e kontaktit në fund të faqes dhe fshijmë menjëherë email-in tënd dhe gjithçka që lidhet me të."
       }
     ]
   },
@@ -1556,9 +1564,6 @@
     "metaDescription": "Punë remote që mund t'i aplikosh nga Kosova, të përditësuara çdo mëngjes: inxhinieri, marketing, dizajn, shitje, mbështetje dhe më shumë.",
     "title": "Shpallje pune remote që mund t'i aplikosh nga Kosova",
     "counts": "{new} shpallje të reja sot · {total} gjithsej",
-    "warning": "Punëdhënësit e vërtetë nuk kërkojnë kurrë para për të aplikuar. Nëse dikush të kërkon, raporto shpalljen.",
-    "categoriesLabel": "Kategoritë",
-    "all": "Të gjitha",
     "categories": {
       "ENGINEERING": "Inxhinieri softuerike",
       "AI_DATA": "AI dhe të dhëna",
@@ -1595,41 +1600,17 @@
     },
     "apply": "Apliko",
     "applyLabel": "Apliko për {title} te {company} (hapet në një skedë të re)",
-    "save": "Ruaj",
-    "saved": "E ruajtur",
-    "saveLabel": "Ruaj {title}",
-    "unsaveLabel": "Hiq {title} nga të ruajturat",
-    "more": "Më shumë",
-    "moreLabel": "Më shumë për {title}",
-    "report": "Raporto",
     "source": "Burimi: {source}",
     "closed": "E mbyllur",
     "showMore": "Shfaq më shumë",
-    "empty": "Nuk ka shpallje në këtë kategori tani. Kontrollo nesër në mëngjes.",
+    "empty": "Nuk gjetëm shpallje. Provo fjalë të tjera ose një lloj tjetër pune.",
     "listLabel": "Shpalljet",
     "loadError": "Shpalljet nuk u ngarkuan. Provo përsëri pas pak.",
-    "notice": "Avenir nuk është punëdhënësi. Shpalljet vijnë nga faqet e karrierës së kompanive dhe nga Remote OK, Jobicy dhe Himalayas. Kontrollo çdo ofertë para se të ndash të dhëna personale.",
-    "creditsLabel": "Burimet e shpalljeve",
-    "reportTitle": "Raporto shpalljen",
-    "reportDescription": "Pse po e raporton këtë shpallje? Dy raportime e fshehin atë nga lista.",
-    "reportReasons": {
-      "SCAM": "Duket mashtrim",
-      "CLOSED": "Është mbyllur",
-      "NOT_ELIGIBLE": "Nuk pranon aplikantë nga Kosova",
-      "OTHER": "Tjetër"
-    },
-    "reportSend": "Dërgo raportimin",
-    "reported": "Faleminderit, e shqyrtojmë.",
-    "signInToSave": "Hyr për të ruajtur shpalljet.",
-    "signIn": "Hyr",
-    "savedLink": "Shpalljet e ruajtura",
-    "accountMenu": "Llogaria",
-    "signOut": "Dil",
     "login": {
-      "metaTitle": "Hyr",
-      "title": "Hyr me email",
-      "lead": "Të dërgojmë një kod me 6 shifra. Nuk ka fjalëkalim, dhe në këtë pajisje mbetesh i kyçur.",
+      "title": "Hyr për të parë të gjitha shpalljet",
+      "lead": "Shkruaj email-in dhe të dërgojmë një kod me 6 shifra. Pa fjalëkalim, dhe në këtë pajisje mbetesh i kyçur.",
       "email": "Email-i",
+      "consent": "Pranoj të marr email-e nga Avenir për mundësi pune dhe trajnime.",
       "send": "Dërgo kodin",
       "sending": "Po dërgohet…",
       "sent": "Kodin e dërguam te {email}.",
@@ -1638,24 +1619,19 @@
       "useSuggestion": "Përdor {email}",
       "code": "Kodi",
       "codeHint": "Shiko edhe te Spam ose Promotions nëse nuk e gjen.",
-      "verify": "Hyr",
-      "verifying": "Po hyn…",
+      "verify": "Vazhdo",
+      "verifying": "Po vazhdon…",
       "resend": "Dërgo një kod të ri",
-      "terms": "Duke hyrë, pranon që të ruajmë email-in tënd siç shpjegohet te"
+      "terms": "Si i ruajmë të dhënat:"
     },
-    "savedPage": {
-      "metaTitle": "Shpalljet e ruajtura",
-      "title": "Shpalljet e ruajtura",
-      "lead": "Shpalljet që ruan mbeten këtu. Kur një shpallje mbyllet, e shënojmë si të mbyllur.",
-      "empty": "Nuk ke ruajtur ende asnjë shpallje.",
-      "browse": "Shiko shpalljet",
-      "signedInAs": "Je i kyçur si {email}.",
-      "signOutEverywhere": "Dil nga të gjitha pajisjet",
-      "deleteAccount": "Fshi llogarinë",
-      "deleteTitle": "Ta fshijmë llogarinë?",
-      "deleteDescription": "Fshihen menjëherë email-i yt, shpalljet e ruajtura, raportimet dhe të gjitha hyrjet. Kjo nuk kthehet mbrapsht.",
-      "deleted": "Llogaria u fshi.",
-      "signedOutEverywhere": "Dole nga të gjitha pajisjet."
+    "search": {
+      "label": "Kërko shpallje",
+      "placeholder": "Kërko sipas punës ose kompanisë",
+      "type": "Lloji i punës",
+      "allTypes": "Të gjitha llojet",
+      "submit": "Kërko",
+      "results": "{count} shpallje për “{q}”",
+      "clear": "Pastro kërkimin"
     }
   },
   "adminJobs": {
@@ -1697,16 +1673,10 @@
     "disable": "Fik",
     "enable": "Ndiz",
     "hidden": "Shpalljet e fshehura",
-    "hiddenHint": "Shpallje me dy raportime ose nga një burim i bllokuar.",
+    "hiddenHint": "Shpallje nga një kompani ose domen i bllokuar.",
     "hiddenEmpty": "Asnjë shpallje e fshehur.",
     "restore": "Rikthe",
     "close": "Mbyll",
-    "reasons": {
-      "SCAM": "Mashtrim",
-      "CLOSED": "E mbyllur",
-      "NOT_ELIGIBLE": "Jo për Kosovën",
-      "OTHER": "Tjetër"
-    },
     "blocks": "Bllokimet",
     "blocksHint": "Shpalljet nga këto kompani ose domene nuk publikohen kurrë.",
     "blocksEmpty": "Asnjë bllokim.",
@@ -1720,5 +1690,55 @@
     "blockReason": "Arsyeja",
     "unblock": "Hiq bllokimin",
     "saved": "U ruajt."
+  },
+  "unsubscribe": {
+    "metaTitle": "Çregjistrohu",
+    "title": "Çregjistrohu nga email-et e Avenir",
+    "lead": "Nuk do të marrësh më email-e për mundësi pune dhe trajnime. Shpalljet mbeten të hapura për ty si më parë.",
+    "button": "Çregjistrohu",
+    "done": "U çregjistrove. Nuk do të marrësh më email-e nga Avenir.",
+    "invalid": "Kjo lidhje nuk është e plotë. Hap lidhjen «Çregjistrohu» nga email-i që të dërguam."
+  },
+  "adminSubscribers": {
+    "title": "Email-et e kandidatëve",
+    "description": "Kushdo që hyn te shpalljet. «Po» do të thotë që ka pranuar email-e nga Avenir.",
+    "counts": "{total} email-e · {consenting} pranojnë email-e",
+    "export": "Shkarko CSV",
+    "email": "Email-i",
+    "consent": "Pranon email-e",
+    "joined": "Regjistruar",
+    "yes": "Po",
+    "no": "Jo",
+    "unsubscribed": "Jo (u çregjistrua)",
+    "delete": "Fshi",
+    "deleteTitle": "Ta fshijmë këtë email?",
+    "deleteDescription": "Fshihen menjëherë email-i dhe hyrjet e tij. Kjo nuk kthehet mbrapsht.",
+    "deleted": "Email-i u fshi.",
+    "empty": "Askush nuk ka hyrë ende te shpalljet."
+  },
+  "adminCampaigns": {
+    "title": "Fushatat me email",
+    "description": "Dërgo një email te të gjithë që kanë pranuar email-e nga Avenir. Dërgohet pak nga pak, brenda kufirit ditor të email-eve.",
+    "new": "Fushatë e re",
+    "subject": "Titulli i email-it",
+    "body": "Teksti",
+    "bodyHint": "Një rresht bosh fillon paragraf të ri. Lidhja për t'u çregjistruar shtohet vetë në fund.",
+    "save": "Ruaj draftin",
+    "saved": "Drafti u ruajt.",
+    "test": "Dërgo provë te unë",
+    "send": "Dërgo te të gjithë",
+    "sendTitle": "Ta dërgojmë fushatën?",
+    "sendDescription": "Dërgohet te {count} persona që kanë pranuar email-e. Pasi nis, nuk ndryshohet më.",
+    "cancel": "Ndalo dërgimin",
+    "delete": "Fshi draftin",
+    "status": {
+      "DRAFT": "Skicë",
+      "SENDING": "Po dërgohet",
+      "SENT": "U dërgua",
+      "CANCELLED": "U ndal"
+    },
+    "progress": "{sent} nga {recipients} të dërguara",
+    "failed": "{count} dështuan",
+    "empty": "Nuk ka ende fushata."
   }
 }

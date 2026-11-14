@@ -17,7 +17,7 @@ export default function AdminEmailsPage() {
         title={t.adminLaunch.emails.title}
         description={t.adminLaunch.emails.description}
       />
-      <Suspense fallback={<Skeleton className="rounded-card h-64 w-full" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-none" />}>
         <EmailLog />
       </Suspense>
     </>

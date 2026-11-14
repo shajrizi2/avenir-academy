@@ -91,9 +91,9 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
 
-  /* Radii: cards 16px, buttons 14px, pills 999px (rounded-full); inputs use rounded-lg. */
-  --radius-card: 1rem;
-  --radius-button: 0.875rem;
+  /* Radii: none. Every corner is square (PLAN D37). */
+  --radius-card: 0;
+  --radius-button: 0;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -160,7 +160,7 @@
   --chart-3: #888888;
   --chart-4: #b5b5b5;
   --chart-5: #d4d4d4;
-  --radius: 0.75rem;
+  --radius: 0; /* Square corners everywhere (PLAN D37). */
   --sidebar: var(--bg);
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--ink);
@@ -172,6 +172,12 @@
 }
 
 @layer base {
+  /* Every corner is square (PLAN D37), including third-party widgets (toasts, menus). */
+  *,
+  ::before,
+  ::after {
+    border-radius: 0 !important;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -336,7 +342,7 @@
 }
 .prose-lesson :not(pre) > code {
   background: var(--bg-soft);
-  border-radius: 0.375rem;
+  border-radius: 0;
   padding: 0.125rem 0.375rem;
 }
 .prose-lesson blockquote {

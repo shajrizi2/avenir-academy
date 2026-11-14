@@ -29,7 +29,7 @@ export function ModulePath({ steps, accent }: { steps: PathStep[]; accent: strin
             <span
               aria-hidden
               className={cn(
-                'border-ink flex size-10 shrink-0 items-center justify-center rounded-full border-2 text-sm font-extrabold',
+                'border-ink flex size-10 shrink-0 items-center justify-center rounded-none border-2 text-sm font-extrabold',
                 first ? cn(accent, 'text-ink') : 'bg-background text-ink-soft',
               )}
             >

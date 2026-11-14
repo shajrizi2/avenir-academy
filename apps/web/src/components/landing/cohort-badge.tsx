@@ -19,10 +19,10 @@ export async function CohortBadge() {
 
 export function BadgeShell({ children }: { children?: React.ReactNode }) {
   return (
-    <p className="bg-track-ai-tint text-track-ai-ink inline-flex min-h-9 items-center gap-2 rounded-full px-4 py-1 text-sm font-bold">
+    <p className="bg-track-ai-tint text-track-ai-ink inline-flex min-h-9 items-center gap-2 rounded-none px-4 py-1 text-sm font-bold">
       <span className="relative flex size-2" aria-hidden>
-        <span className="bg-track-ai absolute inline-flex size-full rounded-full opacity-60 motion-safe:animate-ping" />
-        <span className="bg-track-ai relative inline-flex size-2 rounded-full" />
+        <span className="bg-track-ai absolute inline-flex size-full rounded-none opacity-60 motion-safe:animate-ping" />
+        <span className="bg-track-ai relative inline-flex size-2 rounded-none" />
       </span>
       <span>{children}</span>
     </p>

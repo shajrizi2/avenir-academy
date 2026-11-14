@@ -1,17 +1,5 @@
-import {
-  JOB_CODE_LENGTH,
-  JOB_CODE_MINUTES,
-  JOB_SESSION_DAYS,
-  type PublicJob,
-  type JobReportReason,
-} from '@ai-academy/shared';
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { JOB_CODE_LENGTH, JOB_CODE_MINUTES, JOB_SESSION_DAYS } from '@ai-academy/shared';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import type { EnvironmentVariables } from '../../../config/env.validation.js';
@@ -19,7 +7,6 @@ import type { JobSeeker, JobSeekerSession } from '../../../generated/prisma/clie
 import { MailService } from '../../../mail/mail.service.js';
 import { jobLoginCode } from '../../../mail/templates.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
-import { publicJobSelect, toPublicJob } from '../board.service.js';
 
 const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
@@ -28,9 +15,6 @@ const MAX_WRONG_CODES = 5;
 const RENEW_AFTER_MS = DAY;
 /** Accounts unused this long are deleted (privacy notice: 2 years). */
 const INACTIVE_DAYS = 730;
-/** Reports that hide a job, and hidden jobs that block a company. */
-export const REPORTS_TO_HIDE = 2;
-export const HIDDEN_JOBS_TO_BLOCK = 3;
 
 export interface Authenticated {
   seeker: JobSeeker;
@@ -104,6 +88,7 @@ export class JobSeekersService {
   async verify(
     email: string,
     code: string,
+    marketingConsent: boolean,
     now: Date,
   ): Promise<{ seeker: JobSeeker; token: string }> {
     const row = await this.prisma.jobSeekerCode.findFirst({
@@ -128,10 +113,14 @@ export class JobSeekersService {
     });
     if (used.count === 0) throw new BadRequestException('Kodi ka skaduar. Kërko një kod të ri.');
 
+    // The tick in the pop-up: on records consent (and when), off withdraws it.
+    const consent = marketingConsent
+      ? { marketingConsent: true, consentAt: now, unsubscribedAt: null }
+      : { marketingConsent: false };
     const seeker = await this.prisma.jobSeeker.upsert({
       where: { email },
-      create: { email, createdAt: now, lastSeenAt: now },
-      update: { lastSeenAt: now },
+      create: { email, createdAt: now, lastSeenAt: now, ...consent },
+      update: { lastSeenAt: now, ...consent },
     });
     const token = randomBytes(32).toString('base64url');
     await this.prisma.jobSeekerSession.create({
@@ -168,91 +157,28 @@ export class JobSeekersService {
     return { seeker, session: renewed, renewed: true };
   }
 
-  async logout(sessionId: string): Promise<void> {
-    await this.prisma.jobSeekerSession.deleteMany({ where: { id: sessionId } });
+  /** Signed token for the unsubscribe link in campaign emails (no sign-in needed to use it). */
+  unsubscribeToken(seekerId: string): string {
+    return createHmac('sha256', this.secret).update(`unsubscribe:${seekerId}`).digest('base64url');
   }
 
-  async logoutEverywhere(seekerId: string): Promise<void> {
-    await this.prisma.jobSeekerSession.deleteMany({ where: { jobSeekerId: seekerId } });
+  /** Stops campaign emails for the person the link was made for; repeat clicks are fine. */
+  async unsubscribe(seekerId: string, token: string, now: Date): Promise<void> {
+    const expected = Buffer.from(this.unsubscribeToken(seekerId));
+    const given = Buffer.from(token);
+    if (expected.length !== given.length || !timingSafeEqual(expected, given)) {
+      throw new BadRequestException('Lidhja nuk është e vlefshme.');
+    }
+    await this.prisma.jobSeeker.updateMany({
+      where: { id: seekerId, marketingConsent: true },
+      data: { marketingConsent: false, unsubscribedAt: now },
+    });
   }
 
-  /** Deletes the email, sessions, saved jobs and reports at once (cascade). */
+  /** Deletes the email, sessions and campaign history at once (cascade). Used by admins. */
   async deleteAccount(seekerId: string): Promise<void> {
     const seeker = await this.prisma.jobSeeker.delete({ where: { id: seekerId } });
     await this.prisma.jobSeekerCode.deleteMany({ where: { email: seeker.email } });
-  }
-
-  async savedJobs(seekerId: string): Promise<PublicJob[]> {
-    const saves = await this.prisma.savedJob.findMany({
-      where: { jobSeekerId: seekerId },
-      orderBy: { createdAt: 'desc' },
-      select: { job: { select: publicJobSelect } },
-    });
-    return saves.map((s) => toPublicJob(s.job));
-  }
-
-  async savedIds(seekerId: string): Promise<string[]> {
-    const saves = await this.prisma.savedJob.findMany({
-      where: { jobSeekerId: seekerId },
-      select: { jobId: true },
-    });
-    return saves.map((s) => s.jobId);
-  }
-
-  async save(seekerId: string, jobId: string): Promise<void> {
-    const job = await this.prisma.job.findFirst({
-      where: { id: jobId, status: { in: ['OPEN', 'CLOSED'] } },
-    });
-    if (!job) throw new NotFoundException('Shpallja nuk u gjet.');
-    await this.prisma.savedJob.upsert({
-      where: { jobSeekerId_jobId: { jobSeekerId: seekerId, jobId } },
-      create: { jobSeekerId: seekerId, jobId },
-      update: {},
-    });
-  }
-
-  async unsave(seekerId: string, jobId: string): Promise<void> {
-    await this.prisma.savedJob.deleteMany({ where: { jobSeekerId: seekerId, jobId } });
-  }
-
-  /**
-   * One report per person and job. Two reports hide the job; a company with three hidden jobs
-   * goes on the blocklist, so its future jobs are never published.
-   */
-  async report(seekerId: string, jobId: string, reason: JobReportReason): Promise<void> {
-    const job = await this.prisma.job.findUnique({
-      where: { id: jobId },
-      include: { company: true },
-    });
-    if (!job) throw new NotFoundException('Shpallja nuk u gjet.');
-    await this.prisma.jobReport.upsert({
-      where: { jobSeekerId_jobId: { jobSeekerId: seekerId, jobId } },
-      create: { jobSeekerId: seekerId, jobId, reason },
-      update: { reason },
-    });
-    const reports = await this.prisma.jobReport.count({ where: { jobId } });
-    if (reports < REPORTS_TO_HIDE || job.status !== 'OPEN') return;
-    await this.prisma.job.update({ where: { id: jobId }, data: { status: 'HIDDEN' } });
-    const hidden = await this.prisma.job.count({
-      where: { companyId: job.companyId, status: 'HIDDEN' },
-    });
-    if (hidden < HIDDEN_JOBS_TO_BLOCK) return;
-    await this.prisma.$transaction([
-      this.prisma.jobBlock.upsert({
-        where: { kind_value: { kind: 'COMPANY', value: job.company.key } },
-        create: {
-          kind: 'COMPANY',
-          value: job.company.key,
-          reason: `${hidden} shpallje të raportuara`,
-        },
-        update: {},
-      }),
-      this.prisma.jobCompany.update({ where: { id: job.companyId }, data: { status: 'BLOCKED' } }),
-      this.prisma.job.updateMany({
-        where: { companyId: job.companyId, status: 'OPEN' },
-        data: { status: 'HIDDEN' },
-      }),
-    ]);
   }
 
   /** Daily: old codes, expired sessions and accounts unused for 2 years go. */

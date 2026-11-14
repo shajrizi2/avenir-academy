@@ -1,5 +1,6 @@
 import type { Role } from '@ai-academy/shared';
 import {
+  AtSign,
   BookOpen,
   Briefcase,
   ClipboardCheck,
@@ -10,6 +11,7 @@ import {
   Mail,
   Presentation,
   Quote,
+  Send,
   Settings,
   Shield,
   UserRound,
@@ -39,6 +41,8 @@ export function navItemsFor(role: Role): NavItem[] {
         { href: '/training/admin/emails', label: t.nav.emails, icon: Mail },
         { href: '/training/admin/courses', label: t.nav.adminCourses, icon: Library },
         { href: '/training/admin/jobs', label: t.nav.jobs, icon: Briefcase },
+        { href: '/training/admin/subscribers', label: t.nav.subscribers, icon: AtSign },
+        { href: '/training/admin/campaigns', label: t.nav.campaigns, icon: Send },
         { href: '/training/teach', label: t.nav.teaching, icon: ClipboardCheck },
         { href: '/training/admin/users', label: t.nav.users, icon: Users },
         { href: '/training/admin/instructors', label: t.nav.instructors, icon: Presentation },

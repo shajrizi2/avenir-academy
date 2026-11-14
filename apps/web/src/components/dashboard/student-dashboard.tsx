@@ -41,7 +41,7 @@ function MyCourses() {
         {t.dashboard.myCourses}
       </h2>
       {isPending ? (
-        <Skeleton className="rounded-card h-36 w-full" />
+        <Skeleton className="h-36 w-full rounded-none" />
       ) : error ? (
         <FormError message={errorMessage(error)} />
       ) : data.length === 0 ? (
@@ -159,7 +159,7 @@ function TrackIcon({ slug }: { slug: string }) {
   return (
     <span
       className={cn(
-        'border-ink text-ink flex size-11 items-center justify-center rounded-xl border-2',
+        'border-ink text-ink flex size-11 items-center justify-center rounded-none border-2',
         theme.fill,
       )}
     >

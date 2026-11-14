@@ -19,7 +19,7 @@ export function PersonAvatar({ name, src, size, className }: PersonAvatarProps) 
         height={size}
         // Photo URLs come from arbitrary hosts entered by admins; skip the optimizer.
         unoptimized
-        className={cn('rounded-full object-cover', className)}
+        className={cn('rounded-none object-cover', className)}
         style={{ width: size, height: size }}
       />
     );
@@ -34,7 +34,7 @@ export function PersonAvatar({ name, src, size, className }: PersonAvatarProps) 
     <span
       aria-hidden
       className={cn(
-        'bg-track-ai-tint text-track-ai-ink flex items-center justify-center rounded-full font-extrabold',
+        'bg-track-ai-tint text-track-ai-ink flex items-center justify-center rounded-none font-extrabold',
         className,
       )}
       style={{ width: size, height: size, fontSize: size / 2.8 }}

@@ -38,7 +38,7 @@ export function PaymentView() {
   });
   const p = t.payments;
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
 
   const amount = formatPrice(payment.amountCents, payment.currency);
@@ -60,7 +60,7 @@ export function PaymentView() {
         actions={
           <span
             className={cn(
-              'inline-flex h-8 items-center rounded-full px-3 text-sm font-bold',
+              'inline-flex h-8 items-center rounded-none px-3 text-sm font-bold',
               STATUS_CLASS[payment.status],
             )}
           >
@@ -172,7 +172,7 @@ function BankRow({
         <span
           className={cn(
             'text-ink font-semibold',
-            highlight && 'bg-active-tint rounded-lg px-2 py-0.5 font-mono',
+            highlight && 'bg-active-tint rounded-none px-2 py-0.5 font-mono',
           )}
         >
           {value}

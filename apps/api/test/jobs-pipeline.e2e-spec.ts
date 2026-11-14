@@ -39,8 +39,6 @@ describe('Job collection (e2e)', () => {
     pipeline = app.get(JobsPipelineService);
     mail = captureMail();
     for (const table of [
-      'jobReport',
-      'savedJob',
       'jobListing',
       'job',
       'jobCompany',

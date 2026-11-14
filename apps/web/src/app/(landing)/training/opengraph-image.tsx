@@ -56,7 +56,7 @@ export default function OpengraphImage() {
             style={{
               display: 'flex',
               padding: '12px 22px',
-              borderRadius: 999,
+              borderRadius: 0,
               fontSize: 24,
               fontWeight: 700,
               ...PILLS[i % PILLS.length],

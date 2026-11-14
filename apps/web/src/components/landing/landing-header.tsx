@@ -30,7 +30,7 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
             <a
               key={link.href}
               href={link.href}
-              className="text-ink-soft hover:bg-soft hover:text-ink rounded-full px-4 py-2 text-sm font-semibold"
+              className="text-ink-soft hover:bg-soft hover:text-ink rounded-none px-4 py-2 text-sm font-semibold"
             >
               {link.label}
             </a>
@@ -39,7 +39,7 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
         <div className="flex items-center justify-end gap-1 sm:gap-2">
           <Link
             href="/training/login"
-            className="text-ink hidden rounded-lg px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline md:inline-flex"
+            className="text-ink hidden rounded-none px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline md:inline-flex"
           >
             {nav.login}
           </Link>

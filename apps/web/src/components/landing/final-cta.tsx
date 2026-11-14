@@ -63,9 +63,9 @@ async function Contact() {
   if (!email && !phone && !whatsapp) return organization;
 
   const linkClass =
-    'text-primary-foreground hover:bg-primary-foreground/10 focus-visible:bg-primary-foreground/10 flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5';
+    'text-primary-foreground hover:bg-primary-foreground/10 focus-visible:bg-primary-foreground/10 flex min-h-11 items-center gap-3 rounded-none px-3 py-2.5';
   return (
-    <div className="reveal rounded-card bg-primary-foreground/5 border-primary-foreground/20 border-2 p-6">
+    <div className="reveal bg-primary-foreground/5 border-primary-foreground/20 rounded-none border-2 p-6">
       <h3 className="text-primary-foreground px-3 text-lg font-bold">{t.contact.title}</h3>
       <ul className="mt-3 space-y-1">
         {email && (

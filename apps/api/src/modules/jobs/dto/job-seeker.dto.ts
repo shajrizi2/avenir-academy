@@ -1,12 +1,7 @@
-import {
-  JOB_CODE_LENGTH,
-  JOB_REPORT_REASONS,
-  type JobReportReason,
-  EMAIL_MAX_LENGTH,
-} from '@ai-academy/shared';
+import { EMAIL_MAX_LENGTH, JOB_CODE_LENGTH } from '@ai-academy/shared';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsIn, Matches, MaxLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsString, Matches, MaxLength } from 'class-validator';
 import { normalizeEmail } from '../../../common/transforms.js';
 
 export class RequestCodeDto {
@@ -22,10 +17,20 @@ export class VerifyCodeDto extends RequestCodeDto {
   @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value))
   @Matches(new RegExp(`^\\d{${JOB_CODE_LENGTH}}$`), { message: 'Kodi ka 6 shifra' })
   code: string;
+
+  @ApiProperty({ description: 'The tick: emails about opportunities from Avenir' })
+  @IsBoolean()
+  marketingConsent: boolean;
 }
 
-export class ReportJobDto {
-  @ApiProperty({ enum: JOB_REPORT_REASONS })
-  @IsIn(JOB_REPORT_REASONS)
-  reason: JobReportReason;
+export class UnsubscribeDto {
+  @ApiProperty()
+  @IsString()
+  @MaxLength(40)
+  id: string;
+
+  @ApiProperty()
+  @IsString()
+  @MaxLength(100)
+  token: string;
 }

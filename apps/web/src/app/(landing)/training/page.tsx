@@ -44,7 +44,7 @@ export default async function LandingPage() {
     <>
       <a
         href="#main"
-        className="text-ink bg-background sr-only z-50 rounded-lg px-4 py-2 font-semibold shadow focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        className="text-ink bg-background sr-only z-50 rounded-none px-4 py-2 font-semibold shadow focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
         {t.skipLink}
       </a>

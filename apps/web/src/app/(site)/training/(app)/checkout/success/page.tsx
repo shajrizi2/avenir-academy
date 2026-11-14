@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: t.meta.pages.checkoutSuccess };
 
 export default function CheckoutSuccessPage() {
   return (
-    <Suspense fallback={<Skeleton className="rounded-card h-64 w-full" />}>
+    <Suspense fallback={<Skeleton className="h-64 w-full rounded-none" />}>
       <CheckoutSuccess />
     </Suspense>
   );

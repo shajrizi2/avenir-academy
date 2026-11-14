@@ -16,15 +16,7 @@ describe('Job board admin (e2e)', () => {
 
   beforeAll(async () => {
     ({ app, prisma } = await bootApp());
-    for (const table of [
-      'jobReport',
-      'savedJob',
-      'jobListing',
-      'job',
-      'jobCompany',
-      'jobBlock',
-      'jobRun',
-    ] as const) {
+    for (const table of ['jobListing', 'job', 'jobCompany', 'jobBlock', 'jobRun'] as const) {
       await (prisma[table] as unknown as { deleteMany: () => Promise<unknown> }).deleteMany();
     }
     admin = await createUser(app, prisma, 'jobsadmin', 'ADMIN');

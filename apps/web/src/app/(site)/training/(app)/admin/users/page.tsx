@@ -14,7 +14,7 @@ export default function AdminUsersPage() {
   return (
     <>
       <PageHeader title={t.admin.users.title} description={t.admin.users.description} />
-      <Suspense fallback={<Skeleton className="rounded-card h-64 w-full" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-none" />}>
         <UserManagement />
       </Suspense>
     </>

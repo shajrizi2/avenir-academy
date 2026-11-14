@@ -21,7 +21,7 @@ export function TestResult() {
   const { data: test, isPending, error } = useQuery(studentTestQuery(testId));
   const state = useWindowState(test ?? { opensAt: '', closesAt: '' });
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
 
   const finished = test.attempts.filter((a) => a.status !== 'IN_PROGRESS');
@@ -58,7 +58,7 @@ export function TestResult() {
       <section
         aria-labelledby="result-title"
         className={cn(
-          'rounded-card grid items-center gap-6 p-6 sm:p-10 md:grid-cols-[1fr_16rem]',
+          'grid items-center gap-6 rounded-none p-6 sm:p-10 md:grid-cols-[1fr_16rem]',
           passed ? 'bg-passed-tint' : 'bg-soft border-line border',
         )}
       >

@@ -9,8 +9,8 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
   return (
-    <div className="border-line-strong rounded-card bg-background flex flex-col items-center gap-4 border-2 border-dashed px-6 py-12 text-center">
-      <span className="bg-track-ai-tint text-track-ai-ink flex size-14 items-center justify-center rounded-2xl">
+    <div className="border-line-strong bg-background flex flex-col items-center gap-4 rounded-none border-2 border-dashed px-6 py-12 text-center">
+      <span className="bg-track-ai-tint text-track-ai-ink flex size-14 items-center justify-center rounded-none">
         <Icon className="size-6" aria-hidden />
       </span>
       <div className="space-y-1">

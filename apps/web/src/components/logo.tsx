@@ -9,7 +9,7 @@ export function Logo({ href = '/', inverse = false }: { href?: string; inverse?:
     <Link
       href={href}
       aria-label={t.shell.home}
-      className={cn('flex items-center rounded-lg', inverse ? 'text-background' : 'text-ink')}
+      className={cn('flex items-center rounded-none', inverse ? 'text-background' : 'text-ink')}
     >
       <Wordmark className="h-7 md:h-8" />
     </Link>

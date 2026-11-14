@@ -13,8 +13,8 @@ export function TestCard({ test, status }: { test: ModuleTest; status: ModuleSta
   const passed = status === 'PASSED';
 
   return (
-    <div className="border-ink rounded-card bg-background flex flex-col gap-5 border-2 p-5 sm:flex-row sm:items-center sm:p-6">
-      <span className="bg-track-ai-tint text-track-ai-ink flex size-12 shrink-0 items-center justify-center rounded-xl">
+    <div className="border-ink bg-background flex flex-col gap-5 rounded-none border-2 p-5 sm:flex-row sm:items-center sm:p-6">
+      <span className="bg-track-ai-tint text-track-ai-ink flex size-12 shrink-0 items-center justify-center rounded-none">
         <ClipboardList className="size-6" aria-hidden />
       </span>
       <div className="min-w-0 flex-1 space-y-1">

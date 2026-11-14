@@ -17,7 +17,7 @@ export default function AdminPaymentsPage() {
         title={t.adminLaunch.payments.title}
         description={t.adminLaunch.payments.description}
       />
-      <Suspense fallback={<Skeleton className="rounded-card h-64 w-full" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-none" />}>
         <PaymentList />
       </Suspense>
     </>

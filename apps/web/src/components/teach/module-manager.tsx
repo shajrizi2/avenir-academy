@@ -22,7 +22,7 @@ export function ModuleManager() {
   const { data: module, isPending, error } = useQuery(moduleQuery(id));
   const m = t.teach.module;
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
 
   const back =

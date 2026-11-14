@@ -17,7 +17,7 @@ export default function AdminGroupsPage() {
         title={t.adminLaunch.groups.title}
         description={t.adminLaunch.groups.description}
       />
-      <Suspense fallback={<Skeleton className="rounded-card h-64 w-full" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-none" />}>
         <GroupList />
       </Suspense>
     </>

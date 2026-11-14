@@ -4,9 +4,11 @@ import { ADMIN, signIn } from './support';
 
 const j = sq.jobs;
 
-/** The job board (PLAN D36). It is switched off in the test database, so `?preview` shows it. */
+/** The job board (PLAN D36, D37). It is switched off in the test database, so `?preview` shows it. */
 test.describe('job board', () => {
-  test('lists open jobs with a few details, tags and the source credit', async ({ page }) => {
+  test('lists open jobs with a few details, tags, the source credit and only "Apliko"', async ({
+    page,
+  }) => {
     await page.goto('/?preview');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(j.title);
     const list = page.getByRole('list', { name: j.listLabel });
@@ -21,48 +23,68 @@ test.describe('job board', () => {
     const apply = list.getByRole('link', { name: /Apliko për Growth Marketer/ });
     await expect(apply).toHaveAttribute('href', 'https://example.com/jobs/e2e-job-1');
     await expect(apply).toHaveAttribute('target', '_blank');
-    await expect(page.getByText(j.warning)).toBeVisible();
+    await expect(list.getByRole('button')).toHaveCount(0);
   });
 
-  test('filters by category', async ({ page }) => {
-    await page.goto('/?preview&kategoria=inxhinieri');
-    const nav = page.getByRole('navigation', { name: j.categoriesLabel });
-    await expect(
-      nav.getByRole('link', { name: new RegExp(j.categories.ENGINEERING) }),
-    ).toHaveAttribute('aria-current', 'page');
+  test('searches with the bar and narrows with the job-type dropdown', async ({ page }) => {
+    await page.goto('/?preview');
+    const search = page.getByRole('search', { name: j.search.label });
+    await search.getByRole('searchbox', { name: j.search.label }).fill('backend');
+    await search.getByRole('button', { name: j.search.submit }).click();
+    await expect(page).toHaveURL(/q=backend/);
     const list = page.getByRole('list', { name: j.listLabel });
     await expect(list.getByRole('heading', { name: 'Backend Engineer' })).toBeVisible();
     await expect(list.getByRole('heading', { name: 'Growth Marketer' })).toHaveCount(0);
+    await expect(page.getByRole('status')).toContainText('1 shpallje për “backend”');
+
+    await page.goto('/?preview');
+    await page
+      .getByRole('combobox', { name: j.search.type })
+      .selectOption({ label: `${j.categories.MARKETING} (1)` });
+    await expect(page).toHaveURL(/kategoria=marketing/);
+    await expect(list.getByRole('heading', { name: 'Growth Marketer' })).toBeVisible();
+    await expect(list.getByRole('heading', { name: 'Backend Engineer' })).toHaveCount(0);
   });
 
-  test('saving while signed out leads to the email sign-in, which sends a code', async ({
+  test('after 10 seconds a signed-out visitor must sign in, with the email tick on', async ({
     page,
   }) => {
+    await page.clock.install();
     await page.goto('/?preview');
-    await page.getByRole('button', { name: 'Ruaj Growth Marketer' }).click();
-    await expect(page).toHaveURL(/\/hyr\?next=%2F%3Fpreview$/);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(j.login.title);
+    const dialog = page.getByRole('dialog', { name: j.login.title });
+    await expect(dialog).toHaveCount(0);
+    // The timer starts once the page has hydrated and asked who is signed in.
+    await page.waitForLoadState('networkidle');
+    await page.clock.runFor(10_500);
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Close' })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('checkbox', { name: j.login.consent })).toBeChecked();
 
-    const email = page.getByLabel(j.login.email);
-    await email.fill(`saver.${Date.now()}@gmial.com`);
-    const fix = page.getByRole('button', { name: /Përdor .*@gmail\.com/ });
-    await fix.click();
+    const email = dialog.getByLabel(j.login.email);
+    await email.fill(`gate.${Date.now()}@gmial.com`);
+    await dialog.getByRole('button', { name: /Përdor .*@gmail\.com/ }).click();
     await expect(email).toHaveValue(/@gmail\.com$/);
-    await page.getByRole('button', { name: j.login.send }).click();
-    await expect(page.getByText(/Kodin e dërguam te .*@gmail\.com/)).toBeVisible();
-    await expect(page.getByLabel(j.login.code)).toBeVisible();
+    await dialog.getByRole('button', { name: j.login.send }).click();
+    await expect(dialog.getByText(/Kodin e dërguam te .*@gmail\.com/)).toBeVisible();
+    await expect(dialog.getByLabel(j.login.code)).toBeVisible();
   });
 
-  test('the header offers sign-in on the board and the academy keeps its own', async ({ page }) => {
+  test('the board has no sign-in or sign-out in its header', async ({ page }) => {
     await page.goto('/?preview');
-    await expect(page.getByRole('banner').getByRole('link', { name: j.signIn })).toHaveAttribute(
-      'href',
-      '/hyr',
-    );
-    await page.goto('/training/courses');
-    await expect(
-      page.getByRole('banner').getByRole('link', { name: sq.nav.login }),
-    ).toHaveAttribute('href', '/training/login');
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Hyr' })).toHaveCount(0);
+    await expect(page.getByRole('banner').getByRole('button')).toHaveCount(0);
+  });
+
+  test('the unsubscribe page asks before unsubscribing and explains a broken link', async ({
+    page,
+  }) => {
+    await page.goto('/cregjistrohu');
+    await expect(page.getByText(sq.unsubscribe.invalid)).toBeVisible();
+    await page.goto('/cregjistrohu?id=nobody&t=forged');
+    await page.getByRole('button', { name: sq.unsubscribe.button }).click();
+    await expect(page.getByText('Lidhja nuk është e vlefshme.')).toBeVisible();
   });
 });
 
@@ -79,4 +101,20 @@ test('admins add a company by its careers link and can switch the board on', asy
 
   await page.goto('/training/admin/settings');
   await expect(page.getByLabel(sq.adminLaunch.settings.jobBoardPublic)).toBeVisible();
+});
+
+test('admins see the stored emails and draft a campaign', async ({ page }) => {
+  await signIn(page, ADMIN);
+  await page.goto('/training/admin/subscribers');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(sq.adminSubscribers.title);
+  await expect(page.getByText('e2e.fan@jobs.test')).toBeVisible();
+
+  await page.goto('/training/admin/campaigns');
+  const subject = `Punë të reja ${Date.now()}`;
+  await page.getByLabel(sq.adminCampaigns.subject).fill(subject);
+  await page.getByLabel(sq.adminCampaigns.body).fill('Paragrafi i parë.\n\nParagrafi i dytë.');
+  await page.getByRole('button', { name: sq.adminCampaigns.save }).click();
+  const card = page.getByRole('listitem').filter({ hasText: subject });
+  await expect(card.getByText(sq.adminCampaigns.status.DRAFT, { exact: true })).toBeVisible();
+  await expect(card.getByRole('button', { name: sq.adminCampaigns.send })).toBeVisible();
 });

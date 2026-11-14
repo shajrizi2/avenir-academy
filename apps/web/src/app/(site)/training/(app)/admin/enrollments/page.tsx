@@ -17,7 +17,7 @@ export default function AdminEnrollmentsPage() {
         title={t.adminLaunch.enrollments.title}
         description={t.adminLaunch.enrollments.description}
       />
-      <Suspense fallback={<Skeleton className="rounded-card h-64 w-full" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-none" />}>
         <EnrollmentQueue />
       </Suspense>
     </>

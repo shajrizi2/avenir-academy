@@ -40,7 +40,7 @@ export function LessonView() {
     onError: (e) => toast.error(errorMessage(e)),
   });
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
 
   const backHref = `/training/learn/${courseSlug}/${moduleId}`;
@@ -77,7 +77,7 @@ export function LessonView() {
 
       {lesson.videoUrl && <VideoEmbed url={lesson.videoUrl} title={l.video} />}
 
-      <article className="rounded-card bg-background border-line border p-6 sm:p-8">
+      <article className="bg-background border-line rounded-none border p-6 sm:p-8">
         <Markdown content={lesson.content} />
       </article>
 

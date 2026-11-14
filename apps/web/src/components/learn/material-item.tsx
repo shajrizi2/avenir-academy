@@ -36,8 +36,8 @@ export function MaterialItem({
   }
 
   return (
-    <li className="border-line rounded-card flex flex-wrap items-center gap-3 border p-3 sm:p-4">
-      <span className="bg-track-ai-tint text-track-ai-ink flex size-10 shrink-0 items-center justify-center rounded-xl">
+    <li className="border-line flex flex-wrap items-center gap-3 rounded-none border p-3 sm:p-4">
+      <span className="bg-track-ai-tint text-track-ai-ink flex size-10 shrink-0 items-center justify-center rounded-none">
         <Icon className="size-5" aria-hidden />
       </span>
       <div className="min-w-0 flex-1 basis-40">

@@ -1,24 +1,24 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { CodeLoginForm } from '@/components/jobs/code-login-form';
+import { Unsubscribe } from '@/components/jobs/unsubscribe';
 import { t } from '@/i18n/messages';
 
-const copy = t.jobs.login;
+const copy = t.unsubscribe;
 
 export const metadata: Metadata = {
   title: copy.metaTitle,
   robots: { index: false, follow: false },
 };
 
-export default function JobSeekerLoginPage() {
+export default function UnsubscribePage() {
   return (
-    <div className="mx-auto w-full max-w-md space-y-6 px-4 py-16 sm:px-6 lg:py-24">
+    <div className="mx-auto w-full max-w-xl space-y-6 px-4 py-16 sm:px-6 lg:py-24">
       <header className="space-y-2">
         <h1 className="text-heading tracking-heading text-ink font-extrabold">{copy.title}</h1>
-        <p className="text-ink-soft text-base">{copy.lead}</p>
+        <p className="text-ink-soft">{copy.lead}</p>
       </header>
       <Suspense>
-        <CodeLoginForm />
+        <Unsubscribe />
       </Suspense>
     </div>
   );

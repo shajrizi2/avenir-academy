@@ -25,7 +25,7 @@ export function JobRow({ job }: { job: PublicJob }) {
         </p>
         <p className="text-ink-soft flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
           {jobTags(job).map((tag) => (
-            <span key={tag} className="bg-soft text-ink rounded-full px-2.5 py-0.5 font-medium">
+            <span key={tag} className="bg-soft text-ink px-2.5 py-0.5 font-medium">
               {tag}
             </span>
           ))}

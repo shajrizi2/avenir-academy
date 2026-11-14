@@ -12,7 +12,7 @@ export function AttemptHistory({
   passMark: number;
 }) {
   return (
-    <ol className="border-line rounded-card bg-background divide-line divide-y border">
+    <ol className="border-line bg-background divide-line divide-y rounded-none border">
       {attempts.map((attempt, index) => (
         <li key={attempt.id} className="flex flex-wrap items-center gap-x-6 gap-y-1 px-5 py-4">
           <p className="text-ink min-w-32 font-bold">

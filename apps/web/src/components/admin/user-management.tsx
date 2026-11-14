@@ -94,7 +94,7 @@ export function UserManagement() {
       </div>
 
       {isPending ? (
-        <Skeleton className="rounded-card h-64 w-full" />
+        <Skeleton className="h-64 w-full rounded-none" />
       ) : error ? (
         <FormError message={errorMessage(error)} />
       ) : data.items.length === 0 ? (

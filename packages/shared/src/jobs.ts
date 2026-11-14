@@ -80,13 +80,13 @@ export interface JobBoardPage {
   categories: { category: JobCategory; count: number }[];
 }
 
+export const JOB_SEARCH_MAX_LENGTH = 100;
+
 export const jobBoardQuerySchema = z.object({
+  q: z.string().trim().max(JOB_SEARCH_MAX_LENGTH).optional(),
   category: z.enum(JOB_CATEGORIES).optional(),
   page: z.coerce.number().int().min(1).max(1000).optional(),
 });
-
-export const JOB_REPORT_REASONS = ['SCAM', 'CLOSED', 'NOT_ELIGIBLE', 'OTHER'] as const;
-export type JobReportReason = (typeof JOB_REPORT_REASONS)[number];
 
 export const JOB_CODE_LENGTH = 6;
 export const JOB_CODE_MINUTES = 10;
@@ -102,8 +102,6 @@ export const jobSeekerVerifySchema = jobSeekerEmailSchema.extend({
     .regex(new RegExp(`^\\d{${JOB_CODE_LENGTH}}$`), 'Shkruaj kodin me 6 shifra nga email-i'),
 });
 export type JobSeekerVerifyInput = z.infer<typeof jobSeekerVerifySchema>;
-
-export const jobReportSchema = z.object({ reason: z.enum(JOB_REPORT_REASONS) });
 
 export interface JobSeekerMe {
   email: string;
@@ -171,7 +169,6 @@ export interface AdminHiddenJob {
   title: string;
   company: string;
   applyUrl: string;
-  reports: { reason: JobReportReason; count: number }[];
 }
 
 export const addJobCompanySchema = z.object({
@@ -186,3 +183,45 @@ export const addJobBlockSchema = z.object({
   reason: z.string().trim().min(1).max(200),
 });
 export type AddJobBlockInput = z.infer<typeof addJobBlockSchema>;
+
+// ---- Subscribers and campaigns (PLAN D37) ----
+
+export interface AdminSubscriber {
+  id: string;
+  email: string;
+  marketingConsent: boolean;
+  consentAt: string | null;
+  unsubscribedAt: string | null;
+  createdAt: string;
+  lastSeenAt: string;
+}
+
+export interface AdminSubscribers {
+  total: number;
+  consenting: number;
+  subscribers: AdminSubscriber[];
+}
+
+export type CampaignStatus = 'DRAFT' | 'SENDING' | 'SENT' | 'CANCELLED';
+
+export interface AdminCampaign {
+  id: string;
+  subject: string;
+  body: string;
+  status: CampaignStatus;
+  createdAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  recipients: number;
+  sent: number;
+  failed: number;
+}
+
+export const CAMPAIGN_SUBJECT_MAX = 150;
+export const CAMPAIGN_BODY_MAX = 10_000;
+
+export const campaignSchema = z.object({
+  subject: z.string().trim().min(1, 'Shkruaj titullin e email-it').max(CAMPAIGN_SUBJECT_MAX),
+  body: z.string().trim().min(1, 'Shkruaj tekstin e email-it').max(CAMPAIGN_BODY_MAX),
+});
+export type CampaignInput = z.infer<typeof campaignSchema>;

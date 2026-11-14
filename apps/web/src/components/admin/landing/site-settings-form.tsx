@@ -24,7 +24,7 @@ type Values = z.output<typeof siteSettingsSchema>;
 
 export function SiteSettingsForm() {
   const { data, isPending, error } = useQuery(siteSettingsQuery);
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   return <SettingsForm key={JSON.stringify(data)} settings={data} />;
 }

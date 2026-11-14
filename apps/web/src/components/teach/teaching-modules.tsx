@@ -20,7 +20,7 @@ export function TeachingModules() {
   const { data, isPending, error } = useQuery(teachingModulesQuery);
   const m = t.teach.index;
 
-  if (isPending) return <Skeleton className="rounded-card h-48 w-full" />;
+  if (isPending) return <Skeleton className="h-48 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   if (data.length === 0) {
     const isAdmin = user?.role === 'ADMIN';
@@ -39,11 +39,11 @@ export function TeachingModules() {
         const theme = trackTheme(module.course.slug);
         return (
           <li key={module.id} className="relative">
-            <div className="border-line-strong rounded-card bg-background hover:border-ink flex h-full flex-col gap-4 border-2 p-6 transition-colors">
+            <div className="border-line-strong bg-background hover:border-ink flex h-full flex-col gap-4 rounded-none border-2 p-6 transition-colors">
               <div className="flex items-start gap-4">
                 <span
                   className={cn(
-                    'border-ink text-ink flex size-11 shrink-0 items-center justify-center rounded-xl border-2 font-extrabold',
+                    'border-ink text-ink flex size-11 shrink-0 items-center justify-center rounded-none border-2 font-extrabold',
                     theme.fill,
                   )}
                 >
@@ -54,7 +54,7 @@ export function TeachingModules() {
                   <h2 className="text-ink text-lg font-bold">
                     <Link
                       href={`/training/teach/modules/${module.id}`}
-                      className="after:rounded-card after:absolute after:inset-0 focus-visible:outline-none"
+                      className="after:absolute after:inset-0 after:rounded-none focus-visible:outline-none"
                     >
                       {module.title}
                     </Link>

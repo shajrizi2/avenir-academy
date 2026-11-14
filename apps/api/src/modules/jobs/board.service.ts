@@ -62,11 +62,26 @@ export function toPublicJob(job: JobRow): PublicJob {
 export class JobBoardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async page(query: { category?: JobCategory; page?: number }, now: Date): Promise<JobBoardPage> {
+  async page(
+    query: { q?: string; category?: JobCategory; page?: number },
+    now: Date,
+  ): Promise<JobBoardPage> {
     const page = query.page ?? 1;
+    // Every word must appear in the title or the company name ("react berlin" finds both).
+    const words = (query.q ?? '').split(/\s+/).filter(Boolean).slice(0, 8);
     const where: Prisma.JobWhereInput = {
       status: 'OPEN',
       ...(query.category ? { category: query.category } : {}),
+      ...(words.length
+        ? {
+            AND: words.map((word) => ({
+              OR: [
+                { title: { contains: word, mode: 'insensitive' as const } },
+                { company: { name: { contains: word, mode: 'insensitive' as const } } },
+              ],
+            })),
+          }
+        : {}),
     };
     const startOfToday = zonedTimeToUtc(parseDateKey(localDateKey(now)));
     const [settings, rows, total, totalOpen, newToday, groups] = await Promise.all([

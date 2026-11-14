@@ -98,7 +98,7 @@ export default function DesignPage() {
                   <li key={name} className="flex items-center gap-3 text-sm">
                     {/* Full class names so Tailwind generates them: bg-canvas, bg-soft, … */}
                     <span
-                      className={`border-line size-10 rounded-lg border ${SWATCH_CLASS[name]}`}
+                      className={`border-line size-10 rounded-none border ${SWATCH_CLASS[name]}`}
                     />
                     <code>{name}</code>
                   </li>
@@ -140,7 +140,7 @@ export default function DesignPage() {
               </Button>
             </div>
           ))}
-          <div className="bg-ink rounded-card flex flex-wrap items-center gap-4 p-6">
+          <div className="bg-ink flex flex-wrap items-center gap-4 rounded-none p-6">
             <code className="text-primary-foreground/80 w-36 text-sm">on a dark band</code>
             <Button variant="chunky-outline" size="lg">
               Start now
@@ -167,7 +167,7 @@ export default function DesignPage() {
           </Card>
           <Card className="bg-track-ai-tint border-transparent">
             <CardHeader>
-              <span className="bg-track-ai text-primary-foreground flex size-10 items-center justify-center rounded-xl">
+              <span className="bg-track-ai text-primary-foreground flex size-10 items-center justify-center rounded-none">
                 <Check className="size-5" aria-hidden />
               </span>
               <CardTitle className="mt-2">Track-tinted card</CardTitle>
@@ -205,7 +205,7 @@ export default function DesignPage() {
       <Section title="Illustrations">
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {ILLUSTRATIONS.map(({ name, Component }) => (
-            <li key={name} className="border-line rounded-card bg-background border p-4">
+            <li key={name} className="border-line bg-background rounded-none border p-4">
               <Component />
               <code className="text-ink-soft mt-2 block text-sm">{name}</code>
             </li>

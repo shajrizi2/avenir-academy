@@ -86,13 +86,13 @@ function Overview() {
     queryKey: keys.overview,
     queryFn: () => apiFetch<AdminJobsOverview>('/admin/jobs/overview'),
   });
-  if (isPending) return <Skeleton className="rounded-card h-48 w-full" />;
+  if (isPending) return <Skeleton className="h-48 w-full rounded-none" />;
   if (error) return <FormError message={errorMessage(error)} />;
   return (
     <div className="space-y-6">
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {(['open', 'rejected', 'hidden', 'closed'] as const).map((k) => (
-          <div key={k} className="border-line bg-background rounded-card border p-4">
+          <div key={k} className="border-line bg-background rounded-none border p-4">
             <dt className="text-ink-soft text-sm">{a.counts[k]}</dt>
             <dd className="text-ink text-heading font-extrabold">{data.counts[k]}</dd>
           </div>
@@ -284,9 +284,6 @@ function Hidden({ act }: { act: Act }) {
                 >
                   {job.title} · {job.company}
                 </a>
-                <p className="text-ink-soft text-sm">
-                  {job.reports.map((r) => `${a.reasons[r.reason]} ${r.count}`).join(', ')}
-                </p>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"

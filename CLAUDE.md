@@ -52,7 +52,7 @@ apps/api/
   src/common/i18n/     Albanian messages for class-validator errors
   src/mail/            MailService (console transport in dev; sendLogged = idempotent), templates.ts (every email), ics.ts
   src/modules/groups, payments, lessons, notifications (cron jobs + email log)
-  src/modules/jobs/    the job board (PLAN D36): sources/ (career pages + job-board feeds), rules/ (remote, Kosovo eligibility, scam, category), dedupe.ts, pipeline.service.ts (06:00 run)
+  src/modules/jobs/    the job board (PLAN D36, D37): campaigns/ (admin email campaigns, minute cron), seekers/, sources/ (career pages + job-board feeds), rules/ (remote, Kosovo eligibility, scam, category), dedupe.ts, pipeline.service.ts (06:00 run)
   src/modules/         auth, users, courses, enrollments, ... (one Nest module per folder)
   test/                e2e tests (*.e2e-spec.ts)
 apps/web/
@@ -61,7 +61,7 @@ apps/web/
   src/app/(landing)/   ROOT LAYOUT #1: the academy's marketing landing page at /training (+ opengraph-image)
   src/app/(site)/      ROOT LAYOUT #2 (lang="sq"): everything else; "/" is the job board (PLAN D34)
     training/(public)/ catalog, course detail (groups + seats), auth pages (header + footer layout)
-    (board)/          the job board "/" (+ /?preview), /hyr (email-code sign-in), /shpalljet-e-ruajtura, /for-companies, /sourcing, /privatesia
+    (board)/          the job board "/" (+ /?preview; search, job-type dropdown, sign-in pop-up after 10 s), /cregjistrohu (unsubscribe), /for-companies, /sourcing, /privatesia
     training/(app)/    dashboard, checkout/*, payments/*, learn/* (incl. lessons), teach/*, admin/* (sidebar, client-side guarded)
   src/app/global-not-found.tsx, sitemap.ts, robots.ts
   src/components/landing/  one component per landing section + header/footer/CTA helpers
@@ -90,7 +90,7 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
 - **Auth:**
   - Every route requires a JWT by default (global `JwtAuthGuard`). Mark public routes with `@Public()` and restrict them with `@Roles(Role.ADMIN, ...)`.
   - Instructors may touch only modules where `module.instructorId === user.id`. Check this in the service with `ModuleAccessService` (`src/modules/course-modules/module-access.service.ts`): `assertStaff()` for writes, `assertCanView()` for reads (students need an APPROVED enrollment and a module that isn't LOCKED).
-- **Job seekers** (PLAN D36) are not `User`s: they sign in with an emailed 6-digit code and hold a one-year `aj_session` httpOnly cookie on the API host (`src/modules/jobs/seekers/`, `JobSeekerGuard`). The web app calls those routes with `jobsFetch` (`lib/job-seeker.ts`), never `apiFetch`.
+- **Job seekers** (PLAN D36, D37) are not `User`s: they sign in with an emailed 6-digit code (only through the board's 10-second pop-up; there is no sign-in or sign-out link) and hold a one-year `aj_session` httpOnly cookie on the API host (`src/modules/jobs/seekers/`, `JobSeekerGuard`). The web app calls those routes with `jobsFetch` (`lib/job-seeker.ts`), never `apiFetch`.
 - **Tokens:**
   - The access token is a 15-minute JWT returned in the response body; the web app keeps it in memory.
   - The refresh token is a 7-day JWT in the httpOnly `aa_refresh` cookie (path `/`).
@@ -131,7 +131,7 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
     - Track accents: `track-ai` and `track-marketing` exist as tokens but are greys now; courses are told apart by name and icon. Pick them with `trackTheme(slug)` from `components/course/track-theme.ts`.
     - Status: `passed` / `active` / `locked` / `failed`, each with `-tint` and `-ink`, all greys: the badge's icon and word carry the meaning.
   - **Type:** Plus Jakarta Sans (`app/fonts.ts`). Headings are 700–800 with `tracking-heading`; body is 400–500. The scale is 14 / 16 / 18 / 24 / 32 / 44 / 64: `text-sm`, `text-base`, `text-lg`, `text-subheading`, `text-heading`, `text-title`, `text-display` (plus `text-display-sm` = 40 for the mobile hero). When you add a token class, register it in `lib/utils.ts` (`createCn`), or `cn` will drop it.
-  - **Shapes:** cards use `rounded-card` (16px), buttons `rounded-button` (14px), pills `rounded-full`.
+  - **Shapes:** everything is square (PLAN D37): use `rounded-none`, never another `rounded-*`; the radius tokens are 0 and `globals.css` removes any radius left over.
   - **Pressable:** primary actions use `<Button variant="chunky">` (black) or `variant="chunky-outline"` (white, also on dark bands). Clickable cards use `<Card variant="pressable">`. Both are built on the `pressable` utility (2px border plus a solid bottom shadow in `--press`: lifts 1px on hover, sinks 3px when pressed). Don't make static content pressable.
   - **Layout:** 8px grid; landing sections use `py-16 lg:py-28` and alternate `bg-background` / `bg-soft`; content is `max-w-[1200px]` with `px-4 sm:px-6`; every page must work at 375px with no horizontal scroll. Tap targets are at least 44px (`h-11` inputs).
   - **Illustrations:** original inline SVG components in `components/illustrations/` (flat grey shapes with a 2px ink outline, `aria-hidden`, no sparkles). Never download or copy third-party art.

@@ -38,7 +38,7 @@ export function TestPage() {
     },
   });
 
-  if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
+  if (isPending) return <Skeleton className="h-96 w-full rounded-none" />;
   if (error) {
     return (
       <div className="space-y-4">
@@ -126,7 +126,7 @@ function Overview({
 
       <section
         aria-labelledby="start-title"
-        className="border-ink rounded-card bg-background space-y-4 border-2 p-6 sm:p-8"
+        className="border-ink bg-background space-y-4 rounded-none border-2 p-6 sm:p-8"
       >
         <h2 id="start-title" className="text-ink text-subheading font-extrabold">
           {test.activeAttemptId ? t.tests.page.inProgressTitle : t.tests.page.beforeStart}
@@ -230,8 +230,8 @@ function StartArea({
 
 function Rule({ icon: Icon, label, value }: { icon: typeof Clock; label: string; value: string }) {
   return (
-    <li className="border-line rounded-card bg-background flex items-center gap-4 border p-5">
-      <span className="bg-soft text-ink flex size-11 shrink-0 items-center justify-center rounded-xl">
+    <li className="border-line bg-background flex items-center gap-4 rounded-none border p-5">
+      <span className="bg-soft text-ink flex size-11 shrink-0 items-center justify-center rounded-none">
         <Icon className="size-5" aria-hidden />
       </span>
       <div>

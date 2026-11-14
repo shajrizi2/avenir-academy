@@ -36,6 +36,9 @@ for (const [id, title, category, region, source, status] of jobs) {
 await db.query(
   `INSERT INTO "JobListing" (id, "jobId", source, "externalId", "sourceUrl") VALUES ('e2e-l1', 'e2e-job-1', 'REMOTEOK', 'e2e-1', 'https://remoteok.com/remote-jobs/e2e-1')`,
 );
+await db.query(
+  `INSERT INTO "JobSeeker" (id, email, "marketingConsent", "consentAt") VALUES ('e2e-seeker', 'e2e.fan@jobs.test', true, now())`,
+);
 await db.end();
 
 // A child process, so the compiled app loads exactly as in production (not through tsx).

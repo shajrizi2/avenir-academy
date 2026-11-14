@@ -91,7 +91,7 @@ async function CourseDetailContent({
             <BackLink />
             <span
               className={cn(
-                'border-ink text-ink mt-6 flex size-14 items-center justify-center rounded-2xl border-2 shadow-[0_3px_0_var(--ink)]',
+                'border-ink text-ink mt-6 flex size-14 items-center justify-center rounded-none border-2 shadow-[0_3px_0_var(--ink)]',
                 theme.fill,
               )}
             >
@@ -147,14 +147,14 @@ async function CourseDetailContent({
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="border-ink rounded-card bg-background space-y-5 border-2 p-6 shadow-[0_6px_0_var(--ink)]">
+          <div className="border-ink bg-background space-y-5 rounded-none border-2 p-6 shadow-[0_6px_0_var(--ink)]">
             <p className="text-ink flex flex-wrap items-baseline gap-x-2">
               <span className="text-title font-extrabold">{price}</span>
               <span className="text-ink-soft font-semibold">{t.catalog.card.perMonth}</span>
               {listPrice && (
                 <span className="text-ink-soft text-sm">
                   <s>{listPrice}</s>
-                  <span className="bg-track-marketing-tint text-track-marketing-ink ml-2 rounded-full px-2 py-0.5 text-xs font-bold">
+                  <span className="bg-track-marketing-tint text-track-marketing-ink ml-2 rounded-none px-2 py-0.5 text-xs font-bold">
                     -{discountPercent(course.priceCents, course.listPriceCents)}%
                   </span>
                 </span>
@@ -220,8 +220,8 @@ function CourseDetailSkeleton() {
         </div>
       </div>
       <div className="mx-auto grid w-full max-w-[1200px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_360px]">
-        <Skeleton className="rounded-card h-80" />
-        <Skeleton className="rounded-card h-64" />
+        <Skeleton className="h-80 rounded-none" />
+        <Skeleton className="h-64 rounded-none" />
       </div>
     </div>
   );

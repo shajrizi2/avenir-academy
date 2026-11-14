@@ -83,10 +83,10 @@ function TrackCard({ track, group, locale, t }: TrackCardProps) {
   const percent = discountPercent(track.priceCents, track.listPriceCents);
   const full = group?.seatsLeft === 0;
   return (
-    <article className={cn('reveal rounded-card flex h-full flex-col p-6 sm:p-8', theme.tint)}>
+    <article className={cn('reveal flex h-full flex-col rounded-none p-6 sm:p-8', theme.tint)}>
       <span
         className={cn(
-          'border-ink text-ink flex size-14 items-center justify-center rounded-2xl border-2 shadow-[0_3px_0_var(--ink)]',
+          'border-ink text-ink flex size-14 items-center justify-center rounded-none border-2 shadow-[0_3px_0_var(--ink)]',
           theme.fill,
         )}
       >
@@ -141,7 +141,7 @@ function TrackCard({ track, group, locale, t }: TrackCardProps) {
             <s className="text-ink-soft text-sm">
               {format(t.insteadOf, { price: formatPrice(track.listPriceCents, track.currency) })}
             </s>
-            <span className="bg-ink text-primary-foreground rounded-full px-2 py-0.5 text-xs font-bold">
+            <span className="bg-ink text-primary-foreground rounded-none px-2 py-0.5 text-xs font-bold">
               {format(t.discount, { percent })}
             </span>
           </>
@@ -193,7 +193,7 @@ function Row({
 
 function Pill({ icon: Icon, children }: { icon: typeof Clock; children: React.ReactNode }) {
   return (
-    <span className="bg-background/70 text-ink inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-bold">
+    <span className="bg-background/70 text-ink inline-flex h-8 items-center gap-1.5 rounded-none px-3 text-xs font-bold">
       <Icon className="size-3.5" aria-hidden />
       {children}
     </span>
@@ -204,7 +204,7 @@ function TrackSkeletons() {
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       {[0, 1, 2].map((i) => (
-        <Skeleton key={i} className="rounded-card h-[640px]" />
+        <Skeleton key={i} className="h-[640px] rounded-none" />
       ))}
     </div>
   );

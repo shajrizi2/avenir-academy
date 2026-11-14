@@ -10,30 +10,32 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FormError } from '@/components/form-error';
 import { TextField } from '@/components/form/text-field';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { FieldGroup } from '@/components/ui/field';
+import { Label } from '@/components/ui/label';
 import { fmt, t } from '@/i18n/messages';
 import { errorMessage } from '@/lib/api';
 import { emailTypoFix } from '@/lib/job-format';
-import { jobSeekerKeys, jobsFetch, useJobSeeker } from '@/lib/job-seeker';
-import { safeNext } from '@/lib/routes';
+import { jobSeekerKeys, jobsFetch } from '@/lib/job-seeker';
 import { useHydrated } from '@/lib/use-hydrated';
 
 const copy = t.jobs.login;
 
-/** Sign in with an emailed 6-digit code: email first, then the code (PLAN D36). */
+/**
+ * Sign in with an emailed 6-digit code: email (with the email-consent tick, on by default)
+ * first, then the code (PLAN D36, D37). Signing in stores the session for a year.
+ */
 export function CodeLoginForm() {
-  const router = useRouter();
   const queryClient = useQueryClient();
-  const next = safeNext(useSearchParams().get('next')) ?? '/';
   const hydrated = useHydrated();
-  const me = useJobSeeker();
+  const consentId = useId();
   const [email, setEmail] = useState<string | null>(null);
+  const [consent, setConsent] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const emailForm = useForm<JobSeekerEmailInput>({
@@ -45,12 +47,7 @@ export function CodeLoginForm() {
     defaultValues: { email: '', code: '' },
   });
 
-  useEffect(() => {
-    if (me.data) router.replace(next);
-  }, [me.data, next, router]);
-
-  const typed = emailForm.watch('email');
-  const suggestion = emailTypoFix(typed);
+  const suggestion = emailTypoFix(emailForm.watch('email'));
 
   async function sendCode(address: string) {
     setError(null);
@@ -70,12 +67,11 @@ export function CodeLoginForm() {
   const onCode = codeForm.handleSubmit(async (values) => {
     setError(null);
     try {
-      const signedIn = await jobsFetch<JobSeekerMe>('/job-seekers/auth/verify', {
+      const me = await jobsFetch<JobSeekerMe>('/job-seekers/auth/verify', {
         method: 'POST',
-        body: values,
+        body: { ...values, marketingConsent: consent },
       });
-      queryClient.setQueryData(jobSeekerKeys.me, signedIn);
-      router.replace(next);
+      queryClient.setQueryData(jobSeekerKeys.me, me);
     } catch (e) {
       setError(errorMessage(e));
     }
@@ -106,6 +102,16 @@ export function CodeLoginForm() {
                 </button>
               </p>
             )}
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id={consentId}
+                checked={consent}
+                onCheckedChange={(v) => setConsent(v === true)}
+              />
+              <Label htmlFor={consentId} className="text-ink text-sm leading-5 font-normal">
+                {copy.consent}
+              </Label>
+            </div>
             <Button
               type="submit"
               variant="chunky"
@@ -116,10 +122,13 @@ export function CodeLoginForm() {
             </Button>
             <p className="text-ink-soft text-sm">
               {copy.terms}{' '}
-              <Link href="/privatesia" className="text-ink underline underline-offset-4">
+              <Link
+                href="/privatesia"
+                target="_blank"
+                className="text-ink underline underline-offset-4"
+              >
                 {t.shell.privacy}
               </Link>
-              .
             </p>
           </FieldGroup>
         </fieldset>

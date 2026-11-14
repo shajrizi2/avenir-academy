@@ -17,7 +17,7 @@ import { RoleSelect } from './role-select';
 export function UsersTable({ users }: { users: PublicUser[] }) {
   return (
     <>
-      <div className="border-line rounded-card bg-background hidden overflow-hidden border md:block">
+      <div className="border-line bg-background hidden overflow-hidden rounded-none border md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -50,7 +50,7 @@ export function UsersTable({ users }: { users: PublicUser[] }) {
 
       <ul className="space-y-3 md:hidden">
         {users.map((user) => (
-          <li key={user.id} className="border-line rounded-card bg-background space-y-3 border p-4">
+          <li key={user.id} className="border-line bg-background space-y-3 rounded-none border p-4">
             <div className="min-w-0">
               <p className="text-ink font-bold">
                 {user.firstName} {user.lastName}

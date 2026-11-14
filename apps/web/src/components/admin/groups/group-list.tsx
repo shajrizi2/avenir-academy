@@ -48,7 +48,7 @@ export function GroupList() {
         }
       />
       {groups.isPending ? (
-        <Skeleton className="rounded-card h-48 w-full" />
+        <Skeleton className="h-48 w-full rounded-none" />
       ) : groups.error ? (
         <FormError message={errorMessage(groups.error)} />
       ) : groups.data.length === 0 ? (
@@ -57,14 +57,14 @@ export function GroupList() {
         <ul className="grid gap-4 md:grid-cols-2">
           {groups.data.map((group) => (
             <li key={group.id} className="relative">
-              <div className="border-line rounded-card bg-background hover:border-ink flex h-full flex-col gap-3 border-2 p-5 transition-colors">
+              <div className="border-line bg-background hover:border-ink flex h-full flex-col gap-3 rounded-none border-2 p-5 transition-colors">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-ink-soft text-sm font-semibold">{group.course.title}</p>
                     <h2 className="text-ink text-lg font-bold">
                       <Link
                         href={`/training/admin/groups/${group.id}`}
-                        className="after:rounded-card after:absolute after:inset-0 focus-visible:outline-none"
+                        className="after:absolute after:inset-0 after:rounded-none focus-visible:outline-none"
                       >
                         {group.name}
                       </Link>

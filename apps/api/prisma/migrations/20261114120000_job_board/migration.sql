@@ -20,10 +20,10 @@ CREATE TYPE "JobRegion" AS ENUM ('WORLDWIDE', 'EUROPE', 'BALKANS', 'CONTRACT_ANY
 CREATE TYPE "JobCloseReason" AS ENUM ('MISSING_FROM_SOURCE', 'DEAD_LINK', 'TOO_OLD', 'MANUAL');
 
 -- CreateEnum
-CREATE TYPE "JobReportReason" AS ENUM ('SCAM', 'CLOSED', 'NOT_ELIGIBLE', 'OTHER');
+CREATE TYPE "JobBlockKind" AS ENUM ('COMPANY', 'DOMAIN');
 
 -- CreateEnum
-CREATE TYPE "JobBlockKind" AS ENUM ('COMPANY', 'DOMAIN');
+CREATE TYPE "CampaignStatus" AS ENUM ('DRAFT', 'SENDING', 'SENT', 'CANCELLED');
 
 -- AlterEnum
 -- This migration adds more than one value to an enum.
@@ -35,6 +35,7 @@ CREATE TYPE "JobBlockKind" AS ENUM ('COMPANY', 'DOMAIN');
 
 ALTER TYPE "EmailType" ADD VALUE 'JOB_LOGIN_CODE';
 ALTER TYPE "EmailType" ADD VALUE 'JOBS_ALERT';
+ALTER TYPE "EmailType" ADD VALUE 'CAMPAIGN';
 
 -- AlterTable
 ALTER TABLE "SiteSettings" ADD COLUMN     "jobBoardPublic" BOOLEAN NOT NULL DEFAULT false;
@@ -115,6 +116,9 @@ CREATE TABLE "JobListing" (
 CREATE TABLE "JobSeeker" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "marketingConsent" BOOLEAN NOT NULL DEFAULT false,
+    "consentAt" TIMESTAMP(3),
+    "unsubscribedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastSeenAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -147,25 +151,6 @@ CREATE TABLE "JobSeekerSession" (
 );
 
 -- CreateTable
-CREATE TABLE "SavedJob" (
-    "jobSeekerId" TEXT NOT NULL,
-    "jobId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "SavedJob_pkey" PRIMARY KEY ("jobSeekerId","jobId")
-);
-
--- CreateTable
-CREATE TABLE "JobReport" (
-    "jobSeekerId" TEXT NOT NULL,
-    "jobId" TEXT NOT NULL,
-    "reason" "JobReportReason" NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "JobReport_pkey" PRIMARY KEY ("jobSeekerId","jobId")
-);
-
--- CreateTable
 CREATE TABLE "JobBlock" (
     "id" TEXT NOT NULL,
     "kind" "JobBlockKind" NOT NULL,
@@ -186,6 +171,30 @@ CREATE TABLE "JobRun" (
     "errors" JSONB,
 
     CONSTRAINT "JobRun_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "EmailCampaign" (
+    "id" TEXT NOT NULL,
+    "subject" TEXT NOT NULL,
+    "body" TEXT NOT NULL,
+    "status" "CampaignStatus" NOT NULL DEFAULT 'DRAFT',
+    "createdById" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "startedAt" TIMESTAMP(3),
+    "finishedAt" TIMESTAMP(3),
+
+    CONSTRAINT "EmailCampaign_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "EmailCampaignRecipient" (
+    "campaignId" TEXT NOT NULL,
+    "jobSeekerId" TEXT NOT NULL,
+    "sentAt" TIMESTAMP(3),
+    "failed" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "EmailCampaignRecipient_pkey" PRIMARY KEY ("campaignId","jobSeekerId")
 );
 
 -- CreateIndex
@@ -231,12 +240,6 @@ CREATE UNIQUE INDEX "JobSeekerSession_tokenHash_key" ON "JobSeekerSession"("toke
 CREATE INDEX "JobSeekerSession_jobSeekerId_idx" ON "JobSeekerSession"("jobSeekerId");
 
 -- CreateIndex
-CREATE INDEX "SavedJob_jobId_idx" ON "SavedJob"("jobId");
-
--- CreateIndex
-CREATE INDEX "JobReport_jobId_idx" ON "JobReport"("jobId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "JobBlock_kind_value_key" ON "JobBlock"("kind", "value");
 
 -- CreateIndex
@@ -251,14 +254,16 @@ ALTER TABLE "JobListing" ADD CONSTRAINT "JobListing_jobId_fkey" FOREIGN KEY ("jo
 -- AddForeignKey
 ALTER TABLE "JobSeekerSession" ADD CONSTRAINT "JobSeekerSession_jobSeekerId_fkey" FOREIGN KEY ("jobSeekerId") REFERENCES "JobSeeker"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey
-ALTER TABLE "SavedJob" ADD CONSTRAINT "SavedJob_jobSeekerId_fkey" FOREIGN KEY ("jobSeekerId") REFERENCES "JobSeeker"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- CreateIndex
+
+-- CreateIndex
+CREATE INDEX "EmailCampaign_status_idx" ON "EmailCampaign"("status");
+
+-- CreateIndex
+CREATE INDEX "EmailCampaignRecipient_campaignId_sentAt_idx" ON "EmailCampaignRecipient"("campaignId", "sentAt");
 
 -- AddForeignKey
-ALTER TABLE "SavedJob" ADD CONSTRAINT "SavedJob_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "Job"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "EmailCampaignRecipient" ADD CONSTRAINT "EmailCampaignRecipient_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "EmailCampaign"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "JobReport" ADD CONSTRAINT "JobReport_jobSeekerId_fkey" FOREIGN KEY ("jobSeekerId") REFERENCES "JobSeeker"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "JobReport" ADD CONSTRAINT "JobReport_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "Job"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "EmailCampaignRecipient" ADD CONSTRAINT "EmailCampaignRecipient_jobSeekerId_fkey" FOREIGN KEY ("jobSeekerId") REFERENCES "JobSeeker"("id") ON DELETE CASCADE ON UPDATE CASCADE;

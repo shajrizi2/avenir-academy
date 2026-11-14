@@ -28,7 +28,7 @@ export function Markdown({ content }: { content: string }) {
               src={typeof src === 'string' ? src : undefined}
               alt={alt ?? ''}
               loading="lazy"
-              className="rounded-card"
+              className="rounded-none"
             />
           ),
         }}
