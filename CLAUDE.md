@@ -52,6 +52,7 @@ apps/api/
   src/common/i18n/     Albanian messages for class-validator errors
   src/mail/            MailService (console transport in dev; sendLogged = idempotent), templates.ts (every email), ics.ts
   src/modules/groups, payments, lessons, notifications (cron jobs + email log)
+  src/modules/jobs/    the job board (PLAN D36): sources/ (career pages + job-board feeds), rules/ (remote, Kosovo eligibility, scam, category), dedupe.ts, pipeline.service.ts (06:00 run)
   src/modules/         auth, users, courses, enrollments, ... (one Nest module per folder)
   test/                e2e tests (*.e2e-spec.ts)
 apps/web/
@@ -123,7 +124,7 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
   - Motion is CSS-only (`.reveal` scroll-driven fade-in; `.animate-pop` / `.animate-shake` on demo answers) and is disabled under `prefers-reduced-motion`. Targets: Lighthouse Performance ≥ 90, Accessibility ≥ 95, SEO 100.
 - **UI (design system; review it all at `/design`, dev only):** clean and simple. **Black, white and greys only, no AI-style decoration** (no sparkles, robots, glows or "AI-powered" labels; PLAN D35). Light mode only. The logo is the Avenir wordmark (`components/brand/wordmark.tsx`, files in `public/brand/`): black on white, white on black, never recoloured.
   - **Tokens only.** Every colour comes from `globals.css`. Never use Tailwind palette colours (`slate-*`, `indigo-*`, `white`, …) or hex values in components. The one exception is `opengraph-image.tsx`, because `ImageResponse` can't read CSS variables.
-    - Neutrals: `bg-background` (white), `bg-soft` (#F7F6F3 warm off-white, the app's page background), `text-ink` (#141414), `text-ink-soft` (#5B5B5B secondary text), `border-line` / `border-line-strong`.
+    - Neutrals: `bg-background` (white), `bg-soft` (#F5F5F5 light grey, the app's page background), `text-ink` (#111111), `text-ink-soft` (#555555 secondary text), `border-line` / `border-line-strong`.
     - Primary is ink: black buttons with white text (`text-primary-foreground`).
     - Track accents: `track-ai` and `track-marketing` exist as tokens but are greys now; courses are told apart by name and icon. Pick them with `trackTheme(slug)` from `components/course/track-theme.ts`.
     - Status: `passed` / `active` / `locked` / `failed`, each with `-tint` and `-ink`, all greys: the badge's icon and word carry the meaning.
@@ -143,6 +144,7 @@ apps/*/Dockerfile      one image per app (build from the repo root); .github/wor
   - **Seats:** count and take a seat only inside a transaction after `GroupsService.lockAndCountFree()` (row lock on the group). Seats taken = APPROVED enrollments + PENDING_PAYMENT holds not yet expired.
   - **Payments:** only `applyConfirmed` confirms a payment (Stripe webhook, admin confirm, manual). The success redirect proves nothing. Every outcome is idempotent (status checks, `StripeEvent` ids, email unique keys).
 - **Email:** every email is an Albanian template in `src/mail/templates.ts` and goes through `MailService.sendLogged()` with a `uniqueKey` (`EmailLog` makes repeats no-ops). `send()` never throws; don't `await` it where timing could reveal whether an account exists (PLAN D21). Cron jobs live in `src/modules/notifications/scheduler.service.ts` and only call service methods that take `now`, so tests drive them directly (`CRON_ENABLED=false`).
+- **Job board rules** (PLAN D36) are pure functions in `src/modules/jobs/rules/` with example postings in `rules.spec.ts`: when a decision is wrong, add the posting as a test case first, then fix the pattern. The sources never reach the internet in tests (`FakeJobsHttp` + `test/fixtures/jobs/`).
 - **Tests:** the Playwright journeys (`apps/web/e2e/`) create their own users, courses and groups through the API (`e2e/support.ts`) and simulate Stripe with a signed webhook against the fake client, so they can run in parallel; don't depend on seed users' state beyond logging in. `a11y.spec.ts` must stay at zero axe violations. API e2e suites boot through `test/support.ts` (`bootApp`, `captureMail`, `signStripeEvent`).
 - **Don't** add paid services or change `schema.prisma` without asking the product owner. Don't leave TODO stubs in shipped scope.
 - **Commits:** small, imperative subject lines, one milestone per commit.

@@ -1,0 +1,37 @@
+{
+  "jobs": [
+    {
+      "id": "abc-123",
+      "title": "Product Designer",
+      "department": "Design",
+      "team": "Product",
+      "employmentType": "FullTime",
+      "location": "Remote",
+      "secondaryLocations": [{ "location": "Anywhere" }],
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "isListed": true,
+      "publishedAt": "2026-11-11T08:00:00.000Z",
+      "jobUrl": "https://jobs.ashbyhq.com/gadget/abc-123",
+      "applyUrl": "https://jobs.ashbyhq.com/gadget/abc-123/application",
+      "descriptionPlain": "Design our mobile app. We hire through Deel worldwide.",
+      "compensation": {
+        "summaryComponents": [
+          {
+            "compensationType": "Salary",
+            "interval": "1 YEAR",
+            "currencyCode": "EUR",
+            "minValue": 50000,
+            "maxValue": 70000
+          }
+        ]
+      }
+    },
+    {
+      "id": "hidden-1",
+      "title": "Secret Role",
+      "isListed": false,
+      "jobUrl": "https://jobs.ashbyhq.com/gadget/hidden-1"
+    }
+  ]
+}

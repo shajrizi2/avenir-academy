@@ -1,0 +1,26 @@
+{
+  "jobs": [
+    {
+      "id": 4821001,
+      "title": "Senior Growth Marketer",
+      "updated_at": "2026-11-12T10:00:00-05:00",
+      "first_published": "2026-11-10T09:00:00-05:00",
+      "location": { "name": "Remote - Europe" },
+      "absolute_url": "https://boards.greenhouse.io/acmelabs/jobs/4821001",
+      "content": "&lt;p&gt;Own our &lt;strong&gt;growth&lt;/strong&gt; experiments.&lt;/p&gt;&lt;p&gt;You can live anywhere in Europe.&lt;/p&gt;",
+      "departments": [{ "id": 1, "name": "Marketing" }],
+      "offices": [{ "id": 2, "name": "Remote" }]
+    },
+    {
+      "id": 4821002,
+      "title": "Office Manager",
+      "updated_at": "2026-11-12T10:00:00-05:00",
+      "location": { "name": "Berlin, Germany" },
+      "absolute_url": "https://boards.greenhouse.io/acmelabs/jobs/4821002",
+      "content": "&lt;p&gt;Run our Berlin office, five days a week on site.&lt;/p&gt;",
+      "departments": [{ "id": 3, "name": "Operations" }],
+      "offices": []
+    }
+  ],
+  "meta": { "total": 2 }
+}

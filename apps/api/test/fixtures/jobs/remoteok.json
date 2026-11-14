@@ -1,0 +1,31 @@
+[
+  {
+    "last_updated": 1794528000,
+    "legal": "Please link back to the URL on Remote OK and mention Remote OK as a source."
+  },
+  {
+    "id": "100200",
+    "slug": "remote-seo-specialist-brightco-100200",
+    "epoch": 1794528000,
+    "date": "2026-11-13T00:00:00+00:00",
+    "company": "BrightCo",
+    "position": "SEO Specialist",
+    "tags": ["seo", "marketing"],
+    "description": "<p>Grow our organic traffic. We hire from anywhere in the world.</p>",
+    "location": "Worldwide",
+    "salary_min": 40000,
+    "salary_max": 60000,
+    "url": "https://remoteok.com/remote-jobs/remote-seo-specialist-brightco-100200",
+    "apply_url": "https://boards.greenhouse.io/brightco/jobs/777"
+  },
+  {
+    "id": "100201",
+    "epoch": 1794528000,
+    "company": "QuickCash",
+    "position": "Data Entry Assistant",
+    "tags": ["admin"],
+    "description": "<p>No experience needed, earn $500 per day! Message us on Telegram.</p>",
+    "location": "Worldwide",
+    "url": "https://remoteok.com/remote-jobs/100201"
+  }
+]

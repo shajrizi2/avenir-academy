@@ -392,3 +392,29 @@ export function offlineLearning(p: {
       : []),
   ]);
 }
+
+// ---- Job board (PLAN D36) ----
+
+export function jobLoginCode(p: { code: string; minutes: number }): Rendered {
+  return render(`${p.code} është kodi yt për Avenir`, 'Përshëndetje,', [
+    { kind: 'p', text: 'Ky është kodi për të hyrë në shpalljet e punës në Avenir:' },
+    { kind: 'p', text: p.code },
+    {
+      kind: 'p',
+      text: `Kodi vlen ${p.minutes} minuta dhe mund të përdoret vetëm një herë. Mos ia jep askujt.`,
+    },
+    { kind: 'p', text: 'Nëse nuk e kërkove ti, mund ta shpërfillësh këtë email.' },
+  ]);
+}
+
+export function jobsAlert(p: { problems: string[]; adminUrl: string }): Rendered {
+  return render('Shpalljet e punës: diçka nuk funksionoi sot', 'Përshëndetje,', [
+    { kind: 'p', text: 'Mbledhja e përditshme e shpalljeve pati këto probleme:' },
+    { kind: 'list', items: p.problems },
+    {
+      kind: 'p',
+      text: 'Pjesa tjetër e faqes vazhdon të punojë. Burimet që dështojnë ndalen automatikisht për një javë.',
+    },
+    { kind: 'button', label: 'Hap ditarin e mbledhjes', url: p.adminUrl },
+  ]);
+}

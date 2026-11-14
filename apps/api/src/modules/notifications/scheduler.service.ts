@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import type { EnvironmentVariables } from '../../config/env.validation.js';
+import { JobsPipelineService } from '../jobs/pipeline.service.js';
 import { PaymentsService } from '../payments/payments.service.js';
 import { NotificationsService } from './notifications.service.js';
 
@@ -20,6 +21,7 @@ export class SchedulerService {
     config: ConfigService<EnvironmentVariables, true>,
     private readonly notifications: NotificationsService,
     private readonly payments: PaymentsService,
+    private readonly jobs: JobsPipelineService,
   ) {
     this.enabled = config.get('CRON_ENABLED', { infer: true });
   }
@@ -47,6 +49,15 @@ export class SchedulerService {
   @Cron('5 0 * * *', { timeZone: DEFAULT_TIMEZONE })
   async groupStatuses(): Promise<void> {
     await this.run('group statuses', () => this.notifications.refreshGroupStatuses());
+  }
+
+  /** The job board's daily collection (PLAN D36). */
+  @Cron('0 6 * * *', { timeZone: DEFAULT_TIMEZONE })
+  async collectJobs(): Promise<void> {
+    await this.run('job collection', async () => {
+      const stats = await this.jobs.run(new Date());
+      return stats ? stats.created : 0;
+    });
   }
 
   private async run(name: string, job: () => Promise<number | void>): Promise<void> {
