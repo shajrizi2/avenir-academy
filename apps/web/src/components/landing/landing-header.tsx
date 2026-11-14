@@ -1,5 +1,6 @@
 import type { Locale } from '@ai-academy/shared';
 import Link from 'next/link';
+import { MainMenu } from '@/components/layout/main-menu';
 import { Logo } from '@/components/logo';
 import type { LandingMessages } from '@/i18n/messages';
 import { CtaLink } from './cta-link';
@@ -19,9 +20,12 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
 
   return (
     <header className="border-line bg-background/90 sticky top-0 z-40 border-b backdrop-blur-md">
-      <div className="mx-auto grid h-16 w-full max-w-[1200px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 md:h-20 md:grid-cols-[1fr_auto_1fr]">
-        <Logo href="/training" />
-        <nav aria-label={nav.label} className="hidden items-center gap-1 md:flex">
+      <div className="mx-auto grid h-16 w-full max-w-[1200px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 md:h-20 lg:grid-cols-[1fr_auto_1fr]">
+        <div className="flex items-center gap-6">
+          <Logo />
+          <MainMenu current="training" className="hidden md:flex" />
+        </div>
+        <nav aria-label={nav.label} className="hidden items-center gap-1 lg:flex">
           {links.map((link) => (
             <a
               key={link.href}

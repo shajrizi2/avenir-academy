@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 const STATUS_STYLES: Record<ModuleStatus, { className: string; Icon: typeof Lock }> = {
   PASSED: { className: 'bg-passed-tint text-passed-ink', Icon: CheckCircle2 },
-  ACTIVE: { className: 'bg-active-tint text-active-ink', Icon: CircleDot },
+  ACTIVE: { className: 'bg-active-tint text-active-ink border-ink border', Icon: CircleDot },
   LOCKED: { className: 'bg-locked-tint text-locked-ink', Icon: Lock },
   FAILED: { className: 'bg-failed-tint text-failed-ink', Icon: XCircle },
 };

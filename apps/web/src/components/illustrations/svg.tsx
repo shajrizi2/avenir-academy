@@ -28,27 +28,6 @@ export function IllustrationSvg({
   );
 }
 
-/** A four-point sparkle centred on (x, y). */
-export function Sparkle({
-  x,
-  y,
-  r,
-  className,
-}: {
-  x: number;
-  y: number;
-  r: number;
-  className?: string;
-}) {
-  const k = r * 0.22;
-  return (
-    <path
-      className={className}
-      d={`M${x} ${y - r} L${x + k} ${y - k} L${x + r} ${y} L${x + k} ${y + k} L${x} ${y + r} L${x - k} ${y + k} L${x - r} ${y} L${x - k} ${y - k} Z`}
-    />
-  );
-}
-
 export interface IllustrationProps {
   className?: string;
 }

@@ -1,13 +1,15 @@
 import { ImageResponse } from 'next/og';
+import { WORDMARK_PATH } from '@/components/brand/wordmark-path';
 import { getMessages } from '@/i18n/messages';
 
 /** ImageResponse can't read CSS variables, so the design tokens (globals.css) are copied here. */
-const INK = '#141414';
-const INK_SOFT = '#5b5b5b';
-const BG_SOFT = '#f7f6f3';
+const INK = '#111111';
+const INK_SOFT = '#555555';
+const BG = '#ffffff';
+/** Black and white only (PLAN D35). */
 const PILLS = [
-  { background: '#f0ecff', color: '#5b3be0' },
-  { background: '#fff1e6', color: '#b4500c' },
+  { background: '#111111', color: '#ffffff' },
+  { background: '#ffffff', color: '#111111', border: '2px solid #111111' },
 ];
 
 export const size = { width: 1200, height: 630 };
@@ -27,7 +29,7 @@ export default function OpengraphImage() {
         flexDirection: 'column',
         justifyContent: 'space-between',
         padding: 72,
-        background: BG_SOFT,
+        background: BG,
         color: INK,
         fontFamily: 'sans-serif',
       }}
@@ -35,24 +37,9 @@ export default function OpengraphImage() {
       <div
         style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 34, fontWeight: 800 }}
       >
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 16,
-            background: INK,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            gap: 4,
-            paddingBottom: 12,
-          }}
-        >
-          <div style={{ width: 9, height: 12, borderRadius: 3, background: '#ff8a3d' }} />
-          <div style={{ width: 9, height: 21, borderRadius: 3, background: '#7c5cfc' }} />
-          <div style={{ width: 9, height: 31, borderRadius: 3, background: '#ffffff' }} />
-        </div>
-        Avenir Academy
+        <svg viewBox="0 0 585 184" width={230} height={72}>
+          <path fill={INK} fillRule="evenodd" d={WORDMARK_PATH} />
+        </svg>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ fontSize: 88, fontWeight: 800, letterSpacing: -2, lineHeight: 1.05 }}>

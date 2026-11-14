@@ -4,6 +4,7 @@ import type { Role } from '@ai-academy/shared';
 import { Menu } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Logo } from '@/components/logo';
+import { MainMenu } from './main-menu';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { t } from '@/i18n/messages';
@@ -49,6 +50,7 @@ export function AppShell({ role, children }: { role: Role; children: React.React
             </Sheet>
             <Logo />
           </div>
+          <MainMenu current="training" className="hidden md:flex" />
           <div className="ml-auto">
             <UserMenu />
           </div>

@@ -4,6 +4,7 @@ import type { Locale } from '@ai-academy/shared';
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { MainMenu } from '@/components/layout/main-menu';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -30,8 +31,9 @@ export function MobileMenu({ locale, links, nav }: MobileMenuProps) {
       <SheetContent side="right" className="w-[85vw] max-w-sm gap-0 p-6">
         <SheetHeader className="p-0 pb-6">
           <SheetTitle className="sr-only">{nav.menuTitle}</SheetTitle>
-          <Logo href={`/${locale}`} />
+          <Logo />
         </SheetHeader>
+        <MainMenu current="training" className="mb-4" />
         <nav aria-label={nav.label} className="flex flex-col gap-1">
           {links.map((link) => (
             <a

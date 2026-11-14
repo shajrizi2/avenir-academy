@@ -20,6 +20,8 @@ test.use({ reducedMotion: 'reduce' });
 
 for (const path of [
   '/training',
+  '/for-companies',
+  '/privatesia',
   '/training/courses',
   '/training/courses/vibe-coding-ai',
   '/training/login',

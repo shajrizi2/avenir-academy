@@ -1,20 +1,18 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { Logo } from '@/components/logo';
+import { BrandFooter } from '@/components/layout/brand-footer';
 import { getLandingMessages } from '@/i18n/server';
-import { CookieSettingsButton } from '@/components/analytics/analytics';
 import { getSiteSettings, getTracks } from '@/lib/landing-data';
 import { localizeCourse } from '@/lib/localize';
 
 const linkClass = 'text-ink-soft hover:text-ink font-medium underline-offset-4 hover:underline';
 
 export async function LandingFooter() {
-  const { locale, t } = await getLandingMessages();
+  const { t } = await getLandingMessages();
   return (
     <footer className="border-line bg-background border-t">
       <div className="mx-auto grid w-full max-w-[1200px] grid-cols-2 gap-10 px-4 py-16 sm:px-6 md:grid-cols-[1.5fr_repeat(4,1fr)]">
         <div className="col-span-2 max-w-xs space-y-4 md:col-span-1">
-          <Logo href={`/${locale}`} />
           <p className="text-ink-soft text-sm leading-6">{t.footer.tagline}</p>
         </div>
         <FooterColumn title={t.footer.platform}>
@@ -72,12 +70,7 @@ export async function LandingFooter() {
           </Suspense>
         </FooterColumn>
       </div>
-      <div className="border-line border-t">
-        <div className="text-ink-soft mx-auto flex w-full max-w-[1200px] flex-wrap justify-between gap-3 px-4 py-6 text-sm sm:px-6">
-          <p>© Avenir Academy. {t.footer.rights}</p>
-          <CookieSettingsButton label={t.consent.settings} className={linkClass} />
-        </div>
-      </div>
+      <BrandFooter />
     </footer>
   );
 }

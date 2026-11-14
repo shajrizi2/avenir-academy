@@ -1,13 +1,11 @@
 import type { ModuleStatus } from '@ai-academy/shared';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import {
-  ChatSparkles,
   LaptopCode,
   LiveClass,
   MegaphoneChart,
-  NeuralNetwork,
   PathUnlock,
   TestCheck,
 } from '@/components/illustrations';
@@ -66,8 +64,6 @@ const BUTTON_VARIANTS = [
 ] as const;
 
 const ILLUSTRATIONS = [
-  { name: 'NeuralNetwork', Component: NeuralNetwork },
-  { name: 'ChatSparkles', Component: ChatSparkles },
   { name: 'MegaphoneChart', Component: MegaphoneChart },
   { name: 'LaptopCode', Component: LaptopCode },
   { name: 'PathUnlock', Component: PathUnlock },
@@ -172,7 +168,7 @@ export default function DesignPage() {
           <Card className="bg-track-ai-tint border-transparent">
             <CardHeader>
               <span className="bg-track-ai text-primary-foreground flex size-10 items-center justify-center rounded-xl">
-                <Sparkles className="size-5" aria-hidden />
+                <Check className="size-5" aria-hidden />
               </span>
               <CardTitle className="mt-2">Track-tinted card</CardTitle>
               <CardDescription className="text-ink">

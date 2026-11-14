@@ -1494,5 +1494,55 @@
     "deleteAria": "Fshi {title}",
     "preview": "Pamja paraprake",
     "manage": "Menaxho mësimet"
+  },
+  "shell": {
+    "home": "Avenir, faqja kryesore",
+    "mainMenu": "Menyja kryesore",
+    "jobs": "Shpalljet",
+    "training": "Trajnohu",
+    "forCompanies": "For companies",
+    "privacy": "Privatësia",
+    "footerLinks": "Lidhje në fund të faqes",
+    "tagline": "Shpallje pune remote për Kosovën dhe trajnime live në shqip.",
+    "rights": "Të gjitha të drejtat e rezervuara."
+  },
+  "forCompanies": {
+    "metaTitle": "For companies",
+    "metaDescription": "Hire remote talent from Kosovo through Avenir. Coming soon.",
+    "title": "Hire remote talent from Kosovo",
+    "lead": "We're building a simple way for companies to reach job seekers in Kosovo. Coming soon.",
+    "contact": "Questions? Write to us at {email}.",
+    "contactSoon": "Contact details will be published soon."
+  },
+  "sourcing": {
+    "title": "Sourcing"
+  },
+  "privacy": {
+    "metaTitle": "Privatësia",
+    "metaDescription": "Çfarë të dhënash ruan Avenir për ata që kërkojnë punë, pse, për sa kohë dhe si i fshin.",
+    "title": "Privatësia",
+    "updated": "Përditësuar më {date}",
+    "sections": [
+      {
+        "title": "Çfarë ruajmë",
+        "body": "Kur hyn me email, ruajmë adresën tënde të email-it, shpalljet që ruan, shpalljet që raporton dhe pajisjet ku je i kyçur. Nuk ruajmë CV, fjalëkalime apo aplikime: aplikimi bëhet gjithmonë në faqen e punëdhënësit."
+      },
+      {
+        "title": "Pse i ruajmë",
+        "body": "Email-in e përdorim vetëm për të të dërguar kodin e hyrjes. Shpalljet e ruajtura dhe raportimet i ruajmë që t'i shohësh përsëri dhe që të heqim shpalljet e rreme ose të mbyllura. Nuk dërgojmë reklama dhe nuk i shesim të dhënat."
+      },
+      {
+        "title": "Për sa kohë",
+        "body": "Kodi i hyrjes vlen 10 minuta. Hyrja në një pajisje zgjat një vit dhe rinovohet sa herë që e viziton faqen. Llogaritë që nuk përdoren për 2 vjet fshihen automatikisht."
+      },
+      {
+        "title": "Cookies",
+        "body": "Cookie e hyrjes është e domosdoshme që të mbetesh i kyçur, ndaj nuk kërkon pëlqim. Google Analytics ngarkohet vetëm nëse e pranon në banerin e cookies."
+      },
+      {
+        "title": "Si i fshin",
+        "body": "Te «Shpalljet e ruajtura» gjen butonin «Fshi llogarinë». Ai fshin menjëherë email-in, shpalljet e ruajtura, raportimet dhe të gjitha hyrjet. Për çdo pyetje, na shkruaj në adresën e kontaktit në fund të faqes."
+      }
+    ]
   }
 }

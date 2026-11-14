@@ -1,4 +1,4 @@
-import { IllustrationSvg, type IllustrationProps, Sparkle } from './svg';
+import { IllustrationSvg, type IllustrationProps } from './svg';
 
 /** A big speech bubble saying "Mirë se vini!": every class is taught in Albanian. */
 export function HelloBubble({ className }: IllustrationProps) {
@@ -21,7 +21,6 @@ export function HelloBubble({ className }: IllustrationProps) {
       </text>
       <circle cx="196" cy="150" r="14" className="fill-track-ai" />
       <circle cx="222" cy="160" r="7" className="fill-track-ai-tint" />
-      <Sparkle x={26} y={26} r={12} className="fill-active" />
     </IllustrationSvg>
   );
 }

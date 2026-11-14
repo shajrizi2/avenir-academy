@@ -1,4 +1,4 @@
-import { IllustrationSvg, type IllustrationProps, Sparkle } from './svg';
+import { IllustrationSvg, type IllustrationProps } from './svg';
 
 /** A laptop with code brackets on screen: learning to code with AI. */
 export function LaptopCode({ className }: IllustrationProps) {
@@ -24,8 +24,6 @@ export function LaptopCode({ className }: IllustrationProps) {
         className="fill-background"
       />
       <rect x="104" y="136" width="32" height="6" rx="3" className="fill-line-strong" />
-      <Sparkle x={214} y={40} r={13} className="fill-track-marketing" />
-      <Sparkle x={24} y={64} r={9} className="fill-track-ai" />
     </IllustrationSvg>
   );
 }

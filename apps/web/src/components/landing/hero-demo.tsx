@@ -3,12 +3,7 @@
 import type { Locale } from '@ai-academy/shared';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
-import {
-  ChatSparkles,
-  LaptopCode,
-  MegaphoneChart,
-  NeuralNetwork,
-} from '@/components/illustrations';
+import { LaptopCode, MegaphoneChart, PathUnlock, TestCheck } from '@/components/illustrations';
 import type { LandingMessages } from '@/i18n/messages';
 import { track } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
@@ -17,7 +12,7 @@ import { CtaLink } from './cta-link';
 type Demo = LandingMessages['hero']['demo'];
 
 /** One illustration per topic tab, in the order of `demo.topics`. */
-const ILLUSTRATIONS = [NeuralNetwork, LaptopCode, MegaphoneChart, ChatSparkles];
+const ILLUSTRATIONS = [TestCheck, LaptopCode, MegaphoneChart, PathUnlock];
 
 /**
  * The hero's "learn by doing" demo: pick a topic, answer one question, get instant

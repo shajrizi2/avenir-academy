@@ -27,5 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     { url: `${SITE_URL}/training/register`, changeFrequency: 'yearly', priority: 0.6 },
     { url: `${SITE_URL}/training/login`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${SITE_URL}/for-companies`, changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${SITE_URL}/privatesia`, changeFrequency: 'yearly', priority: 0.2 },
   ];
 }

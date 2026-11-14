@@ -1,12 +1,12 @@
 import { BadgeCheck, Footprints, LifeBuoy } from 'lucide-react';
-import { ChatSparkles, HelloBubble, LaptopCode } from '@/components/illustrations';
+import { HelloBubble, LaptopCode, LiveClass } from '@/components/illustrations';
 import { getLandingMessages } from '@/i18n/server';
 import { FeatureCard } from './feature-card';
 import { FeatureRows } from './feature-rows';
 import { SectionHeading } from './landing-section';
 
 /** The first three benefits get an illustrated row each; the rest are compact cards. */
-const ROW_ILLUSTRATIONS = [ChatSparkles, LaptopCode, HelloBubble];
+const ROW_ILLUSTRATIONS = [LiveClass, LaptopCode, HelloBubble];
 const CARD_ICONS = [BadgeCheck, Footprints, LifeBuoy];
 
 export async function Benefits() {

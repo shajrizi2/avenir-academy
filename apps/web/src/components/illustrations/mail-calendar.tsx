@@ -1,4 +1,4 @@
-import { IllustrationSvg, type IllustrationProps, Sparkle } from './svg';
+import { IllustrationSvg, type IllustrationProps } from './svg';
 
 /** An envelope carrying a calendar page: the timetable arrives by email. */
 export function MailCalendar({ className }: IllustrationProps) {
@@ -18,8 +18,6 @@ export function MailCalendar({ className }: IllustrationProps) {
       <rect x="162" y="76" width="14" height="12" rx="3" className="fill-soft" />
       <rect x="184" y="76" width="14" height="12" rx="3" className="fill-active" />
       <rect x="140" y="96" width="36" height="8" rx="3" className="fill-soft" />
-      <Sparkle x={30} y={36} r={10} className="fill-track-ai" />
-      <Sparkle x={222} y={132} r={8} className="fill-track-marketing" />
     </IllustrationSvg>
   );
 }

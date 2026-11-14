@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { AuthCard } from '@/components/auth-card';
-import { ChatSparkles } from '@/components/illustrations';
+import { HelloBubble } from '@/components/illustrations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { t } from '@/i18n/messages';
 import { LoginForm } from './login-form';
@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: t.meta.pages.login };
 export default function LoginPage() {
   return (
     <AuthCard
-      illustration={ChatSparkles}
+      illustration={HelloBubble}
       title={t.auth.login.title}
       description={t.auth.login.description}
       footer={

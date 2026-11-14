@@ -104,38 +104,38 @@
 }
 
 :root {
-  /* Neutrals: white and a warm off-white, near-black ink. */
+  /* Black and white only (PLAN D35): white, neutral greys, near-black ink. No brand colours. */
   --bg: #ffffff;
-  --bg-soft: #f7f6f3;
-  --ink: #141414;
-  --ink-soft: #5b5b5b; /* 6.8:1 on white, 6.3:1 on bg-soft */
-  --border: #e4e2dd;
-  --border-strong: #d3d0c9; /* outlines and shadows of white chunky elements */
+  --bg-soft: #f5f5f5;
+  --ink: #111111;
+  --ink-soft: #555555; /* 7.5:1 on white, 6.9:1 on bg-soft */
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4; /* outlines and shadows of white chunky elements */
   --press-ink: #000000; /* bottom shadow of black chunky elements */
 
-  /* Track accents */
-  --track-ai: #7c5cfc;
-  --track-ai-ink: #5b3be0; /* 6.7:1 on white */
-  --track-ai-tint: #f0ecff;
-  --track-ai-shadow: #5a3fd6;
-  --track-marketing: #ff8a3d;
-  --track-marketing-ink: #b4500c; /* 5.1:1 on white */
-  --track-marketing-tint: #fff1e6;
-  --track-marketing-shadow: #d9681f;
+  /* Course accents, kept as tokens but grey: the two courses differ by name, not colour. */
+  --track-ai: #111111;
+  --track-ai-ink: #111111;
+  --track-ai-tint: #f0f0f0;
+  --track-ai-shadow: #000000;
+  --track-marketing: #555555;
+  --track-marketing-ink: #111111;
+  --track-marketing-tint: #f0f0f0;
+  --track-marketing-shadow: #333333;
 
-  /* Module status: green PASSED, amber ACTIVE, slate LOCKED, red FAILED. */
-  --passed: #22a35a;
-  --passed-ink: #15803d;
-  --passed-tint: #dcfce7;
-  --active: #f5a524;
-  --active-ink: #92400e;
-  --active-tint: #fef3c7;
-  --locked: #94a3b8;
-  --locked-ink: #475569;
-  --locked-tint: #f1f5f9;
-  --failed: #e5484d;
-  --failed-ink: #b91c1c;
-  --failed-tint: #fee2e2;
+  /* Module status in greys; the badge's icon and word carry the meaning. */
+  --passed: #111111;
+  --passed-ink: #111111;
+  --passed-tint: #e5e5e5;
+  --active: #111111;
+  --active-ink: #111111;
+  --active-tint: #ffffff;
+  --locked: #a3a3a3;
+  --locked-ink: #555555;
+  --locked-tint: #f5f5f5;
+  --failed: #111111;
+  --failed-ink: #111111;
+  --failed-tint: #d4d4d4;
 
   /* shadcn/ui: primary is ink (black buttons, white text). */
   --background: var(--bg);
@@ -150,16 +150,16 @@
   --secondary-foreground: var(--ink);
   --muted: var(--bg-soft);
   --muted-foreground: var(--ink-soft);
-  --accent: #efede8;
+  --accent: #eeeeee;
   --accent-foreground: var(--ink);
   --destructive: var(--failed-ink);
   --input: var(--border-strong);
-  --ring: var(--track-ai);
-  --chart-1: var(--track-ai);
-  --chart-2: var(--track-marketing);
-  --chart-3: var(--passed);
-  --chart-4: var(--active);
-  --chart-5: var(--locked);
+  --ring: var(--ink);
+  --chart-1: #111111;
+  --chart-2: #555555;
+  --chart-3: #888888;
+  --chart-4: #b5b5b5;
+  --chart-5: #d4d4d4;
   --radius: 0.75rem;
   --sidebar: var(--bg);
   --sidebar-foreground: var(--ink);
@@ -168,7 +168,7 @@
   --sidebar-accent: var(--bg-soft);
   --sidebar-accent-foreground: var(--ink);
   --sidebar-border: var(--border);
-  --sidebar-ring: var(--track-ai);
+  --sidebar-ring: var(--ink);
 }
 
 @layer base {

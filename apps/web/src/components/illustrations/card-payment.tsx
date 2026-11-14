@@ -1,4 +1,4 @@
-import { IllustrationSvg, type IllustrationProps, Sparkle } from './svg';
+import { IllustrationSvg, type IllustrationProps } from './svg';
 
 /** A bank card next to a bank building: pay by card or by transfer. */
 export function CardPayment({ className }: IllustrationProps) {
@@ -18,7 +18,6 @@ export function CardPayment({ className }: IllustrationProps) {
       <rect x="156" y="136" width="64" height="8" rx="3" className="fill-ink" />
       <circle cx="196" cy="48" r="20" className="fill-passed" />
       <path d="M186 48 l7 7 l13 -14" fill="none" className="stroke-background" strokeWidth={4} />
-      <Sparkle x={24} y={40} r={10} className="fill-active" />
     </IllustrationSvg>
   );
 }
