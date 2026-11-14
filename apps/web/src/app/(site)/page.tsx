@@ -1,7 +1,6 @@
-import { DEFAULT_LOCALE } from '@ai-academy/shared';
 import { redirect } from 'next/navigation';
 
-/** "/" is normally redirected by proxy.ts (with language detection); this is the fallback. */
+/** Until the job board launches, the home page is the academy's landing page. */
 export default function RootPage() {
-  redirect(`/${DEFAULT_LOCALE}`);
+  redirect('/training');
 }

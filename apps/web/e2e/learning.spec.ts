@@ -41,7 +41,7 @@ test.describe('a student pays by card and learns', () => {
   test('the course page shows the price, the discount, the schedule and real seats', async ({
     page,
   }) => {
-    await page.goto(`/courses/${course.slug}`);
+    await page.goto(`/training/courses/${course.slug}`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(course.title);
     await expect(page.getByText('€89', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('€150').first()).toBeVisible();
@@ -50,7 +50,10 @@ test.describe('a student pays by card and learns', () => {
     await expect(page.getByText('Maksimumi 10 persona për grup')).toBeVisible();
     // Logged out: "Regjistrohu" sends the visitor through registration back to checkout.
     const register = page.getByRole('link', { name: 'Regjistrohu', exact: true }).last();
-    await expect(register).toHaveAttribute('href', `/register?next=%2Fcheckout%2F${group.id}`);
+    await expect(register).toHaveAttribute(
+      'href',
+      `/training/register?next=%2Ftraining%2Fcheckout%2F${group.id}`,
+    );
   });
 
   test('the student picks the card and is sent to Stripe; the webhook confirms the seat', async ({
@@ -58,7 +61,7 @@ test.describe('a student pays by card and learns', () => {
     request,
   }) => {
     await signIn(page, student);
-    await page.goto(`/checkout/${group.id}`);
+    await page.goto(`/training/checkout/${group.id}`);
     await expect(page.getByRole('heading', { name: 'Pagesa e muajit të parë' })).toBeVisible();
     await expect(page.getByText('€89 në muaj')).toBeVisible();
     await page.getByRole('radio', { name: /Paguaj me kartë/ }).click();
@@ -79,7 +82,7 @@ test.describe('a student pays by card and learns', () => {
       timeout: 15_000,
     });
     await page.getByRole('link', { name: 'Hap kursin' }).click();
-    await expect(page).toHaveURL(new RegExp(`/learn/${course.slug}$`));
+    await expect(page).toHaveURL(new RegExp(`/training/learn/${course.slug}$`));
     await expect(page.getByText('Aktiv', { exact: true })).toBeVisible();
     await expect(page.getByText('I mbyllur', { exact: true })).toBeVisible();
     await expect(page.getByText('I paguar', { exact: true })).toBeVisible();
@@ -98,7 +101,7 @@ test.describe('a student pays by card and learns', () => {
     // The instructor adds a lecture starting in 10 minutes (inside the join window).
     const instructorPage = await browser.newPage();
     await signIn(instructorPage, INSTRUCTOR);
-    await instructorPage.goto(`/teach/modules/${course.modules[0].id}`);
+    await instructorPage.goto(`/training/teach/modules/${course.modules[0].id}`);
     await instructorPage.getByRole('button', { name: 'Shto leksion' }).click();
     const dialog = instructorPage.getByRole('dialog');
     await dialog.getByLabel('Titulli').fill('Leksioni i hapjes');
@@ -109,9 +112,12 @@ test.describe('a student pays by card and learns', () => {
 
     const page = await browser.newPage();
     await signIn(page, student);
-    await page.goto(`/learn/${course.slug}/${course.modules[0].id}`);
+    await page.goto(`/training/learn/${course.slug}/${course.modules[0].id}`);
     await expect(page.getByRole('heading', { name: 'Leksionet live' })).toBeVisible();
-    // The generated timetable (12 lectures) plus the instructor's extra one.
+    // The generated timetable (12 lectures) plus the instructor's extra one. The test cohort
+    // starts on a fixed date, so lecture 1 may already sit in the collapsed past lectures.
+    const past = page.locator('main details > summary');
+    if (await past.count()) await past.first().click();
     await expect(page.getByText('Leksioni 1', { exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: /Hyr në Google Meet/ }).first()).toHaveAttribute(
       'href',
@@ -131,7 +137,7 @@ test.describe('a student pays by card and learns', () => {
     const test = await createOpenTest(request, course.modules[0].id);
     const page = await browser.newPage();
     await signIn(page, student);
-    await page.goto(`/tests/${test.id}`);
+    await page.goto(`/training/tests/${test.id}`);
     await page.getByRole('button', { name: 'Fillo testin' }).click();
     await page.getByLabel('Në Google Meet').check();
     await expect(page.getByText('U ruajt', { exact: true })).toBeVisible();
@@ -140,7 +146,7 @@ test.describe('a student pays by card and learns', () => {
     await expect(page.getByRole('heading', { name: 'E kalove!' })).toBeVisible();
 
     // Month 2 is unpaid: the course page offers to pay it; module 2 is still locked.
-    await page.goto(`/learn/${course.slug}`);
+    await page.goto(`/training/learn/${course.slug}`);
     await expect(page.getByText('I kaluar', { exact: true })).toBeVisible();
     await expect(page.getByText('I mbyllur', { exact: true })).toBeVisible();
     await page.getByRole('link', { name: 'Paguaj modulin 2' }).click();
@@ -153,7 +159,7 @@ test.describe('a student pays by card and learns', () => {
     await expect(page.getByRole('heading', { name: 'Pagesa u konfirmua' })).toBeVisible({
       timeout: 15_000,
     });
-    await page.goto(`/learn/${course.slug}`);
+    await page.goto(`/training/learn/${course.slug}`);
     await expect(page.getByText('Aktiv', { exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: /Vazhdimi/ })).toBeVisible();
   });
@@ -175,7 +181,7 @@ test.describe('a student pays by bank transfer', () => {
 
   test('the student gets the bank details and a reference', async ({ page }) => {
     await signIn(page, student);
-    await page.goto(`/checkout/${group.id}`);
+    await page.goto(`/training/checkout/${group.id}`);
     await page.getByRole('radio', { name: /Transfertë bankare/ }).click();
     await page.getByRole('button', { name: 'Merr të dhënat e bankës' }).click();
     await expect(page).toHaveURL(/\/payments\//);
@@ -196,7 +202,7 @@ test.describe('a student pays by bank transfer', () => {
     expect(payment).toBeTruthy();
 
     await signIn(page, ADMIN);
-    await page.goto('/admin/payments?provider=BANK_TRANSFER&status=PENDING');
+    await page.goto('/training/admin/payments?provider=BANK_TRANSFER&status=PENDING');
     const row = page.getByRole('listitem').filter({ hasText: student });
     await row.getByRole('button', { name: 'Konfirmo' }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Konfirmo', exact: true }).click();
@@ -204,7 +210,7 @@ test.describe('a student pays by bank transfer', () => {
 
     const studentPage = await page.context().browser()!.newPage();
     await signIn(studentPage, student);
-    await studentPage.goto(`/learn/${course.slug}`);
+    await studentPage.goto(`/training/learn/${course.slug}`);
     await expect(studentPage.getByText('Aktiv', { exact: true })).toBeVisible();
     await expect(studentPage.getByText('I paguar', { exact: true })).toBeVisible();
     const seats = await admin.get<AdminGroup>(`/admin/groups/${group.id}`);

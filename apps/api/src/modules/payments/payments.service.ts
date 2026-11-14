@@ -3,6 +3,7 @@ import {
   HOLD_EXPIRING_WARNING_HOURS,
   type Paginated,
   WAITLIST_OFFER_HOURS,
+  TRAINING_PATH,
 } from '@ai-academy/shared';
 import {
   BadRequestException,
@@ -145,7 +146,8 @@ export class PaymentsService {
     private readonly bank: BankTransferProvider,
     config: ConfigService<EnvironmentVariables, true>,
   ) {
-    this.webUrl = config.get('WEB_URL', { infer: true }).replace(/\/$/, '');
+    // Every link in these emails points into the academy, which lives under /training.
+    this.webUrl = `${config.get('WEB_URL', { infer: true }).replace(/\/$/, '')}${TRAINING_PATH}`;
   }
 
   // ---- Providers ----

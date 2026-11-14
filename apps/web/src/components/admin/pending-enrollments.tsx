@@ -14,7 +14,7 @@ export function PendingEnrollments() {
   const o = t.adminLaunch.overview;
   return (
     <CallOut
-      href="/admin/enrollments?status=PENDING"
+      href="/training/admin/enrollments?status=PENDING"
       icon={Inbox}
       count={data?.total}
       none={o.pendingNone}
@@ -31,7 +31,7 @@ export function PendingBankTransfers() {
   const o = t.adminLaunch.overview;
   return (
     <CallOut
-      href="/admin/payments?provider=BANK_TRANSFER&status=PENDING"
+      href="/training/admin/payments?provider=BANK_TRANSFER&status=PENDING"
       icon={Landmark}
       count={data?.pendingBankTransfers}
       none={o.bankNone}

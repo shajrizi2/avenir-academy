@@ -65,7 +65,7 @@ export function LoginForm() {
           />
           <div className="-mt-2 text-right">
             <Link
-              href="/forgot-password"
+              href="/training/forgot-password"
               className="text-ink text-sm font-semibold underline-offset-4 hover:underline"
             >
               {t.auth.login.forgot}

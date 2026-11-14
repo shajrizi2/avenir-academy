@@ -29,7 +29,7 @@ export function UpcomingSessions() {
             session={session}
             context={
               <Link
-                href={`/learn/${session.module.course.slug}/${session.module.id}`}
+                href={`/training/learn/${session.module.course.slug}/${session.module.id}`}
                 className="hover:text-ink underline-offset-4 hover:underline"
               >
                 {fmt(t.learn.session.contextModule, {

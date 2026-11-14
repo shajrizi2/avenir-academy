@@ -45,11 +45,17 @@ export function MobileMenu({ locale, links, nav }: MobileMenuProps) {
           ))}
         </nav>
         <div className="mt-6 flex flex-col gap-4 border-t pt-6">
-          <CtaLink href="/register" cta="menu_register" locale={locale} variant="chunky" size="lg">
+          <CtaLink
+            href="/training/register"
+            cta="menu_register"
+            locale={locale}
+            variant="chunky"
+            size="lg"
+          >
             {nav.cta}
           </CtaLink>
           <Button asChild variant="chunky-outline" size="lg">
-            <Link href="/login">{nav.login}</Link>
+            <Link href="/training/login">{nav.login}</Link>
           </Button>
         </div>
       </SheetContent>

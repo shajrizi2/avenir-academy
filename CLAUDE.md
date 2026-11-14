@@ -57,17 +57,18 @@ apps/api/
 apps/web/
   messages/sq.json     landing copy (Albanian, source of truth); en.json mirrors its keys
   e2e/                 Playwright tests
-  src/app/[locale]/    ROOT LAYOUT #1: marketing landing page /sq (+ opengraph-image)
-  src/app/(site)/      ROOT LAYOUT #2 (lang="sq"): everything else
-    (public)/          catalog, course detail (groups + seats), auth pages (header + footer layout)
-    (app)/             dashboard, checkout/*, payments/*, learn/* (incl. lessons), teach/*, admin/* (sidebar, client-side guarded)
+  src/app/(landing)/   ROOT LAYOUT #1: the academy's marketing landing page at /training (+ opengraph-image)
+  src/app/(site)/      ROOT LAYOUT #2 (lang="sq"): everything else; "/" is the job board (PLAN D34)
+    training/(public)/ catalog, course detail (groups + seats), auth pages (header + footer layout)
+    training/(app)/    dashboard, checkout/*, payments/*, learn/* (incl. lessons), teach/*, admin/* (sidebar, client-side guarded)
   src/app/global-not-found.tsx, sitemap.ts, robots.ts
   src/components/landing/  one component per landing section + header/footer/CTA helpers
   src/i18n/            messages.ts (t, fmt, plural), server.ts (landing), no-english.test.ts (flags English JSX)
   src/components/ui/   shadcn/ui primitives (generated; edit sparingly)
   src/components/      app components (layout, course, status badge, ...)
   src/lib/             api client, auth context, queries, landing-data (fail-soft loaders), analytics track()
-  src/proxy.ts         "/" → /sq or /en (aa_locale cookie); /login redirect without a session cookie (UX only)
+  src/proxy.ts         /training/login redirect without a session cookie (UX only)
+  src/lib/legacy-redirects.ts  permanent redirects from the old academy paths (/sq, /login, /dashboard, ...) to /training
 packages/shared/src/   enums.ts, schemas/*.ts (zod), types.ts (API DTO shapes)
 scripts/bootstrap.mjs  first-run local setup
 docs/PLAN.md           spec, roadmap, decisions

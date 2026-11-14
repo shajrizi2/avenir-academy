@@ -33,7 +33,7 @@ import { cn } from '@/lib/utils';
 
 export async function generateMetadata({
   params,
-}: PageProps<'/courses/[slug]'>): Promise<Metadata> {
+}: PageProps<'/training/courses/[slug]'>): Promise<Metadata> {
   const { slug } = await params;
   try {
     const course = localizeCourse(
@@ -46,7 +46,7 @@ export async function generateMetadata({
   }
 }
 
-export default function CourseDetailPage({ params }: PageProps<'/courses/[slug]'>) {
+export default function CourseDetailPage({ params }: PageProps<'/training/courses/[slug]'>) {
   return (
     <Suspense fallback={<CourseDetailSkeleton />}>
       <CourseDetailContent params={params} />
@@ -54,7 +54,9 @@ export default function CourseDetailPage({ params }: PageProps<'/courses/[slug]'
   );
 }
 
-async function CourseDetailContent({ params }: Pick<PageProps<'/courses/[slug]'>, 'params'>) {
+async function CourseDetailContent({
+  params,
+}: Pick<PageProps<'/training/courses/[slug]'>, 'params'>) {
   const { slug } = await params;
   let course: CourseDetail;
   try {
@@ -199,7 +201,7 @@ function formatDay(key: string): string {
 function BackLink() {
   return (
     <Link
-      href="/courses"
+      href="/training/courses"
       className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
     >
       <ArrowLeft className="size-4" aria-hidden /> {t.catalog.detail.allCourses}

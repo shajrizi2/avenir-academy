@@ -27,8 +27,8 @@ export function ModuleManager() {
 
   const back =
     user?.role === 'ADMIN'
-      ? { href: `/admin/courses/${module.course.id}`, label: module.course.title }
-      : { href: '/teach', label: m.myModules };
+      ? { href: `/training/admin/courses/${module.course.id}`, label: module.course.title }
+      : { href: '/training/teach', label: m.myModules };
 
   return (
     <>

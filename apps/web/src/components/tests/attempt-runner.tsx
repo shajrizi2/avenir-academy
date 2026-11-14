@@ -35,7 +35,7 @@ export function AttemptRunner({ attemptId, testId, onFinished }: AttemptRunnerPr
   useEffect(() => {
     if (!finished) return;
     onFinished();
-    router.replace(`/tests/${testId}/result`);
+    router.replace(`/training/tests/${testId}/result`);
   }, [finished, onFinished, router, testId]);
 
   if (isPending || finished) return <Skeleton className="rounded-card h-96 w-full" />;
@@ -129,7 +129,7 @@ function Runner({
       queryClient.invalidateQueries({ queryKey: ['modules'] }),
     ]);
     onFinished();
-    router.push(`/tests/${testId}/result`);
+    router.push(`/training/tests/${testId}/result`);
   }
 
   // Hand in automatically when the time is up.

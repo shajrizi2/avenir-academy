@@ -24,7 +24,7 @@ export async function FinalCta() {
             {t.finalCta.text}
           </p>
           <CtaLink
-            href="/register"
+            href="/training/register"
             cta="final_register"
             locale={locale}
             variant="chunky-outline"

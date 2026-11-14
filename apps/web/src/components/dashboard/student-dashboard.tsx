@@ -51,7 +51,7 @@ function MyCourses() {
           description={t.dashboard.noCoursesText}
           action={
             <Button asChild variant="chunky">
-              <Link href="/courses">{t.dashboard.browse}</Link>
+              <Link href="/training/courses">{t.dashboard.browse}</Link>
             </Button>
           }
         />
@@ -67,7 +67,7 @@ function MyCourses() {
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle>
                         <Link
-                          href={`/courses/${enrollment.course.slug}`}
+                          href={`/training/courses/${enrollment.course.slug}`}
                           className="hover:underline"
                         >
                           {enrollment.course.title}
@@ -119,7 +119,7 @@ function EnrollmentNotice({ enrollment }: { enrollment: EnrollmentSummary }) {
     case 'APPROVED':
       return (
         <Button asChild variant="chunky" className="mt-2 self-start">
-          <Link href={`/learn/${enrollment.course.slug}`}>
+          <Link href={`/training/learn/${enrollment.course.slug}`}>
             {t.dashboard.openCourse} <ArrowRight data-icon="inline-end" />
           </Link>
         </Button>
@@ -138,7 +138,7 @@ function EnrollmentNotice({ enrollment }: { enrollment: EnrollmentSummary }) {
           </p>
           {enrollment.group && (
             <Button asChild variant="chunky-outline" className="mt-2 self-start">
-              <Link href={`/checkout/${enrollment.group.id}`}>
+              <Link href={`/training/checkout/${enrollment.group.id}`}>
                 {t.dashboard.continuePayment} <ArrowRight data-icon="inline-end" />
               </Link>
             </Button>

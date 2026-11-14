@@ -53,7 +53,7 @@ export function TeachingModules() {
                   <p className="text-ink-soft text-sm font-semibold">{module.course.title}</p>
                   <h2 className="text-ink text-lg font-bold">
                     <Link
-                      href={`/teach/modules/${module.id}`}
+                      href={`/training/teach/modules/${module.id}`}
                       className="after:rounded-card after:absolute after:inset-0 focus-visible:outline-none"
                     >
                       {module.title}

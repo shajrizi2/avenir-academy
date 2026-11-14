@@ -20,7 +20,7 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
   return (
     <header className="border-line bg-background/90 sticky top-0 z-40 border-b backdrop-blur-md">
       <div className="mx-auto grid h-16 w-full max-w-[1200px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 md:h-20 md:grid-cols-[1fr_auto_1fr]">
-        <Logo href={`/${locale}`} />
+        <Logo href="/training" />
         <nav aria-label={nav.label} className="hidden items-center gap-1 md:flex">
           {links.map((link) => (
             <a
@@ -34,12 +34,12 @@ export function LandingHeader({ locale, nav }: LandingHeaderProps) {
         </nav>
         <div className="flex items-center justify-end gap-1 sm:gap-2">
           <Link
-            href="/login"
+            href="/training/login"
             className="text-ink hidden rounded-lg px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline md:inline-flex"
           >
             {nav.login}
           </Link>
-          <CtaLink href="/register" cta="header_register" locale={locale} variant="chunky">
+          <CtaLink href="/training/register" cta="header_register" locale={locale} variant="chunky">
             {nav.cta}
           </CtaLink>
           <div className="md:hidden">

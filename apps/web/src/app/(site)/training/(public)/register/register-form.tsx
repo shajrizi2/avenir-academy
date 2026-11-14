@@ -52,7 +52,7 @@ export function RegisterForm() {
       await register(values);
       track('sign_up', { method: 'email' });
       toast.success(t.auth.register.welcome);
-      router.replace(next ?? '/dashboard');
+      router.replace(next ?? '/training/dashboard');
     } catch (e) {
       setError(errorMessage(e));
     }

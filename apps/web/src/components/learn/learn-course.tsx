@@ -92,7 +92,7 @@ export function LearnCourse() {
                   </div>
                 ) : (
                   <Link
-                    href={`/learn/${course.slug}/${module.id}`}
+                    href={`/training/learn/${course.slug}/${module.id}`}
                     className="pressable border-line-strong rounded-card bg-background hover:border-ink focus-visible:ring-ring/50 flex items-start gap-4 p-5 outline-none [--press:var(--border-strong)] hover:[--press:var(--ink)] focus-visible:ring-3"
                   >
                     {content}
@@ -101,7 +101,7 @@ export function LearnCourse() {
                 {!module.paid && !module.paymentPending && course.group && (
                   <div className="flex justify-end">
                     <Button asChild variant="chunky-outline" size="sm">
-                      <Link href={`/checkout/${course.group.id}?module=${module.id}`}>
+                      <Link href={`/training/checkout/${course.group.id}?module=${module.id}`}>
                         <CreditCard data-icon="inline-start" />{' '}
                         {fmt(t.learn.payModule, { number: module.order })}
                       </Link>

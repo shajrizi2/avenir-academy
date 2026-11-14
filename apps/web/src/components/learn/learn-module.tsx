@@ -30,7 +30,7 @@ export function LearnModule() {
       <div className="space-y-4">
         <FormError message={errorMessage(error)} />
         <Link
-          href={`/learn/${courseSlug}`}
+          href={`/training/learn/${courseSlug}`}
           className="text-ink font-semibold underline underline-offset-4"
         >
           {t.learn.backToCourse}
@@ -49,7 +49,7 @@ export function LearnModule() {
   return (
     <>
       <Link
-        href={`/learn/${module.course.slug}`}
+        href={`/training/learn/${module.course.slug}`}
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {module.course.title}
@@ -137,7 +137,7 @@ export function LearnModule() {
               return (
                 <li key={lesson.id}>
                   <Link
-                    href={`/learn/${module.course.slug}/${module.id}/lessons/${lesson.id}`}
+                    href={`/training/learn/${module.course.slug}/${module.id}/lessons/${lesson.id}`}
                     className="pressable border-line-strong rounded-card bg-background hover:border-ink focus-visible:ring-ring/50 flex items-center gap-4 p-4 outline-none [--press:var(--border-strong)] hover:[--press:var(--ink)] focus-visible:ring-3"
                   >
                     <Icon

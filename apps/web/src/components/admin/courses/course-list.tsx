@@ -50,7 +50,7 @@ export function CourseList() {
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="text-ink text-lg font-bold">
                     <Link
-                      href={`/admin/courses/${course.id}`}
+                      href={`/training/admin/courses/${course.id}`}
                       className="after:rounded-card after:absolute after:inset-0 focus-visible:outline-none"
                     >
                       {course.title}
@@ -93,7 +93,7 @@ function NewCourseButton() {
     toast.success(t.admin.courses.created);
     void queryClient.invalidateQueries({ queryKey: ['courses'] });
     setOpen(false);
-    router.push(`/admin/courses/${course.id}`);
+    router.push(`/training/admin/courses/${course.id}`);
   }
 
   return (

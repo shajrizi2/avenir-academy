@@ -16,7 +16,7 @@ export default function ResetPasswordPage() {
       title={t.auth.reset.title}
       description={t.auth.reset.description}
       footer={
-        <Link href="/login" className="text-ink font-bold underline underline-offset-4">
+        <Link href="/training/login" className="text-ink font-bold underline underline-offset-4">
           {t.auth.forgot.backToLogin}
         </Link>
       }

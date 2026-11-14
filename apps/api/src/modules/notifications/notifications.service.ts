@@ -1,4 +1,4 @@
-import { localDateKey, zonedParts } from '@ai-academy/shared';
+import { localDateKey, zonedParts, TRAINING_PATH } from '@ai-academy/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { EnvironmentVariables } from '../../config/env.validation.js';
@@ -34,7 +34,8 @@ export class NotificationsService {
     private readonly mail: MailService,
     config: ConfigService<EnvironmentVariables, true>,
   ) {
-    this.webUrl = config.get('WEB_URL', { infer: true }).replace(/\/$/, '');
+    // Every link in these emails points into the academy, which lives under /training.
+    this.webUrl = `${config.get('WEB_URL', { infer: true }).replace(/\/$/, '')}${TRAINING_PATH}`;
   }
 
   /**

@@ -30,13 +30,13 @@ export function HeaderAuth() {
   return (
     <div className="flex items-center gap-2">
       <Link
-        href="/login"
+        href="/training/login"
         className="text-ink rounded-lg px-3 py-2 text-sm font-semibold underline-offset-4 hover:underline"
       >
         {t.nav.login}
       </Link>
       <Button asChild variant="chunky">
-        <Link href="/register">{t.nav.startNow}</Link>
+        <Link href="/training/register">{t.nav.startNow}</Link>
       </Button>
     </div>
   );

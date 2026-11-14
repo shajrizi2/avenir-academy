@@ -33,18 +33,18 @@ export function CourseEditor() {
   return (
     <>
       <Link
-        href="/admin/courses"
+        href="/training/admin/courses"
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {t.admin.courses.allCourses}
       </Link>
       <PageHeader
         title={course.title}
-        description={`/courses/${course.slug}`}
+        description={`/training/courses/${course.slug}`}
         actions={
           course.isPublished && (
             <Button asChild variant="chunky-outline">
-              <Link href={`/courses/${course.slug}`} target="_blank">
+              <Link href={`/training/courses/${course.slug}`} target="_blank">
                 {t.admin.courses.viewPublic} <ExternalLink data-icon="inline-end" />
               </Link>
             </Button>
@@ -74,7 +74,7 @@ function DetailsCard({ course }: { course: CourseDetail }) {
       await apiFetch(`/courses/${course.id}`, { method: 'DELETE' });
       toast.success(t.admin.courses.deleted);
       void queryClient.invalidateQueries({ queryKey: ['courses'] });
-      router.push('/admin/courses');
+      router.push('/training/admin/courses');
     } catch (e) {
       toast.error(errorMessage(e));
       throw e;
@@ -209,7 +209,9 @@ function ModuleRow({
       </div>
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link href={`/teach/modules/${module.id}`}>{t.admin.courses.sessionsMaterials}</Link>
+          <Link href={`/training/teach/modules/${module.id}`}>
+            {t.admin.courses.sessionsMaterials}
+          </Link>
         </Button>
         <ModuleFormDialog
           title={fmt(t.admin.courses.editModule, { number: module.order })}

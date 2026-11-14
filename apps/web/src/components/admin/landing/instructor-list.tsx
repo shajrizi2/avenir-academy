@@ -55,7 +55,7 @@ export function InstructorList() {
         description={t.admin.instructors.emptyText}
         action={
           <Button asChild variant="chunky">
-            <Link href="/admin/users?role=STUDENT">{t.admin.instructors.openUsers}</Link>
+            <Link href="/training/admin/users?role=STUDENT">{t.admin.instructors.openUsers}</Link>
           </Button>
         }
       />

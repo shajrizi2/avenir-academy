@@ -3,7 +3,7 @@ import { PASSWORD, STUDENT, unique } from './support';
 
 test('a visitor creates an account and lands on the dashboard', async ({ page }) => {
   const email = `${unique('visitor')}@example.com`;
-  await page.goto('/register');
+  await page.goto('/training/register');
   await page.getByLabel('Emri', { exact: true }).fill('Vera');
   await page.getByLabel('Mbiemri').fill('Visitor');
   await page.getByLabel('Email').fill(email);
@@ -17,7 +17,7 @@ test('a visitor creates an account and lands on the dashboard', async ({ page })
 test('a wrong password shows an Albanian error and keeps the visitor on the login page', async ({
   page,
 }) => {
-  await page.goto('/login');
+  await page.goto('/training/login');
   await page.getByLabel('Email').fill(STUDENT);
   await page.getByLabel('Fjalëkalimi').fill('not-the-password');
   await page.getByRole('button', { name: 'Hyr', exact: true }).click();
@@ -30,8 +30,8 @@ test('a wrong password shows an Albanian error and keeps the visitor on the logi
 test('signed-out visitors are sent to login, then back to where they were going', async ({
   page,
 }) => {
-  await page.goto('/dashboard');
-  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/);
+  await page.goto('/training/dashboard');
+  await expect(page).toHaveURL(/\/training\/login\?next=%2Ftraining%2Fdashboard$/);
   await page.getByLabel('Email').fill(STUDENT);
   await page.getByLabel('Fjalëkalimi').fill(PASSWORD);
   await page.getByRole('button', { name: 'Hyr', exact: true }).click();

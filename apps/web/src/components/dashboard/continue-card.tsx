@@ -12,7 +12,7 @@ export function ContinueCard() {
   const { data } = useQuery(nextLessonQuery);
   if (!data) return null;
   const d = t.dashboard;
-  const href = `/learn/${data.module.course.slug}/${data.module.id}/lessons/${data.lesson.id}`;
+  const href = `/training/learn/${data.module.course.slug}/${data.module.id}/lessons/${data.lesson.id}`;
   return (
     <section
       aria-labelledby="continue-title"

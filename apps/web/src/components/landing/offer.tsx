@@ -34,7 +34,7 @@ export async function Offer() {
         </Suspense>
         <div className="border-line mt-8 flex flex-col items-center gap-4 border-t pt-8 text-center">
           <CtaLink
-            href="/courses"
+            href="/training/courses"
             cta="offer_reserve"
             locale={locale}
             variant="chunky"

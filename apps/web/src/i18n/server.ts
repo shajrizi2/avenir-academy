@@ -1,16 +1,9 @@
-import { isActiveLocale, type Locale } from '@ai-academy/shared';
-import { notFound } from 'next/navigation';
-import { locale as rootLocale } from 'next/root-params';
+import { DEFAULT_LOCALE, type Locale } from '@ai-academy/shared';
 import { getMessages, type LandingMessages } from './messages';
 
-/**
- * The current page's locale (from the [locale] root segment). Only Albanian is active:
- * `/en/...` is redirected to `/sq/...` by proxy.ts, anything else is a 404.
- */
+/** The landing page's locale. The platform is Albanian only (PLAN D29), so this is always `sq`. */
 export async function getLocale(): Promise<Locale> {
-  const value = await rootLocale();
-  if (!isActiveLocale(value)) notFound();
-  return value;
+  return DEFAULT_LOCALE;
 }
 
 /** Landing-page copy for the current locale. */

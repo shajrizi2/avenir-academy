@@ -38,7 +38,7 @@ export function TestCard({ test, status }: { test: ModuleTest; status: ModuleSta
         </p>
       </div>
       <Button asChild variant={state === 'open' && !passed ? 'chunky' : 'chunky-outline'}>
-        <Link href={`/tests/${test.id}`}>
+        <Link href={`/training/tests/${test.id}`}>
           {passed
             ? t.learn.testCard.seeResult
             : state === 'open'

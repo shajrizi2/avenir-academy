@@ -13,7 +13,7 @@ export default function CourseNotFound() {
         description={t.errors.notFoundText}
         action={
           <Button asChild variant="outline">
-            <Link href="/courses">{t.nav.browseCourses}</Link>
+            <Link href="/training/courses">{t.nav.browseCourses}</Link>
           </Button>
         }
       />

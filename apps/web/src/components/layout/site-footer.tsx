@@ -14,13 +14,13 @@ export function SiteFooter() {
           <p className="text-ink-soft">{t.nav.footerTagline}</p>
         </div>
         <nav aria-label={t.nav.footer} className="flex flex-wrap gap-x-6 gap-y-3">
-          <Link href="/courses" className={linkClass}>
+          <Link href="/training/courses" className={linkClass}>
             {t.nav.courses}
           </Link>
-          <Link href="/register" className={linkClass}>
+          <Link href="/training/register" className={linkClass}>
             {t.nav.createAccount}
           </Link>
-          <Link href="/login" className={linkClass}>
+          <Link href="/training/login" className={linkClass}>
             {t.nav.login}
           </Link>
           <CookieSettingsButton label={t.nav.cookieSettings} className={linkClass} />

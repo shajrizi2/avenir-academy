@@ -75,7 +75,7 @@ export function CheckoutView() {
       if (result.kind === 'STRIPE') {
         window.location.assign(result.url);
       } else if (result.kind === 'BANK_TRANSFER') {
-        router.push(`/payments/${result.paymentId}`);
+        router.push(`/training/payments/${result.paymentId}`);
       } else {
         setWaitlisted(result.group.name);
       }
@@ -98,7 +98,7 @@ export function CheckoutView() {
         description={fmt(c.waitlisted, { group: waitlisted })}
         action={
           <Button asChild variant="chunky">
-            <Link href="/dashboard">{t.checkout.success.goToDashboard}</Link>
+            <Link href="/training/dashboard">{t.checkout.success.goToDashboard}</Link>
           </Button>
         }
       />
@@ -116,17 +116,27 @@ export function CheckoutView() {
   // States that don't need a payment right now.
   if (first && existing?.status === 'APPROVED') {
     return (
-      <Notice text={c.alreadyEnrolled} href={`/learn/${g.course.slug}`} label={c.backToCourse} />
+      <Notice
+        text={c.alreadyEnrolled}
+        href={`/training/learn/${g.course.slug}`}
+        label={c.backToCourse}
+      />
     );
   }
   if (moduleId && month?.paid) {
-    return <Notice text={c.alreadyPaid} href={`/learn/${g.course.slug}`} label={c.backToCourse} />;
+    return (
+      <Notice
+        text={c.alreadyPaid}
+        href={`/training/learn/${g.course.slug}`}
+        label={c.backToCourse}
+      />
+    );
   }
 
   return (
     <>
       <Link
-        href={`/courses/${g.course.slug}`}
+        href={`/training/courses/${g.course.slug}`}
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {c.backToCourse}

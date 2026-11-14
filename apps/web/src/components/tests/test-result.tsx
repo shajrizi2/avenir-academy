@@ -26,7 +26,7 @@ export function TestResult() {
 
   const finished = test.attempts.filter((a) => a.status !== 'IN_PROGRESS');
   const latest = finished[0];
-  const moduleHref = `/learn/${test.module.course.slug}/${test.module.id}`;
+  const moduleHref = `/training/learn/${test.module.course.slug}/${test.module.id}`;
   const back = (
     <Link
       href={moduleHref}
@@ -43,7 +43,7 @@ export function TestResult() {
         {back}
         <p className="text-ink">{t.tests.result.notHandedIn}</p>
         <Button asChild variant="chunky" className="self-start">
-          <Link href={`/tests/${test.id}`}>{t.tests.result.goToTest}</Link>
+          <Link href={`/training/tests/${test.id}`}>{t.tests.result.goToTest}</Link>
         </Button>
       </>
     );
@@ -120,7 +120,7 @@ function NextStep({
   if (passed) {
     return nextModule ? (
       <Button asChild variant="chunky" size="lg">
-        <Link href={`/learn/${nextModule.course.slug}/${nextModule.id}`}>
+        <Link href={`/training/learn/${nextModule.course.slug}/${nextModule.id}`}>
           {fmt(t.tests.result.nextModule, { number: nextModule.order, title: nextModule.title })}
           <ArrowRight data-icon="inline-end" />
         </Link>
@@ -140,7 +140,7 @@ function NextStep({
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="chunky" size="lg">
-            <Link href={`/tests/${testId}`}>
+            <Link href={`/training/tests/${testId}`}>
               <RotateCcw data-icon="inline-start" /> {t.tests.result.tryAgain}
             </Link>
           </Button>

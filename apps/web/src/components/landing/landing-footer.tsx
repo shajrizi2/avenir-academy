@@ -39,7 +39,7 @@ export async function LandingFooter() {
             <TrackLinks />
           </Suspense>
           <li>
-            <Link href="/courses" className={linkClass}>
+            <Link href="/training/courses" className={linkClass}>
               {t.footer.allCourses}
             </Link>
           </li>
@@ -56,12 +56,12 @@ export async function LandingFooter() {
             </a>
           </li>
           <li>
-            <Link href="/register" className={linkClass}>
+            <Link href="/training/register" className={linkClass}>
               {t.nav.register}
             </Link>
           </li>
           <li>
-            <Link href="/login" className={linkClass}>
+            <Link href="/training/login" className={linkClass}>
               {t.nav.login}
             </Link>
           </li>
@@ -95,7 +95,7 @@ async function TrackLinks() {
   const [{ locale }, tracks] = await Promise.all([getLandingMessages(), getTracks()]);
   return tracks?.map((track) => (
     <li key={track.id}>
-      <Link href={`/courses/${track.slug}`} className={linkClass}>
+      <Link href={`/training/courses/${track.slug}`} className={linkClass}>
         {localizeCourse(track, locale).title}
       </Link>
     </li>

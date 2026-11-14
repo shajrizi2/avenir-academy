@@ -38,7 +38,7 @@ export async function HowItWorks() {
       />
       <div className="bg-background flex justify-center px-4 pt-4 pb-16 lg:pb-28">
         <CtaLink
-          href="/register"
+          href="/training/register"
           cta="how_it_works_register"
           locale={locale}
           variant="chunky"

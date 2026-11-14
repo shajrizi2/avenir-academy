@@ -169,7 +169,7 @@ function Question({ index, demo, locale }: { index: number; demo: Demo; locale: 
               <div className="border-line flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-ink-soft text-sm font-medium">{demo.outro}</p>
                 <CtaLink
-                  href="/register"
+                  href="/training/register"
                   cta="hero_demo_start"
                   locale={locale}
                   variant="chunky"

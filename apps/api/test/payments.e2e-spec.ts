@@ -190,7 +190,7 @@ describe('Payments and groups (e2e)', () => {
     expect(res.kind).toBe('STRIPE');
     if (res.kind !== 'STRIPE') return;
     stripePaymentId = res.paymentId;
-    expect(res.url).toContain('/checkout/success?payment=');
+    expect(res.url).toContain('/training/checkout/success?payment=');
     // The hold is 30 minutes (plus Stripe's own margin is on their side).
     expect(new Date(res.expiresAt).getTime() - Date.now()).toBeGreaterThan(29 * 60_000);
 
@@ -205,7 +205,7 @@ describe('Payments and groups (e2e)', () => {
     });
     expect(params.customer_email).toBe(student.email);
     expect(params.locale).toBe('auto');
-    expect(params.success_url).toContain(`/checkout/success?payment=${stripePaymentId}`);
+    expect(params.success_url).toContain(`/training/checkout/success?payment=${stripePaymentId}`);
 
     const payment = await prisma.payment.findUniqueOrThrow({ where: { id: stripePaymentId } });
     stripeSessionId = payment.stripeSessionId!;

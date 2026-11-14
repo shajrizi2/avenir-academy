@@ -52,7 +52,7 @@ export function GroupDetail() {
       await apiFetch(`/groups/${id}`, { method: 'DELETE' });
       toast.success(g.deleted);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'groups'] });
-      router.push('/admin/groups');
+      router.push('/training/admin/groups');
     } catch (e) {
       toast.error(errorMessage(e));
       throw e;
@@ -66,7 +66,7 @@ export function GroupDetail() {
   return (
     <>
       <Link
-        href="/admin/groups"
+        href="/training/admin/groups"
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {g.title}

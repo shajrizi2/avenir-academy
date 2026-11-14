@@ -1,4 +1,3 @@
-import { ACTIVE_LOCALES } from '@ai-academy/shared';
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@/components/analytics/analytics';
 import { getMessages } from '@/i18n/messages';
@@ -11,12 +10,8 @@ export const metadata: Metadata = { metadataBase: new URL(SITE_URL) };
 
 export const viewport: Viewport = { themeColor: '#ffffff' };
 
-export function generateStaticParams() {
-  return ACTIVE_LOCALES.map((locale) => ({ locale }));
-}
-
-/** Root layout of the marketing site (/sq; /en redirects there). */
-export default async function LocaleLayout({ children }: LayoutProps<'/[locale]'>) {
+/** Root layout of the academy's marketing landing page (/training). */
+export default async function LandingLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   return (
     // suppressHydrationWarning: browser extensions often inject attributes on <html>/<body>

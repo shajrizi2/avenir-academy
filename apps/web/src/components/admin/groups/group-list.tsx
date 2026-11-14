@@ -63,7 +63,7 @@ export function GroupList() {
                     <p className="text-ink-soft text-sm font-semibold">{group.course.title}</p>
                     <h2 className="text-ink text-lg font-bold">
                       <Link
-                        href={`/admin/groups/${group.id}`}
+                        href={`/training/admin/groups/${group.id}`}
                         className="after:rounded-card after:absolute after:inset-0 focus-visible:outline-none"
                       >
                         {group.name}

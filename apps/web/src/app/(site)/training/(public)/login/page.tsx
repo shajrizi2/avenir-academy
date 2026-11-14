@@ -18,7 +18,10 @@ export default function LoginPage() {
       footer={
         <span>
           {t.auth.login.noAccount}{' '}
-          <Link href="/register" className="text-ink font-bold underline underline-offset-4">
+          <Link
+            href="/training/register"
+            className="text-ink font-bold underline underline-offset-4"
+          >
             {t.auth.login.register}
           </Link>
         </span>

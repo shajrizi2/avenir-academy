@@ -145,7 +145,7 @@ function SessionRow({
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button asChild variant={past ? 'chunky' : 'outline'} size="sm">
-          <Link href={`/teach/sessions/${session.id}`}>
+          <Link href={`/training/teach/sessions/${session.id}`}>
             <UserCheck data-icon="inline-start" /> {m.attendance}
           </Link>
         </Button>

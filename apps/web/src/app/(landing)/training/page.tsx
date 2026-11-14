@@ -24,13 +24,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: t.meta.title },
     description: t.meta.description,
-    alternates: { canonical: `/${locale}` },
+    alternates: { canonical: '/training' },
     openGraph: {
       type: 'website',
       siteName: SITE_NAME,
       title: t.meta.title,
       description: t.meta.description,
-      url: `/${locale}`,
+      url: '/training',
       locale: OG_LOCALE[locale],
     },
     twitter: { card: 'summary_large_image', title: t.meta.title, description: t.meta.description },

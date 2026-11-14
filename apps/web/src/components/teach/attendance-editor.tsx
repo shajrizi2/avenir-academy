@@ -56,7 +56,7 @@ function Roster({ attendance }: { attendance: SessionAttendance }) {
   return (
     <>
       <Link
-        href={`/teach/modules/${session.moduleId}`}
+        href={`/training/teach/modules/${session.moduleId}`}
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {session.module.title}

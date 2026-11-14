@@ -34,7 +34,7 @@ export function CourseProgressBlock({ progress }: { progress: CourseProgress }) 
         <div className="bg-soft rounded-xl p-3 text-sm">
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              href={`/learn/${course.slug}/${current.id}`}
+              href={`/training/learn/${course.slug}/${current.id}`}
               className="text-ink font-bold hover:underline"
             >
               {fmt(t.common.module, { number: current.order })}: {current.title}
@@ -71,7 +71,7 @@ function TestHint({
       {state === 'open' ? (
         <>
           <Link
-            href={`/tests/${test.id}`}
+            href={`/training/tests/${test.id}`}
             className="text-ink font-bold underline underline-offset-4"
           >
             {t.dashboard.testOpen}

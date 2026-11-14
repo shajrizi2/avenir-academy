@@ -31,7 +31,7 @@ export function TestResultsView() {
 
   const back = (
     <Link
-      href={`/teach/modules/${moduleId}`}
+      href={`/training/teach/modules/${moduleId}`}
       className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
     >
       <ArrowLeft className="size-4" aria-hidden /> {m.back}
@@ -52,7 +52,7 @@ export function TestResultsView() {
           description={m.noTestText}
           action={
             <Button asChild variant="chunky">
-              <Link href={`/teach/modules/${moduleId}/test`}>{m.createTest}</Link>
+              <Link href={`/training/teach/modules/${moduleId}/test`}>{m.createTest}</Link>
             </Button>
           }
         />

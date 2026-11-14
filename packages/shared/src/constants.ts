@@ -32,6 +32,9 @@ export const MAX_PAGE_SIZE = 100;
 export const LOCALES = ['sq', 'en'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'sq';
+
+/** The academy lives under this path; the home page is the job board. */
+export const TRAINING_PATH = '/training';
 export const ACTIVE_LOCALES = ['sq'] as const satisfies readonly Locale[];
 export function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && (LOCALES as readonly string[]).includes(value);

@@ -43,13 +43,13 @@ export function PaymentView() {
 
   const amount = formatPrice(payment.amountCents, payment.currency);
   const retryHref = payment.group
-    ? `/checkout/${payment.group.id}?module=${payment.module.id}`
-    : `/courses/${payment.course.slug}`;
+    ? `/training/checkout/${payment.group.id}?module=${payment.module.id}`
+    : `/training/courses/${payment.course.slug}`;
 
   return (
     <>
       <Link
-        href="/dashboard"
+        href="/training/dashboard"
         className="text-ink inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden /> {p.backToDashboard}

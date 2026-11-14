@@ -149,7 +149,7 @@ function TrackCard({ track, group, locale, t }: TrackCardProps) {
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <CtaLink
-          href={group ? `/checkout/${group.id}` : `/courses/${track.slug}`}
+          href={group ? `/training/checkout/${group.id}` : `/training/courses/${track.slug}`}
           cta={`track_register_${track.slug}`}
           locale={locale}
           variant="chunky"
@@ -159,7 +159,7 @@ function TrackCard({ track, group, locale, t }: TrackCardProps) {
           <span className="sr-only">: {track.title}</span>
         </CtaLink>
         <CtaLink
-          href={`/courses/${track.slug}`}
+          href={`/training/courses/${track.slug}`}
           cta={`track_${track.slug}`}
           locale={locale}
           variant="chunky-outline"

@@ -24,7 +24,13 @@ export async function Hero() {
           {t.hero.subtitle}
         </p>
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-          <CtaLink href="/register" cta="hero_register" locale={locale} variant="chunky" size="xl">
+          <CtaLink
+            href="/training/register"
+            cta="hero_register"
+            locale={locale}
+            variant="chunky"
+            size="xl"
+          >
             {t.hero.ctaPrimary}
           </CtaLink>
           <CtaLink

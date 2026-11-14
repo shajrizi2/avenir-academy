@@ -43,7 +43,10 @@ export function TestPage() {
     return (
       <div className="space-y-4">
         <FormError message={errorMessage(error)} />
-        <Link href="/dashboard" className="text-ink font-semibold underline underline-offset-4">
+        <Link
+          href="/training/dashboard"
+          className="text-ink font-semibold underline underline-offset-4"
+        >
           {t.tests.page.backToDashboard}
         </Link>
       </div>
@@ -84,7 +87,7 @@ function Overview({
 }) {
   const state = useWindowState(test);
   const finished = test.attempts.filter((a) => a.status !== 'IN_PROGRESS');
-  const moduleHref = `/learn/${test.module.course.slug}/${test.module.id}`;
+  const moduleHref = `/training/learn/${test.module.course.slug}/${test.module.id}`;
 
   return (
     <>
@@ -138,7 +141,7 @@ function Overview({
               {t.tests.page.yourAttempts}
             </h2>
             <Link
-              href={`/tests/${test.id}/result`}
+              href={`/training/tests/${test.id}/result`}
               className="text-ink text-sm font-semibold underline underline-offset-4"
             >
               {t.tests.page.latestResult}
@@ -180,7 +183,7 @@ function StartArea({
         </p>
         {test.nextModule && (
           <Button asChild variant="chunky" size="lg">
-            <Link href={`/learn/${test.nextModule.course.slug}/${test.nextModule.id}`}>
+            <Link href={`/training/learn/${test.nextModule.course.slug}/${test.nextModule.id}`}>
               {fmt(t.tests.page.goToModule, {
                 number: test.nextModule.order,
                 title: test.nextModule.title,

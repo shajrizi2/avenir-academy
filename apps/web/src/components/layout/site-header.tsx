@@ -11,7 +11,7 @@ export function SiteHeader() {
           <Logo />
           <nav aria-label={t.nav.main} className="hidden sm:block">
             <Link
-              href="/courses"
+              href="/training/courses"
               className="text-ink-soft hover:bg-soft hover:text-ink rounded-full px-4 py-2 text-sm font-semibold"
             >
               {t.nav.courses}
@@ -21,7 +21,7 @@ export function SiteHeader() {
         <HeaderAuth />
       </div>
       <nav aria-label={t.nav.mainMobile} className="border-line border-t px-4 py-2 sm:hidden">
-        <Link href="/courses" className="text-ink text-sm font-semibold">
+        <Link href="/training/courses" className="text-ink text-sm font-semibold">
           {t.nav.browseCourses}
         </Link>
       </nav>

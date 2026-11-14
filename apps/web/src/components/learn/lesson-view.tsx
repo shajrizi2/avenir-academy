@@ -43,7 +43,7 @@ export function LessonView() {
   if (isPending) return <Skeleton className="rounded-card h-96 w-full" />;
   if (error) return <FormError message={errorMessage(error)} />;
 
-  const backHref = `/learn/${courseSlug}/${moduleId}`;
+  const backHref = `/training/learn/${courseSlug}/${moduleId}`;
   const done = Boolean(lesson.completedAt);
 
   return (
@@ -98,7 +98,9 @@ export function LessonView() {
         <div>
           {lesson.previous ? (
             <Button asChild variant="outline">
-              <Link href={`/learn/${courseSlug}/${moduleId}/lessons/${lesson.previous.id}`}>
+              <Link
+                href={`/training/learn/${courseSlug}/${moduleId}/lessons/${lesson.previous.id}`}
+              >
                 <ArrowLeft data-icon="inline-start" /> {l.previous}
               </Link>
             </Button>
@@ -118,7 +120,7 @@ export function LessonView() {
           )}
           {lesson.next ? (
             <Button asChild variant={done ? 'chunky' : 'outline'}>
-              <Link href={`/learn/${courseSlug}/${moduleId}/lessons/${lesson.next.id}`}>
+              <Link href={`/training/learn/${courseSlug}/${moduleId}/lessons/${lesson.next.id}`}>
                 {l.next} <ArrowRight data-icon="inline-end" />
               </Link>
             </Button>

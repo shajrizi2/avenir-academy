@@ -3,16 +3,16 @@ import sq from '../messages/sq.json' with { type: 'json' };
 
 const t = sq.landing;
 
-test.describe('landing /sq', () => {
+test.describe('landing /training', () => {
   test('shows the Albanian headline and metadata', async ({ page }) => {
-    await page.goto('/sq');
+    await page.goto('/training');
     await expect(page.locator('html')).toHaveAttribute('lang', 'sq');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(t.hero.title);
     await expect(page).toHaveTitle(t.meta.title);
   });
 
   test('the hero CTAs go to /register and to the courses', async ({ page }) => {
-    await page.goto('/sq');
+    await page.goto('/training');
     const hero = page.getByRole('region', { name: t.hero.title });
     await hero.getByRole('link', { name: t.hero.ctaSecondary }).click();
     await expect(page).toHaveURL(/#tracks$/);
@@ -23,7 +23,7 @@ test.describe('landing /sq', () => {
   });
 
   test('sells the three courses with the price, the discount and real seats', async ({ page }) => {
-    await page.goto('/sq');
+    await page.goto('/training');
     const tracks = page.locator('#tracks');
     for (const title of [
       'Development & Vibe Coding përmes AI',
@@ -46,13 +46,13 @@ test.describe('landing /sq', () => {
   });
 
   test('the header "Fillo tani" button goes to /register', async ({ page }) => {
-    await page.goto('/sq');
+    await page.goto('/training');
     await page.getByRole('banner').getByRole('link', { name: t.nav.cta }).click();
     await expect(page).toHaveURL(/\/register$/);
   });
 
   test('the hero demo gives instant feedback on an answer', async ({ page }) => {
-    await page.goto('/sq');
+    await page.goto('/training');
     const { demo } = t.hero;
     const topic = demo.topics[1];
     await page.getByRole('tab', { name: topic.tab }).click();
@@ -72,13 +72,13 @@ test.describe('landing /sq', () => {
     await expect(feedback).toContainText(demo.correct);
     await expect(feedback.getByRole('link', { name: demo.cta })).toHaveAttribute(
       'href',
-      '/register',
+      '/training/register',
     );
   });
 
   test('has SEO essentials and no English alternates', async ({ page }) => {
-    await page.goto('/sq');
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/sq$/);
+    await page.goto('/training');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/training$/);
     await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
     await expect(page.locator('meta[property="og:image"]').first()).toHaveAttribute(
       'content',
@@ -88,22 +88,16 @@ test.describe('landing /sq', () => {
   });
 });
 
-test('"/" redirects to the Albanian landing page', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveURL(/\/sq$/);
-});
-
-test('/en and /en/... redirect permanently to /sq', async ({ request }) => {
+test('old landing addresses redirect permanently to /training', async ({ request }) => {
   for (const [from, to] of [
-    ['/en', '/sq'],
-    ['/en/kurse?x=1', '/sq/kurse?x=1'],
+    ['/sq', '/training'],
+    ['/en', '/training'],
+    ['/en/kurse?x=1', '/training?x=1'],
   ]) {
     const res = await request.get(from, { maxRedirects: 0 });
-    expect(res.status(), from).toBe(301);
-    expect(
-      new URL(res.headers().location ?? '', 'http://localhost').pathname +
-        new URL(res.headers().location ?? '', 'http://localhost').search,
-    ).toBe(to);
+    expect(res.status(), from).toBe(308);
+    const location = new URL(res.headers().location ?? '', 'http://localhost');
+    expect(location.pathname + location.search).toBe(to);
   }
 });
 
@@ -114,9 +108,9 @@ test('unknown locales are a 404', async ({ page }) => {
 
 test('phones get a sticky "Regjistrohu tani" bar', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile only');
-  await page.goto('/sq');
+  await page.goto('/training');
   await page.mouse.wheel(0, 2500);
   const bar = page.getByRole('link', { name: t.mobileBar.cta }).last();
   await expect(bar).toBeInViewport();
-  await expect(bar).toHaveAttribute('href', '/register');
+  await expect(bar).toHaveAttribute('href', '/training/register');
 });

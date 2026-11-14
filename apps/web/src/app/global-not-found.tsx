@@ -19,7 +19,7 @@ export default function GlobalNotFound() {
           <h1 className="text-ink text-heading font-extrabold">{t.errors.notFoundTitle}</h1>
           <p className="text-ink-soft">{t.errors.notFoundText}</p>
           <div className="flex justify-center pt-2">
-            <Link href="/sq" className="text-ink font-semibold underline-offset-4 hover:underline">
+            <Link href="/" className="text-ink font-semibold underline-offset-4 hover:underline">
               {t.errors.goHome}
             </Link>
           </div>

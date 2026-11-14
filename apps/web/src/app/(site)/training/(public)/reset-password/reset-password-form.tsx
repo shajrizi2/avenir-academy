@@ -40,7 +40,7 @@ export function ResetPasswordForm() {
         body: { token, password },
       });
       toast.success(t.auth.reset.done);
-      router.replace('/login');
+      router.replace('/training/login');
     } catch (e) {
       setError(errorMessage(e));
     }
@@ -80,7 +80,7 @@ export function ResetPasswordForm() {
           </Button>
           {error && (
             <Link
-              href="/forgot-password"
+              href="/training/forgot-password"
               className="text-ink text-center text-sm font-semibold underline-offset-4 hover:underline"
             >
               {t.auth.reset.requestNew}

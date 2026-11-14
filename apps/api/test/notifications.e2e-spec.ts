@@ -145,7 +145,7 @@ describe('Scheduled emails (e2e)', () => {
         .expect(200)
     ).body as LessonSummary[];
     expect(mail[0].text).toContain(
-      `/learn/${course.slug}/${course.modules[0].id}/lessons/${lessons[0].id}`,
+      `/training/learn/${course.slug}/${course.modules[0].id}/lessons/${lessons[0].id}`,
     );
     expect(mail[0].text).toContain('Mësimi i parë');
   });
