@@ -151,6 +151,35 @@ describe('Kosovo eligibility rule', () => {
     ).toBe(true);
   });
 
+  it('rejects jobs that require a language people in Kosovo rarely speak (PLAN D39)', () => {
+    // Seen on the board: an Estonian-language job.
+    expect(
+      checkEligibility(
+        posting({ description: 'Requirements: fluent Estonian and English, written and spoken.' }),
+      ).rule,
+    ).toBe('not_eligible:language:estonian');
+    expect(
+      checkEligibility(posting({ title: 'Finnish-speaking Customer Support Agent' })).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(posting({ description: 'Dutch language skills are a must.' })).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(posting({ description: 'You speak native-level Japanese.' })).eligible,
+    ).toBe(false);
+  });
+
+  it('keeps jobs where the language is only a plus, or is one spoken in Kosovo', () => {
+    const ok = (description: string, title = 'Support Agent') =>
+      checkEligibility(posting({ title, description })).eligible;
+    expect(ok('Fluent English is required. French is a plus.')).toBe(true);
+    expect(ok('Knowledge of Spanish would be nice to have.')).toBe(true);
+    expect(ok('Fluent German and English required.')).toBe(true);
+    expect(ok('Fluent Albanian or Serbian, and good English.')).toBe(true);
+    expect(ok('You care about polish and strong attention to detail.')).toBe(true);
+    expect(ok('Build apps with React Native.', 'React Native Engineer')).toBe(true);
+  });
+
   it('accepts jobs that hire through an employer of record when the location is open', () => {
     expect(
       checkEligibility(

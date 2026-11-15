@@ -535,7 +535,7 @@ again on their own).
 
 ---
 
-## 12. Job board (PLAN D34–D38)
+## 12. Job board (PLAN D34–D39)
 
 The first deploy with the job board moves the academy to `/training` (every old address
 redirects there permanently) and adds the job tables (migration `20261114120000_job_board`, run by
@@ -545,7 +545,8 @@ the deploy like any other). Nothing else needs configuring: the sources are publ
    start one now: admin → **Shpalljet e punës** → **Nis mbledhjen tani**, then refresh after a
    few minutes. The run log shows what was read, published, rejected and closed.
 2. **Add companies.** The list starts with 13 remote-first companies (migration
-   `20261116090000_job_board_quality`) and grows by itself whenever a job on Remote OK, Jobicy or
+   `20261116090000_job_board_quality`) plus 361 from the company directory, whose careers pages
+   are looked up 120 a run (all within 3–4 mornings), and grows by itself whenever a job on Remote OK, Jobicy or
    Himalayas links to a company's Greenhouse, Lever, Ashby or Workable page. Add companies you
    know by pasting their careers link on the same page; a page that keeps failing switches off
    after 5 runs.

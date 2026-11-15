@@ -52,7 +52,7 @@ apps/api/
   src/common/i18n/     Albanian messages for class-validator errors
   src/mail/            MailService (console transport in dev; sendLogged = idempotent), templates.ts (every email), ics.ts
   src/modules/groups, payments, lessons, notifications (cron jobs + email log)
-  src/modules/jobs/    the job board (PLAN D36, D37): campaigns/ (admin email campaigns, minute cron), seekers/, sources/ (career pages + job-board feeds), rules/ (remote, Kosovo eligibility, scam, category), dedupe.ts, pipeline.service.ts (06:00 run)
+  src/modules/jobs/    the job board (PLAN D36–D39): campaigns/ (admin email campaigns, minute cron), seekers/, sources/ (career pages, job-board feeds, directory.ts of 361 companies), rules/ (remote, Kosovo eligibility, language, scam, category), dedupe.ts, pipeline.service.ts (06:00 run)
   src/modules/         auth, users, courses, enrollments, ... (one Nest module per folder)
   test/                e2e tests (*.e2e-spec.ts)
 apps/web/

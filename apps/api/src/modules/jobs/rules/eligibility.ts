@@ -1,6 +1,7 @@
 import type { JobContract, JobRegion } from '../../../generated/prisma/enums.js';
 import type { RawPosting } from '../types.js';
 import { fold } from '../text.js';
+import { requiredLanguage } from './language.js';
 
 /**
  * Can someone living in Kosovo apply? (PLAN D36, D38.) A job is eligible when it is open
@@ -100,6 +101,9 @@ export function checkEligibility(p: RawPosting): EligibilityResult {
     if (re.test(everything))
       return { eligible: false, rule: `not_eligible:${name}`, region: null, contract };
   }
+  const language = requiredLanguage(p.title, p.description);
+  if (language)
+    return { eligible: false, rule: `not_eligible:language:${language}`, region: null, contract };
   for (const re of RESIDENCE) {
     const place = everything.match(re)?.groups?.place;
     if (place !== undefined && !residenceIsOpen(place))

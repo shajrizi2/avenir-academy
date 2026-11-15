@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { MailMessage } from '../src/mail/mail.service.js';
 import { JobsPipelineService } from '../src/modules/jobs/pipeline.service.js';
 import { FakeJobsHttp } from '../src/modules/jobs/sources/fake-http.js';
+import { JOBS_DIRECTORY } from '../src/modules/jobs/sources/directory.js';
 import { JOBS_HTTP } from '../src/modules/jobs/sources/http.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { bootApp, captureMail, createUser } from './support.js';
@@ -27,15 +28,57 @@ describe('Job collection (e2e)', () => {
     'https://remoteok.com/api': 'remoteok',
     'https://jobicy.com/api/v2/remote-jobs': 'jobicy',
     'https://himalayas.app/jobs/api': 'himalayas',
+    // Directory companies (PLAN D39): one linked from its careers page, one under a guessed name.
+    'https://api.lever.co/v0/postings/linkedco': [],
+    'https://boards-api.greenhouse.io/v1/boards/guessco/jobs': {
+      jobs: [
+        {
+          id: 77001,
+          title: 'Support Engineer',
+          absolute_url: 'https://boards.greenhouse.io/guessco/jobs/77001',
+          location: { name: 'Remote - Worldwide' },
+          content: 'Help customers around the world.',
+          updated_at: '2026-11-10T09:00:00Z',
+        },
+      ],
+    },
   };
-  const pages: Record<string, { status: number; finalUrl?: string; body?: string }> = {};
+  const pages: Record<string, { status: number; finalUrl?: string; body?: string }> = {
+    'https://linked.example/careers': {
+      status: 200,
+      body: '<a href="https://jobs.lever.co/linkedco?team=eng">Open roles</a>',
+    },
+  };
+  const directory = [
+    {
+      name: 'Linked Co',
+      website: 'https://linked.example',
+      careersUrl: 'https://linked.example/careers',
+    },
+    {
+      name: 'Guess Co',
+      website: 'https://guessco.example',
+      careersUrl: 'https://guessco.example/jobs',
+    },
+    {
+      name: 'Quiet Co',
+      website: 'https://quiet.example',
+      careersUrl: 'https://quiet.example/jobs',
+    },
+  ];
   const http = new FakeJobsHttp(routes, pages);
 
   const job = (title: string) =>
     prisma.job.findFirstOrThrow({ where: { title }, include: { listings: true, company: true } });
 
   beforeAll(async () => {
-    ({ app, prisma } = await bootApp((b) => b.overrideProvider(JOBS_HTTP).useValue(http)));
+    ({ app, prisma } = await bootApp((b) =>
+      b
+        .overrideProvider(JOBS_HTTP)
+        .useValue(http)
+        .overrideProvider(JOBS_DIRECTORY)
+        .useValue(directory),
+    ));
     pipeline = app.get(JobsPipelineService);
     mail = captureMail();
     for (const table of [
@@ -262,5 +305,18 @@ describe('Job collection (e2e)', () => {
       data: { status: 'RUNNING', startedAt: new Date('2026-11-23T04:59:00Z') },
     });
     expect(await pipeline.run(new Date('2026-11-23T05:00:00Z'))).toBeNull();
+  });
+
+  it('finds the careers boards of directory companies and switches off the rest', async () => {
+    const company = (name: string) => prisma.jobCompany.findFirstOrThrow({ where: { name } });
+    expect(await company('Linked Co')).toMatchObject({
+      ats: 'LEVER',
+      boardToken: 'linkedco',
+      status: 'ACTIVE',
+      discoveredFrom: 'directory',
+    });
+    expect(await company('Guess Co')).toMatchObject({ ats: 'GREENHOUSE', boardToken: 'guessco' });
+    expect(await company('Quiet Co')).toMatchObject({ ats: null, status: 'DISABLED' });
+    expect(await job('Support Engineer')).toMatchObject({ status: 'OPEN', region: 'WORLDWIDE' });
   });
 });

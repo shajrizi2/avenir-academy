@@ -18,7 +18,8 @@ import {
 import { evaluate } from './evaluate.js';
 import { readCareerPage } from './sources/ats.js';
 import { readFeed } from './sources/feeds.js';
-import { JOBS_HTTP, type JobsHttp } from './sources/http.js';
+import { type DirectoryCompany, JOBS_DIRECTORY } from './sources/directory.js';
+import { HttpError, JOBS_HTTP, type JobsHttp } from './sources/http.js';
 import { hostOf, mapLimit, summarize } from './text.js';
 import {
   ATS_KINDS,
@@ -43,6 +44,11 @@ const DEDUPE_WINDOW_DAYS = 30;
 const FEED_FAILS_TO_PAUSE = 3;
 /** A career page failing this many runs in a row is switched off (an admin can turn it back on). */
 const COMPANY_FAILS_TO_DISABLE = 5;
+/** Directory companies whose careers page is looked up per run (all ~360 within a few days). */
+const PROBES_PER_RUN = 120;
+/** Systems tried with a guessed board name when a careers page links to none. */
+const GUESS_KINDS: AtsKind[] = ['GREENHOUSE', 'LEVER', 'ASHBY'];
+const LINK_IN_PAGE = /https?:\/\/[^\s"'<>)\\]+/g;
 /** A run still marked RUNNING after this long is treated as dead. */
 const STALE_RUN_MS = 2 * 60 * 60 * 1000;
 
@@ -95,6 +101,7 @@ export class JobsPipelineService {
     private readonly mail: MailService,
     @Inject(JOBS_HTTP) private readonly http: JobsHttp,
     config: ConfigService<EnvironmentVariables, true>,
+    @Inject(JOBS_DIRECTORY) private readonly directory: readonly DirectoryCompany[],
   ) {
     this.webUrl = config.get('WEB_URL', { infer: true }).replace(/\/$/, '');
   }
@@ -134,6 +141,7 @@ export class JobsPipelineService {
       };
 
       // 1. Career pages first, so feed jobs that point at them find the company's own listing.
+      stats.discovered += await this.findCareerPages(now);
       const pages = await this.readCareerPages(now);
       const feeds = await this.readFeeds(now, problems);
       for (const result of [...pages, ...feeds]) {
@@ -213,16 +221,99 @@ export class JobsPipelineService {
         return { name, kind, company, ok: true, postings };
       } catch (error) {
         const failCount = company.failCount + 1;
+        // A board that doesn't exist (404) won't come back: switch it off at once.
+        const gone = error instanceof HttpError && error.status === 404;
         await this.prisma.jobCompany.update({
           where: { id: company.id },
           data: {
             failCount,
-            ...(failCount >= COMPANY_FAILS_TO_DISABLE ? { status: 'DISABLED' as const } : {}),
+            ...(failCount >= COMPANY_FAILS_TO_DISABLE || gone
+              ? { status: 'DISABLED' as const }
+              : {}),
           },
         });
         return { name, kind, company, ok: false, postings: [], error: (error as Error).message };
       }
     });
+  }
+
+  /**
+   * The company directory (PLAN D39): adds its companies once, then each run reads up to
+   * PROBES_PER_RUN careers pages not looked at yet and records the Greenhouse, Lever, Ashby or
+   * Workable board they link to (or, failing that, one found under a guessed name). Companies
+   * without a board readable this way are switched off. Returns how many boards were found.
+   */
+  private async findCareerPages(now: Date): Promise<number> {
+    if (this.directory.length === 0) return 0;
+    const byKey = new Map(this.directory.map((c) => [companyKey(c.name), c]));
+    await this.prisma.jobCompany.createMany({
+      data: [...byKey].map(([key, c]) => ({
+        key,
+        name: c.name,
+        website: c.website,
+        discoveredFrom: 'directory',
+      })),
+      skipDuplicates: true,
+    });
+    const todo = await this.prisma.jobCompany.findMany({
+      where: { discoveredFrom: 'directory', ats: null, lastFetchedAt: null, status: 'ACTIVE' },
+      orderBy: { createdAt: 'asc' },
+      take: PROBES_PER_RUN,
+    });
+    const found = await mapLimit(todo, 5, async (company) => {
+      const entry = byKey.get(company.key);
+      const board = entry ? await this.findBoard(entry).catch(() => null) : null;
+      const taken =
+        board &&
+        (await this.prisma.jobCompany.findUnique({
+          where: { ats_boardToken: { ats: board.kind, boardToken: board.token } },
+        }));
+      await this.prisma.jobCompany.update({
+        where: { id: company.id },
+        data:
+          board && !taken
+            ? { ats: board.kind, boardToken: board.token, lastFetchedAt: now }
+            : { status: 'DISABLED', lastFetchedAt: now },
+      });
+      return board && !taken ? 1 : 0;
+    });
+    return found.reduce((a: number, b: number) => a + b, 0);
+  }
+
+  /** The careers system behind a company's careers page. */
+  private async findBoard(c: DirectoryCompany): Promise<{ kind: AtsKind; token: string } | null> {
+    const direct = atsFromUrl(c.careersUrl);
+    if (direct) return { kind: direct.kind, token: direct.token };
+    const page = await this.http.page(c.careersUrl).catch(() => null);
+    if (page && page.status < 400) {
+      for (const link of [page.finalUrl, ...(page.body.match(LINK_IN_PAGE) ?? [])]) {
+        const board = atsFromUrl(link.replace(/&amp;/g, '&'));
+        if (board && !['embed', 'api', 'j', 'jobs'].includes(board.token))
+          return { kind: board.kind, token: board.token };
+      }
+    }
+    const names = new Set(
+      [
+        c.name,
+        hostOf(c.website ?? c.careersUrl)
+          ?.split('.')
+          .at(-2) ?? '',
+      ]
+        .map((n) => n.toLowerCase().replace(/[^a-z0-9]+/g, ''))
+        .filter((n) => n.length >= 2),
+    );
+    for (const token of names) {
+      for (const kind of GUESS_KINDS) {
+        const postings = await readCareerPage(this.http, {
+          name: c.name,
+          ats: kind,
+          boardToken: token,
+          website: c.website,
+        }).catch(() => []);
+        if (postings.length > 0) return { kind, token };
+      }
+    }
+    return null;
   }
 
   private async readFeeds(now: Date, problems: string[]): Promise<SourceResult[]> {
