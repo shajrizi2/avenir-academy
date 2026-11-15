@@ -2,10 +2,10 @@
 # Deploys from your laptop, without GitHub Actions or a registry (run from anywhere in the repo):
 #   1. run lint, type-check and the unit tests (skip with --skip-checks)
 #   2. build the web, api and migrate images for the current commit
-#   3. copy deploy/ and the images to the Droplet over SSH
+#   3. copy deploy/ and the images to the server over SSH
 #   4. run deploy/scripts/deploy.sh there: migrations, health checks, automatic rollback
 #
-#   deploy/scripts/ship.sh deploy@<droplet-ip> [--skip-checks] [--allow-dirty]
+#   deploy/scripts/ship.sh deploy@<server-ip> [--skip-checks] [--allow-dirty]
 #
 # The host can also come from SHIP_HOST. The image tag is the commit SHA, so commit first;
 # --allow-dirty ships uncommitted changes under a "<sha>-dirty-<time>" tag.
@@ -32,7 +32,7 @@ for arg in "$@"; do
   esac
 done
 if [[ -z $HOST ]]; then
-  echo "usage: ship.sh deploy@<droplet-ip> [--skip-checks] [--allow-dirty]" >&2
+  echo "usage: ship.sh deploy@<server-ip> [--skip-checks] [--allow-dirty]" >&2
   exit 64
 fi
 

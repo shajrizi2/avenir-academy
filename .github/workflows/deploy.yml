@@ -1,6 +1,6 @@
 name: Deploy
 
-# Production deploy to the DigitalOcean Droplet (docs/DEPLOY.md, step 7).
+# Production deploy to the Hetzner server (docs/DEPLOY.md, step 7).
 # Runs after CI succeeds on main, or by hand (Actions → Deploy → Run workflow). A manual run
 # with a `tag` skips the build and redeploys that existing image tag (e.g. to roll back).
 on:
@@ -92,7 +92,7 @@ jobs:
           cache-from: type=gha,scope=api
 
   deploy:
-    name: Deploy to the Droplet
+    name: Deploy to the server
     needs: build
     # Also runs when `build` was skipped because a tag was given.
     if: >-
