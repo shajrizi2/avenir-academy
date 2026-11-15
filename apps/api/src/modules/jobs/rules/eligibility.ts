@@ -3,11 +3,13 @@ import type { RawPosting } from '../types.js';
 import { fold } from '../text.js';
 
 /**
- * Can someone living in Kosovo apply? (PLAN D36.) A job is eligible when it is open worldwide,
- * to Europe or the Balkans, or when it is a contractor job (in any country, the US and UK
- * included), or when it hires through a global employer-of-record platform. Postings that
- * require living in a country, citizenship, a clearance, US tax forms or a work permit are
- * never eligible. Anything unclear is left out.
+ * Can someone living in Kosovo apply? (PLAN D36, D38.) A job is eligible when it is open
+ * worldwide, to Europe or the Balkans; when a company's own page offers it as a contractor job
+ * (even "Remote - US"); or when it names no place and hires through a global employer of record.
+ * A list of countries from a job board (Himalayas, Jobicy) is where applicants must live, so a
+ * list without Kosovo or a region that includes it is never eligible, contractor or not. So are
+ * postings that require living in a country, a time zone far from Kosovo, citizenship, a
+ * clearance, US tax forms or a work permit. Anything unclear is left out.
  */
 
 // ---- Hard blockers: the posting itself rules out an applicant in Kosovo. ----
@@ -29,9 +31,16 @@ const BLOCKERS: [string, RegExp][] = [
   ],
 ];
 
-/** "must be based in X": blocks unless X is open to Kosovo. */
-const RESIDENCE =
-  /\b(must|should|need to|required to|have to) (currently )?(reside|live|be (located|based|resident)) (in|within) ([^.;\n]{0,60})/;
+/** "must be based in X", "only candidates in X", "X-based applicants only": block unless X includes Kosovo. */
+const RESIDENCE: RegExp[] = [
+  /\b(must|should|need to|required to|have to) (currently )?(reside|live|be (located|based|resident)) (in|within) (?<place>[^.;\n]{0,60})/,
+  /\b(only|exclusively) (open to |accepting |hiring |considering )?(candidates|applicants|residents|people|talent)( who are| currently)? (based |located |living |residing )?(in|from) (?<place>[^.;\n]{0,60})/,
+  /\b(open|available) (only )?to (candidates|applicants|residents|people) (based |located |living |residing )?(in|from) (?<place>[^.;\n]{0,40}?) only\b/,
+  /\b(?<place>[a-z. ]{2,30})[- ](based|located|resident) (candidates|applicants|talent) only\b/,
+];
+
+/** Kosovo is UTC+1 (UTC+2 in summer): a job must accept one of these offsets. */
+const KOSOVO_OFFSETS: [number, number] = [-1, 3];
 
 // ---- Where applicants may be. ----
 const OPEN_WORLD =
@@ -58,8 +67,21 @@ export interface EligibilityResult {
   contract: JobContract;
 }
 
+const ALL_PLACES = /\ball (countries|locations|regions|time ?zones)\b/;
+
 function residenceIsOpen(place: string): boolean {
-  return OPEN_WORLD.test(place) || EUROPE.test(place) || BALKANS.test(place);
+  return (
+    OPEN_WORLD.test(place) || ALL_PLACES.test(place) || EUROPE.test(place) || BALKANS.test(place)
+  );
+}
+
+/** The region a board's country list opens to someone in Kosovo, or null when it doesn't. */
+function openRegion(regions: string[]): JobRegion | null {
+  const list = fold(regions.join(' | '));
+  if (BALKANS.test(list)) return 'BALKANS';
+  if (OPEN_WORLD.test(list)) return 'WORLDWIDE';
+  if (EUROPE.test(list)) return 'EUROPE';
+  return null;
 }
 
 export function checkEligibility(p: RawPosting): EligibilityResult {
@@ -78,19 +100,35 @@ export function checkEligibility(p: RawPosting): EligibilityResult {
     if (re.test(everything))
       return { eligible: false, rule: `not_eligible:${name}`, region: null, contract };
   }
-  const residence = everything.match(RESIDENCE);
-  if (residence && !residenceIsOpen(residence[6])) {
-    return { eligible: false, rule: 'not_eligible:residence', region: null, contract };
+  for (const re of RESIDENCE) {
+    const place = everything.match(re)?.groups?.place;
+    if (place !== undefined && !residenceIsOpen(place))
+      return { eligible: false, rule: 'not_eligible:residence', region: null, contract };
+  }
+  const zones = p.timezones ?? [];
+  if (zones.length > 0 && !zones.some((z) => z >= KOSOVO_OFFSETS[0] && z <= KOSOVO_OFFSETS[1])) {
+    return { eligible: false, rule: 'not_eligible:timezone', region: null, contract };
+  }
+
+  // A job board's list of countries is a hard restriction: being a contractor doesn't help.
+  if (p.regions.length > 0) {
+    const region = openRegion(p.regions);
+    if (region)
+      return { eligible: true, rule: `eligible:${region.toLowerCase()}`, region, contract };
+    return { eligible: false, rule: 'not_eligible:countries', region: null, contract };
   }
 
   // A board that lists no restriction (Himalayas, Jobicy's "Anywhere") means worldwide.
   const boardSaysOpen =
-    (p.source === 'HIMALAYAS' && p.regions.length === 0) ||
+    p.source === 'HIMALAYAS' ||
     (p.source === 'REMOTEOK' &&
       where.replace(/[|\s]/g, '') === '' &&
       OPEN_WORLD_IN_TEXT.test(description));
-  const locationIsBare = /^(remote|fully remote|100% remote|)$/.test(
-    where.replace(/[|]/g, ' ').trim(),
+  const locationIsBare = /^(remote|fully remote|100% remote|remote only|)$/.test(
+    where
+      .replace(/[|,()-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim(),
   );
 
   if (BALKANS.test(where))
@@ -103,10 +141,16 @@ export function checkEligibility(p: RawPosting): EligibilityResult {
   if (locationIsBare && OPEN_WORLD_IN_TEXT.test(description)) {
     return { eligible: true, rule: 'eligible:worldwide_text', region: 'WORLDWIDE', contract };
   }
+  // A company's own page saying "Remote - US" for a contractor job: contractors can work from
+  // anywhere (the product owner's rule, PLAN D36). Board country lists never get here.
   if (contract === 'CONTRACTOR') {
     return { eligible: true, rule: 'eligible:contractor', region: 'CONTRACT_ANYWHERE', contract };
   }
-  if (GLOBAL_EMPLOYER.test(everything) && (locationIsBare || EU_ONLY.test(where))) {
+  if (!locationIsBare) {
+    const rule = EU_ONLY.test(where) ? 'not_eligible:eu_only' : 'not_eligible:location';
+    return { eligible: false, rule, region: null, contract };
+  }
+  if (GLOBAL_EMPLOYER.test(everything)) {
     return {
       eligible: true,
       rule: 'eligible:global_employer',
@@ -114,7 +158,5 @@ export function checkEligibility(p: RawPosting): EligibilityResult {
       contract,
     };
   }
-  if (EU_ONLY.test(where))
-    return { eligible: false, rule: 'not_eligible:eu_only', region: null, contract };
   return { eligible: false, rule: 'not_eligible:location', region: null, contract };
 }

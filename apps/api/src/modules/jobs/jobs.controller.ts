@@ -1,4 +1,4 @@
-import type { JobBoardPage } from '@ai-academy/shared';
+import type { JobBoardPage, JobBoardStatus } from '@ai-academy/shared';
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator.js';
@@ -19,7 +19,7 @@ export class JobsController {
 
   /** Whether "/" shows the board yet. */
   @Get('status')
-  status(): Promise<{ public: boolean }> {
+  status(): Promise<JobBoardStatus> {
     return this.board.status();
   }
 }

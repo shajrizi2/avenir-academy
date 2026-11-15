@@ -133,16 +133,26 @@ describe('Job collection (e2e)', () => {
     });
     expect(await job('Sales Representative')).toMatchObject({
       status: 'REJECTED',
-      rule: 'not_eligible:location',
+      rule: 'not_eligible:countries',
     });
     expect(await job('Data Analyst')).toMatchObject({
       status: 'OPEN',
       region: 'WORLDWIDE',
       category: 'AI_DATA',
     });
+    // A contractor job Himalayas lists only for Germany and the US: not for Kosovo (PLAN D38).
     expect(await job('Frontend Developer')).toMatchObject({
+      status: 'REJECTED',
+      rule: 'not_eligible:countries',
+    });
+    expect(await job('Freelance Clinical Research Associate')).toMatchObject({
       status: 'OPEN',
-      region: 'CONTRACT_ANYWHERE',
+      region: 'BALKANS',
+      salaryMin: 30,
+      salaryMax: 45,
+      salaryCurrency: 'EUR',
+      salaryPeriod: 'HOUR',
+      summary: 'Monitor clinical trial sites across the Balkans on a freelance basis.',
     });
   });
 

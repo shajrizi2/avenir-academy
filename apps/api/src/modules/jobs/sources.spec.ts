@@ -99,4 +99,47 @@ describe('job-board feeds', () => {
     });
     expect(jobs[1].regions).toEqual(['Germany', 'United States']);
   });
+
+  it('reads Himalayas country objects, time zones, the pay period and the summary', async () => {
+    const jobs = await readFeed(http, 'HIMALAYAS');
+    expect(jobs[2]).toMatchObject({
+      regions: ['Albania', 'Kosovo'],
+      timezones: [0, 1, 2],
+      excerpt: 'Monitor clinical trial sites across the Balkans on a freelance basis.',
+      salary: { min: 30, max: 45, currency: 'EUR', period: 'HOUR' },
+    });
+  });
+
+  it('follows the Himalayas cursor to the next page', async () => {
+    const page = (n: number) => ({
+      jobs: Array.from({ length: n }, (_, i) => ({
+        guid: `g${n}-${i}`,
+        title: `Role ${i}`,
+        companyName: 'Acme',
+        applicationLink: `https://himalayas.app/companies/acme/jobs/${n}-${i}`,
+      })),
+      nextCursor: n === 20 ? 'abc==' : null,
+    });
+    const paged = new FakeJobsHttp({
+      'https://himalayas.app/jobs/api?limit=20&cursor=abc%3D%3D': page(3),
+      'https://himalayas.app/jobs/api?limit=20': page(20),
+    });
+    expect(await readFeed(paged, 'HIMALAYAS')).toHaveLength(23);
+    expect(paged.requested).toEqual([
+      'https://himalayas.app/jobs/api?limit=20',
+      'https://himalayas.app/jobs/api?limit=20&cursor=abc%3D%3D',
+    ]);
+  });
+
+  it('reads Jobicy three ways (latest, anywhere, Europe) without duplicates', async () => {
+    const jobs = await readFeed(http, 'JOBICY');
+    const ids = jobs.map((j) => j.externalId);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(http.requested).toEqual(
+      expect.arrayContaining([
+        'https://jobicy.com/api/v2/remote-jobs?count=100&geo=anywhere',
+        'https://jobicy.com/api/v2/remote-jobs?count=100&geo=europe',
+      ]),
+    );
+  });
 });

@@ -19,7 +19,7 @@ import { evaluate } from './evaluate.js';
 import { readCareerPage } from './sources/ats.js';
 import { readFeed } from './sources/feeds.js';
 import { JOBS_HTTP, type JobsHttp } from './sources/http.js';
-import { hostOf, mapLimit } from './text.js';
+import { hostOf, mapLimit, summarize } from './text.js';
 import {
   ATS_KINDS,
   type AtsKind,
@@ -348,6 +348,7 @@ export class JobsPipelineService {
         contract: decision.contract,
         region,
         locationText: posting.locationText || null,
+        summary: summarize(posting.excerpt || posting.description),
         salaryMin: posting.salary?.min ?? null,
         salaryMax: posting.salary?.max ?? null,
         salaryCurrency: posting.salary?.currency ?? null,
@@ -449,6 +450,7 @@ export class JobsPipelineService {
         applyUrl: cleanUrl(posting.applyUrl),
         applySource: posting.source,
         locationText: posting.locationText || null,
+        summary: summarize(posting.excerpt || posting.description),
         ...(decision.region ? { region: decision.region } : {}),
         ...(posting.salary
           ? {

@@ -28,9 +28,18 @@ const jobs: [string, string, string, string, string, string][] = [
 ];
 for (const [id, title, category, region, source, status] of jobs) {
   await db.query(
-    `INSERT INTO "Job" (id, "companyId", title, fingerprint, category, region, "applyUrl", "applySource", status, rule, "scamReasons", "postedAt", "salaryMin", "salaryMax", "salaryCurrency", "salaryPeriod")
-     VALUES ($1, 'e2e-co', $2, $1, $3::"JobCategory", $4::"JobRegion", $5, $6::"JobSourceKind", $7::"JobStatus", 'eligible:test', '{}', now(), 50000, 70000, 'USD', 'YEAR')`,
-    [id, title, category, region, `https://example.com/jobs/${id}`, source, status],
+    `INSERT INTO "Job" (id, "companyId", title, fingerprint, category, region, "applyUrl", "applySource", status, rule, "scamReasons", "postedAt", "salaryMin", "salaryMax", "salaryCurrency", "salaryPeriod", summary)
+     VALUES ($1, 'e2e-co', $2, $1, $3::"JobCategory", $4::"JobRegion", $5, $6::"JobSourceKind", $7::"JobStatus", 'eligible:test', '{}', now(), 50000, 70000, 'USD', 'YEAR', $8)`,
+    [
+      id,
+      title,
+      category,
+      region,
+      `https://example.com/jobs/${id}`,
+      source,
+      status,
+      `${title}: plan and run the work with a small remote team.`,
+    ],
   );
 }
 await db.query(

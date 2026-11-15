@@ -1,5 +1,7 @@
 'use client';
 
+import type { JobBoardStatus } from '@ai-academy/shared';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import {
   Dialog,
@@ -9,7 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { t } from '@/i18n/messages';
-import { useJobSeeker } from '@/lib/job-seeker';
+import { jobsFetch, useJobSeeker } from '@/lib/job-seeker';
 import { CodeLoginForm } from './code-login-form';
 
 /** How long a signed-out visitor browses before the sign-in pop-up (PLAN D37). */
@@ -20,10 +22,16 @@ const prevent = (event: Event) => event.preventDefault();
 /**
  * After 10 seconds, a visitor who isn't signed in must sign in with their email to keep
  * browsing the board. The pop-up can't be closed; signing in closes it for a year on that
- * device. If the API can't be reached, nobody is blocked.
+ * device. Nobody is blocked when the API can't be reached, or while the server can't email
+ * the codes (production with MAIL_TRANSPORT=console; PLAN D38).
  */
 export function SignInGate() {
   const me = useJobSeeker();
+  const status = useQuery({
+    queryKey: ['job-board-status'],
+    queryFn: () => jobsFetch<JobBoardStatus>('/jobs/status'),
+    staleTime: 5 * 60_000,
+  });
   const [due, setDue] = useState(false);
 
   useEffect(() => {
@@ -31,7 +39,7 @@ export function SignInGate() {
     return () => clearTimeout(timer);
   }, []);
 
-  const open = due && me.isSuccess && me.data === null;
+  const open = due && status.data?.signIn === true && me.isSuccess && me.data === null;
   return (
     <Dialog open={open}>
       <DialogContent

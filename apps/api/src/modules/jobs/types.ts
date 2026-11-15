@@ -17,8 +17,8 @@ export interface Salary {
   min: number | null;
   max: number | null;
   currency: string | null;
-  /** YEAR, MONTH or HOUR. */
-  period: 'YEAR' | 'MONTH' | 'HOUR' | null;
+  /** YEAR, MONTH, WEEK or HOUR. */
+  period: 'YEAR' | 'MONTH' | 'WEEK' | 'HOUR' | null;
 }
 
 /** One job posting as a source gave it, in a common shape. */
@@ -37,16 +37,23 @@ export interface RawPosting {
   companyWebsite?: string | null;
   /** Free-text location ("Remote - Europe", "Worldwide", "New York, NY"). */
   locationText: string;
-  /** Countries or regions the source says applicants must be in (Himalayas, Jobicy). */
+  /**
+   * Countries or regions the source says applicants must be in (Himalayas, Jobicy). A list from
+   * the board is a hard restriction: applicants must live in one of them.
+   */
   regions: string[];
+  /** UTC offsets the job accepts (Himalayas), empty when any time zone is fine. */
+  timezones?: number[];
   /** The source's own remote flag, when it has one. */
   remote: boolean | null;
   /** remote / hybrid / onsite, when the source says. */
   workplace: 'remote' | 'hybrid' | 'onsite' | null;
   /** The source's contract or commitment label ("Contract", "Full-time", "Contractor"). */
   employmentType: string | null;
-  /** Plain-text description, used by the rules only (never stored or shown). */
+  /** Plain-text description, used by the rules (never stored or shown in full). */
   description: string;
+  /** The source's own short summary, when it has one; shown under the title. */
+  excerpt?: string;
   /** The source's category or department labels. */
   sourceCategories: string[];
   postedAt: Date | null;

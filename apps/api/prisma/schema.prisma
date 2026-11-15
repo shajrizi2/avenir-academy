@@ -573,8 +573,10 @@ model Job {
   salaryMin      Int?
   salaryMax      Int?
   salaryCurrency String?
-  /// YEAR, MONTH or HOUR.
+  /// YEAR, MONTH, WEEK or HOUR.
   salaryPeriod   String?
+  /// One or two plain-text sentences about the job, shown under the title (PLAN D38).
+  summary        String?
   applyUrl       String
   applySource    JobSourceKind
   status         JobStatus

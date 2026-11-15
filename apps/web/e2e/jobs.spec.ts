@@ -16,14 +16,26 @@ test.describe('job board', () => {
     await expect(list.getByRole('heading', { name: 'Backend Engineer' })).toBeVisible();
     await expect(list.getByRole('heading', { name: 'Old Role' })).toHaveCount(0);
     await expect(list.getByText('$50k–$70k në vit').first()).toBeVisible();
-    await expect(list.getByRole('link', { name: 'Burimi: Remote OK' })).toHaveAttribute(
-      'href',
-      'https://remoteok.com/remote-jobs/e2e-1',
-    );
+    await expect(
+      list.getByText('Growth Marketer: plan and run the work with a small remote team.'),
+    ).toBeVisible();
+    // The title opens the job too, and the rows alternate white and grey.
+    const title = list.getByRole('link', { name: /^Growth Marketer te E2E Labs/ });
+    await expect(title).toHaveAttribute('href', 'https://example.com/jobs/e2e-job-1');
+    await expect(title).toHaveAttribute('target', '_blank');
     const apply = list.getByRole('link', { name: /Apliko për Growth Marketer/ });
     await expect(apply).toHaveAttribute('href', 'https://example.com/jobs/e2e-job-1');
-    await expect(apply).toHaveAttribute('target', '_blank');
+    const rows = list.getByRole('listitem');
+    const background = (i: number) =>
+      rows.nth(i).evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(await background(0)).not.toBe(await background(1));
+    await expect(list.getByText(/Burimi/)).toHaveCount(0);
     await expect(list.getByRole('button')).toHaveCount(0);
+    // One credit line for the job boards under the list, as their terms ask.
+    await expect(page.getByRole('link', { name: 'Himalayas', exact: true })).toHaveAttribute(
+      'href',
+      'https://himalayas.app',
+    );
   });
 
   test('searches with the bar and narrows with the job-type dropdown', async ({ page }) => {

@@ -1593,6 +1593,7 @@
     "periods": {
       "YEAR": "në vit",
       "MONTH": "në muaj",
+      "WEEK": "në javë",
       "HOUR": "në orë"
     },
     "posted": {
@@ -1602,7 +1603,6 @@
     },
     "apply": "Apliko",
     "applyLabel": "Apliko për {title} te {company} (hapet në një skedë të re)",
-    "source": "Burimi: {source}",
     "closed": "E mbyllur",
     "showMore": "Shfaq më shumë",
     "empty": "Nuk gjetëm shpallje. Provo fjalë të tjera ose një lloj tjetër pune.",
@@ -1634,7 +1634,10 @@
       "submit": "Kërko",
       "results": "{count} shpallje për “{q}”",
       "clear": "Pastro kërkimin"
-    }
+    },
+    "openLabel": "{title} te {company} (hapet në një skedë të re)",
+    "credits": "Disa shpallje vijnë nga {sources}.",
+    "creditsAnd": "dhe"
   },
   "adminJobs": {
     "title": "Shpalljet e punës",

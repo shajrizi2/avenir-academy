@@ -83,6 +83,74 @@ describe('Kosovo eligibility rule', () => {
     expect(uk.region).toBe('CONTRACT_ANYWHERE');
   });
 
+  it('rejects a job board country list without Kosovo, even for contractor jobs (PLAN D38)', () => {
+    const board = { source: 'HIMALAYAS' as const, employmentType: 'Contractor' };
+    // Seen on the board: Himalayas contractor jobs only open to India, or to the US.
+    expect(
+      checkEligibility(posting({ ...board, regions: ['India'], locationText: 'India' })).rule,
+    ).toBe('not_eligible:countries');
+    expect(
+      checkEligibility(
+        posting({ ...board, regions: ['United States'], locationText: 'United States' }),
+      ).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(
+        posting({ ...board, regions: ['Germany', 'France'], locationText: 'Germany, France' }),
+      ).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(
+        posting({
+          source: 'JOBICY',
+          employmentType: 'Contract',
+          regions: ['LATAM'],
+          locationText: 'LATAM',
+        }),
+      ).eligible,
+    ).toBe(false);
+  });
+
+  it('accepts a board country list that includes Kosovo or a region around it', () => {
+    expect(
+      checkEligibility(
+        posting({
+          source: 'HIMALAYAS',
+          regions: ['Albania', 'Kosovo', 'Serbia'],
+          locationText: '',
+        }),
+      ).region,
+    ).toBe('BALKANS');
+    expect(
+      checkEligibility(posting({ source: 'JOBICY', regions: ['EMEA'], locationText: 'EMEA' }))
+        .region,
+    ).toBe('EUROPE');
+    expect(
+      checkEligibility(posting({ source: 'HIMALAYAS', regions: [], locationText: '' })).region,
+    ).toBe('WORLDWIDE');
+  });
+
+  it('rejects time zones far from Kosovo and "only candidates in X" wording', () => {
+    expect(
+      checkEligibility(posting({ source: 'HIMALAYAS', regions: [], timezones: [-8, -7, -5] })).rule,
+    ).toBe('not_eligible:timezone');
+    expect(
+      checkEligibility(posting({ source: 'HIMALAYAS', regions: [], timezones: [-5, 0, 1] }))
+        .eligible,
+    ).toBe(true);
+    expect(
+      checkEligibility(
+        posting({ description: 'This role is only open to candidates based in India.' }),
+      ).rule,
+    ).toBe('not_eligible:residence');
+    expect(
+      checkEligibility(posting({ description: 'US-based applicants only, please.' })).rule,
+    ).toBe('not_eligible:residence');
+    expect(
+      checkEligibility(posting({ description: 'We hire people from all countries.' })).eligible,
+    ).toBe(true);
+  });
+
   it('accepts jobs that hire through an employer of record when the location is open', () => {
     expect(
       checkEligibility(

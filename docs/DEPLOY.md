@@ -535,7 +535,7 @@ again on their own).
 
 ---
 
-## 12. Job board (PLAN D34–D37)
+## 12. Job board (PLAN D34–D38)
 
 The first deploy with the job board moves the academy to `/training` (every old address
 redirects there permanently) and adds the job tables (migration `20261114120000_job_board`, run by
@@ -544,14 +544,18 @@ the deploy like any other). Nothing else needs configuring: the sources are publ
 1. **Wait for the first runs.** The API collects jobs every morning at 06:00 (Europe/Tirane). To
    start one now: admin → **Shpalljet e punës** → **Nis mbledhjen tani**, then refresh after a
    few minutes. The run log shows what was read, published, rejected and closed.
-2. **Add companies.** The list starts empty and grows by itself whenever a job on Remote OK,
-   Jobicy or Himalayas links to a company's Greenhouse, Lever, Ashby or Workable page. Add
-   companies you know by pasting their careers link on the same page.
+2. **Add companies.** The list starts with 13 remote-first companies (migration
+   `20261116090000_job_board_quality`) and grows by itself whenever a job on Remote OK, Jobicy or
+   Himalayas links to a company's Greenhouse, Lever, Ashby or Workable page. Add companies you
+   know by pasting their careers link on the same page; a page that keeps failing switches off
+   after 5 runs.
 3. **Look before launch.** Open `https://avenir.academy/?preview`: the board as visitors will
    see it. Until it is switched on, `https://avenir.academy` still opens the academy.
 4. **Switch it on.** Admin → **Cilësimet e faqes** → **Shfaq shpalljet në faqen kryesore**.
    Within a minute `https://avenir.academy` opens the job board.
-5. **Email limit.** Each sign-in sends one code email through Resend, on the same quota as the
+5. **Sign-in needs email.** The 10-second sign-in pop-up only appears once the API really sends
+   email (`MAIL_TRANSPORT=smtp`, step 5). In temporary mode (6a) visitors browse freely.
+   **Email limit.** Each sign-in sends one code email through Resend, on the same quota as the
    academy's emails. The free plan stops at 100 emails a day and 3,000 a month; upgrade before
    promoting the board.
 6. **Email campaigns.** Admin → **Email-et** lists everyone who signed in (CSV export);

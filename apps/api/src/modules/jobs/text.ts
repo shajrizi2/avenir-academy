@@ -87,3 +87,14 @@ export async function mapLimit<T, R>(
   await Promise.all(workers);
   return results;
 }
+
+/** The first sentence or two of a text, at most `max` characters, cut at a word. */
+export function summarize(text: string | null | undefined, max = 200): string | null {
+  const clean = (text ?? '').replace(/\s+/g, ' ').trim();
+  if (clean.length < 20) return null;
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const sentence = cut.lastIndexOf('. ');
+  if (sentence > max * 0.5) return cut.slice(0, sentence + 1);
+  return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:–-]$/, '')}…`;
+}

@@ -57,13 +57,21 @@ export interface PublicJob {
   salaryMin: number | null;
   salaryMax: number | null;
   salaryCurrency: string | null;
-  salaryPeriod: 'YEAR' | 'MONTH' | 'HOUR' | null;
+  salaryPeriod: 'YEAR' | 'MONTH' | 'WEEK' | 'HOUR' | null;
+  /** One or two sentences about the job, when the source gave any. */
+  summary: string | null;
   applyUrl: string;
   postedAt: string;
-  /** Set when the job came from a job board that must be credited, with the link to it there. */
-  credit: { source: JobFeedSource; url: string } | null;
   /** False once the job has closed (saved jobs keep showing it). */
   open: boolean;
+}
+
+/** GET /jobs/status. */
+export interface JobBoardStatus {
+  /** "/" shows the board (SiteSettings.jobBoardPublic). */
+  public: boolean;
+  /** Visitors are asked to sign in after 10 seconds: only when the codes can be emailed. */
+  signIn: boolean;
 }
 
 export interface JobBoardPage {

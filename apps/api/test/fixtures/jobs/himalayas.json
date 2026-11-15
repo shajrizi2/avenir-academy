@@ -30,6 +30,36 @@
       "pubDate": 1794528000,
       "applicationLink": "https://himalayas.app/companies/pixel/jobs/frontend-developer",
       "guid": "https://himalayas.app/companies/pixel/jobs/frontend-developer"
+    },
+    {
+      "title": "Freelance Clinical Research Associate",
+      "excerpt": "Monitor clinical trial sites across the Balkans on a freelance basis.",
+      "companyName": "Trialwise",
+      "companySlug": "trialwise",
+      "employmentType": "Contractor",
+      "minSalary": 30,
+      "maxSalary": 45,
+      "currency": "EUR",
+      "locationRestrictions": [
+        {
+          "alpha2": "AL",
+          "name": "Albania",
+          "slug": "albania"
+        },
+        {
+          "alpha2": "XK",
+          "name": "Kosovo",
+          "slug": "kosovo"
+        }
+      ],
+      "categories": ["Data-Analysis"],
+      "parentCategories": ["Data"],
+      "description": "<p>Turn product data into decisions.</p>",
+      "pubDate": 1794528000,
+      "applicationLink": "https://himalayas.app/companies/trialwise/jobs/freelance-cra",
+      "guid": "https://himalayas.app/companies/trialwise/jobs/freelance-cra",
+      "salaryPeriod": "hourly",
+      "timezoneRestrictions": [0, 1, 2]
     }
   ]
 }
