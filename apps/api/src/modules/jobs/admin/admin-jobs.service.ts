@@ -62,7 +62,8 @@ export class AdminJobsService {
 
   async companies(): Promise<AdminJobCompany[]> {
     const rows = await this.prisma.jobCompany.findMany({
-      where: { ats: { not: null } },
+      // Career pages, and companies from the job boards that have jobs on the board now.
+      where: { OR: [{ ats: { not: null } }, { jobs: { some: { status: 'OPEN' } } }] },
       orderBy: [{ status: 'asc' }, { name: 'asc' }],
       include: { _count: { select: { jobs: { where: { status: 'OPEN' } } } } },
     });
@@ -72,6 +73,7 @@ export class AdminJobsService {
       ats: c.ats,
       boardToken: c.boardToken,
       status: c.status,
+      hiresInKosovo: c.hiresInKosovo,
       discoveredFrom: c.discoveredFrom,
       lastFetchedAt: c.lastFetchedAt?.toISOString() ?? null,
       failCount: c.failCount,
@@ -100,6 +102,26 @@ export class AdminJobsService {
     };
     if (existing) await this.prisma.jobCompany.update({ where: { id: existing.id }, data });
     else await this.prisma.jobCompany.create({ data: { ...data, key, discoveredFrom: 'admin' } });
+  }
+
+  /**
+   * The admins' verdict on whether a company hires people in Kosovo (PLAN D40). "No" takes its
+   * jobs off the board at once; "Yes" lets its Europe and plain "Remote" jobs through from the
+   * next run on (every other rule still applies).
+   */
+  async setCompanyKosovo(id: string, verdict: 'YES' | 'NO' | 'UNKNOWN'): Promise<void> {
+    const hiresInKosovo = verdict === 'YES' ? true : verdict === 'NO' ? false : null;
+    await this.prisma.$transaction([
+      this.prisma.jobCompany.update({ where: { id }, data: { hiresInKosovo } }),
+      ...(hiresInKosovo === false
+        ? [
+            this.prisma.job.updateMany({
+              where: { companyId: id, status: 'OPEN' },
+              data: { status: 'REJECTED', rule: 'not_eligible:company' },
+            }),
+          ]
+        : []),
+    ]);
   }
 
   async setCompanyStatus(id: string, status: 'ACTIVE' | 'DISABLED'): Promise<void> {

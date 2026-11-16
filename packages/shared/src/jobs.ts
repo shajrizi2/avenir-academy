@@ -40,7 +40,7 @@ export function jobCategoryFromSlug(slug: string | null | undefined): JobCategor
 }
 
 export type JobRegion =
-  'WORLDWIDE' | 'EUROPE' | 'BALKANS' | 'CONTRACT_ANYWHERE' | 'GLOBAL_EMPLOYER';
+  'KOSOVO' | 'WORLDWIDE' | 'EUROPE' | 'BALKANS' | 'CONTRACT_ANYWHERE' | 'GLOBAL_EMPLOYER';
 export type JobContract = 'EMPLOYEE' | 'CONTRACTOR' | 'UNKNOWN';
 /** The job boards whose terms require a visible credit. */
 export type JobFeedSource = 'REMOTEOK' | 'JOBICY' | 'HIMALAYAS';
@@ -158,6 +158,8 @@ export interface AdminJobCompany {
   ats: JobSourceKind | null;
   boardToken: string | null;
   status: 'ACTIVE' | 'DISABLED' | 'BLOCKED';
+  /** The admins' verdict (PLAN D40): hires people in Kosovo, doesn't, or unknown (null). */
+  hiresInKosovo: boolean | null;
   discoveredFrom: string | null;
   lastFetchedAt: string | null;
   failCount: number;

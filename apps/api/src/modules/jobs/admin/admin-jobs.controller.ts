@@ -62,7 +62,8 @@ export class AdminJobsController {
     @Param('id') id: string,
     @Body() dto: UpdateJobCompanyDto,
   ): Promise<MessageResponse> {
-    await this.admin.setCompanyStatus(id, dto.status);
+    if (dto.status) await this.admin.setCompanyStatus(id, dto.status);
+    if (dto.kosovo) await this.admin.setCompanyKosovo(id, dto.kosovo);
     return { message: 'U ruajt.' };
   }
 

@@ -6,7 +6,7 @@ const REMOTE_ONLY_SOURCES = new Set(['REMOTEOK', 'JOBICY', 'HIMALAYAS']);
 
 const NOT_REMOTE_SHORT = /\b(hybrid|on[- ]?site|in[- ]office|office[- ]based)\b/;
 const NOT_REMOTE_LONG =
-  /\b(this is an? (hybrid|on[- ]?site|in[- ]office) (role|position|job)|hybrid (role|position|working model|schedule)|\d\s*(days?|x) (a|per) week (in|at|from) (the|our) office|(must|required to|need to|able to) (commute|work from (the|our) office)|relocation (is )?(required|mandatory)|must (be willing to )?relocate)\b/;
+  /\b(this is an? (hybrid|on[- ]?site|in[- ]office) (role|position|job)|hybrid (role|position|working model|schedule)|\d\s*(days?|x) (a|per) week (in|at|from) (the|our) office|(must|required to|need to|able to) (commute|work from (the|our) office)|relocation (is )?(required|mandatory)|must (be willing to )?relocate|within (a )?commut(ing|able) distance|local candidates( only)?|(must|required to|expected to) (come|be) (in)?to (the|our) office|(regular|weekly|monthly) (office|on[- ]?site) (visits|days|attendance))\b/;
 const REMOTE_WORDS = /\b(remote|anywhere|worldwide|work from home|wfh|distributed|home[- ]based)\b/;
 
 export interface RemoteResult {

@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import type { App } from 'supertest/types.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { MailMessage } from '../src/mail/mail.service.js';
+import { AdminJobsService } from '../src/modules/jobs/admin/admin-jobs.service.js';
 import { JobsPipelineService } from '../src/modules/jobs/pipeline.service.js';
 import { FakeJobsHttp } from '../src/modules/jobs/sources/fake-http.js';
 import { JOBS_DIRECTORY } from '../src/modules/jobs/sources/directory.js';
@@ -144,9 +145,10 @@ describe('Job collection (e2e)', () => {
       status: 'REJECTED',
       rule: 'not_remote:no_signal',
     });
+    // "Remote - US" with nothing saying contractors abroad are welcome (PLAN D40).
     expect(await job('Backend Engineer (Contract)')).toMatchObject({
-      status: 'OPEN',
-      region: 'CONTRACT_ANYWHERE',
+      status: 'REJECTED',
+      rule: 'not_eligible:location',
       contract: 'CONTRACTOR',
       salaryMin: 90000,
     });
@@ -161,7 +163,7 @@ describe('Job collection (e2e)', () => {
     });
     expect(await job('Customer Support Specialist')).toMatchObject({
       status: 'OPEN',
-      region: 'BALKANS',
+      region: 'KOSOVO',
     });
     expect(await job('SEO Specialist')).toMatchObject({
       status: 'OPEN',
@@ -169,9 +171,10 @@ describe('Job collection (e2e)', () => {
       applySource: 'REMOTEOK',
     });
     expect(await job('Data Entry Assistant')).toMatchObject({ status: 'REJECTED', rule: 'scam' });
+    // "EMEA" alone doesn't prove Kosovo is included (PLAN D40).
     expect(await job('Content Writer')).toMatchObject({
-      status: 'OPEN',
-      region: 'EUROPE',
+      status: 'REJECTED',
+      rule: 'not_eligible:europe_unconfirmed',
       category: 'WRITING',
     });
     expect(await job('Sales Representative')).toMatchObject({
@@ -190,7 +193,7 @@ describe('Job collection (e2e)', () => {
     });
     expect(await job('Freelance Clinical Research Associate')).toMatchObject({
       status: 'OPEN',
-      region: 'BALKANS',
+      region: 'KOSOVO',
       salaryMin: 30,
       salaryMax: 45,
       salaryCurrency: 'EUR',
@@ -233,7 +236,7 @@ describe('Job collection (e2e)', () => {
           companyName: 'Acme Labs Inc.',
           jobType: ['full-time'],
           jobGeo: 'Europe',
-          jobDescription: '<p>Growth.</p>',
+          jobDescription: '<p>Growth. We hire through Deel.</p>',
           pubDate: '2026-11-14 08:00:00',
         },
         {
@@ -318,5 +321,17 @@ describe('Job collection (e2e)', () => {
     expect(await company('Guess Co')).toMatchObject({ ats: 'GREENHOUSE', boardToken: 'guessco' });
     expect(await company('Quiet Co')).toMatchObject({ ats: null, status: 'DISABLED' });
     expect(await job('Support Engineer')).toMatchObject({ status: 'OPEN', region: 'WORLDWIDE' });
+  });
+
+  it('takes a company’s jobs off the board when admins say it doesn’t hire in Kosovo', async () => {
+    const open = await prisma.job.findFirstOrThrow({ where: { status: 'OPEN' } });
+    await app.get(AdminJobsService).setCompanyKosovo(open.companyId, 'NO');
+    expect(await prisma.job.findUniqueOrThrow({ where: { id: open.id } })).toMatchObject({
+      status: 'REJECTED',
+      rule: 'not_eligible:company',
+    });
+    expect(
+      await prisma.jobCompany.findUniqueOrThrow({ where: { id: open.companyId } }),
+    ).toMatchObject({ hiresInKosovo: false });
   });
 });

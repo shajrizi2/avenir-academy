@@ -396,7 +396,11 @@ export class JobsPipelineService {
     stats: RunStats,
   ): Promise<void> {
     const company = knownCompany ?? (await this.companyFor(posting));
-    const decision = evaluate(posting, { companyWebsite: company.website, blocked });
+    const decision = evaluate(posting, {
+      companyWebsite: company.website,
+      blocked,
+      hiresInKosovo: company.hiresInKosovo,
+    });
     if (!decision.publish) stats.rejected[decision.rule] = (stats.rejected[decision.rule] ?? 0) + 1;
 
     const existing = await this.prisma.jobListing.findUnique({
