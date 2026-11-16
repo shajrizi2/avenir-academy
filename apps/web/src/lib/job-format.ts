@@ -35,22 +35,14 @@ export function postedLabel(postedAt: string, now: number): string {
   return fmt(t.jobs.posted.days, { count: days });
 }
 
-/** At most three short tags under a job: contract, where applicants may live, salary. */
-export function jobTags(job: PublicJob): string[] {
-  const tags: string[] = [];
+/** The small grey details after the pay: job type, contract, where applicants may live. */
+export function jobDetails(job: PublicJob): string[] {
+  const details: string[] = [t.jobs.categories[job.category]];
   if (job.contract !== 'UNKNOWN' && job.region !== 'CONTRACT_ANYWHERE')
-    tags.push(t.jobs.contracts[job.contract]);
-  tags.push(t.jobs.regions[job.region]);
-  const salary = salaryLabel(job);
-  if (salary) tags.push(salary);
-  return tags;
+    details.push(t.jobs.contracts[job.contract]);
+  details.push(t.jobs.regions[job.region]);
+  return details;
 }
-
-export const FEED_NAMES: Record<NonNullable<PublicJob['credit']>['source'], string> = {
-  REMOTEOK: 'Remote OK',
-  JOBICY: 'Jobicy',
-  HIMALAYAS: 'Himalayas',
-};
 
 const TYPOS: Record<string, string> = {
   'gmial.com': 'gmail.com',

@@ -1,5 +1,6 @@
 import type { AtsKind, RawPosting, Salary } from '../types.js';
 import { asDate, asNumber, asString, htmlToText } from '../text.js';
+import { normalizeSalary } from '../salary.js';
 import type { JobsHttp } from './http.js';
 
 /** A company whose career page is read directly. */
@@ -33,6 +34,7 @@ function period(value: unknown): Salary['period'] {
   const v = asString(value).toLowerCase();
   if (/hour/.test(v)) return 'HOUR';
   if (/month/.test(v)) return 'MONTH';
+  if (/week/.test(v)) return 'WEEK';
   if (/year|annual|salary/.test(v)) return 'YEAR';
   return null;
 }
@@ -149,7 +151,7 @@ async function ashby(http: JobsHttp, c: AtsCompany): Promise<RawPosting[]> {
               min: asNumber(salary.minValue),
               max: asNumber(salary.maxValue),
               currency: asString(salary.currencyCode) || null,
-              period: period(salary.interval) ?? 'YEAR',
+              period: period(salary.interval),
             }
           : null,
       } satisfies RawPosting;
@@ -204,5 +206,7 @@ const READERS: Record<AtsKind, (http: JobsHttp, c: AtsCompany) => Promise<RawPos
 /** Every open job on one company's career page. Postings without an ID or title are dropped. */
 export async function readCareerPage(http: JobsHttp, company: AtsCompany): Promise<RawPosting[]> {
   const postings = await READERS[company.ats](http, company);
-  return postings.filter((p) => p.externalId && p.title && p.applyUrl);
+  return postings
+    .filter((p) => p.externalId && p.title && p.applyUrl)
+    .map((p) => ({ ...p, salary: p.salary && normalizeSalary(p.salary) }));
 }

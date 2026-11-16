@@ -1,18 +1,18 @@
 import {
   JOB_PAGE_SIZE,
   type JobBoardPage,
+  type JobBoardStatus,
   type JobCategory,
-  type JobFeedSource,
   type PublicJob,
   localDateKey,
   parseDateKey,
   zonedTimeToUtc,
 } from '@ai-academy/shared';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { type EnvironmentVariables, NodeEnv } from '../../config/env.validation.js';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-
-const FEEDS = new Set<string>(['REMOTEOK', 'JOBICY', 'HIMALAYAS']);
 
 export const publicJobSelect = {
   id: true,
@@ -25,20 +25,19 @@ export const publicJobSelect = {
   salaryCurrency: true,
   salaryPeriod: true,
   applyUrl: true,
-  applySource: true,
+  summary: true,
   postedAt: true,
   status: true,
   company: { select: { name: true } },
-  listings: { select: { source: true, sourceUrl: true } },
 } as const satisfies Prisma.JobSelect;
 
 type JobRow = Prisma.JobGetPayload<{ select: typeof publicJobSelect }>;
 
-/** A job as the board shows it; a job-board source comes with the credit its terms require. */
+/**
+ * A job as the board shows it. The job boards' credit is one line under the list (their terms
+ * allow a site-wide credit), and the title and "Apliko" link to the job on that board.
+ */
 export function toPublicJob(job: JobRow): PublicJob {
-  const credited = FEEDS.has(job.applySource)
-    ? job.listings.find((l) => l.source === job.applySource)
-    : undefined;
   return {
     id: job.id,
     title: job.title,
@@ -52,7 +51,7 @@ export function toPublicJob(job: JobRow): PublicJob {
     salaryPeriod: (job.salaryPeriod as PublicJob['salaryPeriod']) ?? null,
     applyUrl: job.applyUrl,
     postedAt: job.postedAt.toISOString(),
-    credit: credited ? { source: credited.source as JobFeedSource, url: credited.sourceUrl } : null,
+    summary: job.summary,
     open: job.status === 'OPEN',
   };
 }
@@ -60,7 +59,17 @@ export function toPublicJob(job: JobRow): PublicJob {
 /** The public job list: open jobs, newest first, 30 a page, filtered by category. */
 @Injectable()
 export class JobBoardService {
-  constructor(private readonly prisma: PrismaService) {}
+  /** Whether visitors are asked to sign in (PLAN D38): only when the codes can really be emailed. */
+  private readonly signIn: boolean;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    config: ConfigService<EnvironmentVariables, true>,
+  ) {
+    this.signIn =
+      config.get('MAIL_TRANSPORT', { infer: true }) === 'smtp' ||
+      config.get('NODE_ENV', { infer: true }) !== NodeEnv.Production;
+  }
 
   async page(
     query: { q?: string; category?: JobCategory; page?: number },
@@ -116,12 +125,16 @@ export class JobBoardService {
     };
   }
 
-  /** Whether "/" shows the board (the web app's proxy asks on every visit to "/", cached). */
-  async status(): Promise<{ public: boolean }> {
+  /**
+   * Whether "/" shows the board (the web app's proxy asks on every visit to "/", cached), and
+   * whether the board asks visitors to sign in: never while production emails are switched off
+   * (MAIL_TRANSPORT=console), or nobody could get past the pop-up.
+   */
+  async status(): Promise<JobBoardStatus> {
     const settings = await this.prisma.siteSettings.findUnique({
       where: { id: 1 },
       select: { jobBoardPublic: true },
     });
-    return { public: settings?.jobBoardPublic ?? false };
+    return { public: settings?.jobBoardPublic ?? false, signIn: this.signIn };
   }
 }

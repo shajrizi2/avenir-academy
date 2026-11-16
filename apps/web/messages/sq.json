@@ -1580,6 +1580,7 @@
       "OTHER": "Tjetër"
     },
     "regions": {
+      "KOSOVO": "Hapur për Kosovën",
       "WORLDWIDE": "E gjithë bota",
       "EUROPE": "Evropë",
       "BALKANS": "Ballkan",
@@ -1593,6 +1594,7 @@
     "periods": {
       "YEAR": "në vit",
       "MONTH": "në muaj",
+      "WEEK": "në javë",
       "HOUR": "në orë"
     },
     "posted": {
@@ -1602,7 +1604,6 @@
     },
     "apply": "Apliko",
     "applyLabel": "Apliko për {title} te {company} (hapet në një skedë të re)",
-    "source": "Burimi: {source}",
     "closed": "E mbyllur",
     "showMore": "Shfaq më shumë",
     "empty": "Nuk gjetëm shpallje. Provo fjalë të tjera ose një lloj tjetër pune.",
@@ -1634,7 +1635,10 @@
       "submit": "Kërko",
       "results": "{count} shpallje për “{q}”",
       "clear": "Pastro kërkimin"
-    }
+    },
+    "openLabel": "{title} te {company} (hapet në një skedë të re)",
+    "credits": "Disa shpallje vijnë nga {sources}.",
+    "creditsAnd": "dhe"
   },
   "adminJobs": {
     "title": "Shpalljet e punës",
@@ -1661,7 +1665,7 @@
     "feedPaused": "I ndalur deri më {date}",
     "feedFailing": "{count} dështime radhazi",
     "companies": "Faqet e karrierës",
-    "companiesHint": "Kompanitë që lexohen çdo mëngjes. Shumica shtohen vetë kur një shpallje lidhet me faqen e tyre.",
+    "companiesHint": "Kompanitë që lexohen çdo mëngjes. Shumica shtohen vetë kur një shpallje lidhet me faqen e tyre. Nëse e di që një kompani punëson (ose jo) në Kosovë, zgjidhe: «jo» i heq menjëherë shpalljet e saj, «po» i lejon shpalljet e saj për Evropën.",
     "companiesEmpty": "Nuk ka ende kompani. Shto një ose prit mbledhjen e parë.",
     "addCompany": "Shto kompani",
     "companyName": "Emri i kompanisë",
@@ -1691,7 +1695,13 @@
     "blockValue": "Emri ose domeni",
     "blockReason": "Arsyeja",
     "unblock": "Hiq bllokimin",
-    "saved": "U ruajt."
+    "saved": "U ruajt.",
+    "kosovoLabel": "A punëson {name} në Kosovë?",
+    "kosovo": {
+      "UNKNOWN": "Kosova: nuk dihet",
+      "YES": "Kosova: po",
+      "NO": "Kosova: jo"
+    }
   },
   "unsubscribe": {
     "metaTitle": "Çregjistrohu",

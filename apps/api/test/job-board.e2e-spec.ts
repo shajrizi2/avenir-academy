@@ -61,6 +61,7 @@ describe('Job board (e2e)', () => {
     await make(pixel.id, 'Brand Designer', { category: 'DESIGN' });
     await make(acme.id, 'Closed Role', { status: 'CLOSED', closeReason: 'TOO_OLD' });
     await make(acme.id, 'Remote Copywriter', {
+      summary: 'Write landing pages and emails for our product.',
       applySource: 'REMOTEOK',
       applyUrl: 'https://remoteok.com/remote-jobs/1',
       listings: {
@@ -83,7 +84,7 @@ describe('Job board (e2e)', () => {
     await app.close();
   });
 
-  it('lists open jobs, newest first, with type counts and job-board credits', async () => {
+  it('lists open jobs, newest first, with type counts and a short summary', async () => {
     const page = await list();
     expect(page.public).toBe(false);
     expect(page.jobs[0].title).toBe('Growth Lead');
@@ -92,7 +93,10 @@ describe('Job board (e2e)', () => {
     expect(page.categories[0]).toEqual({ category: 'MARKETING', count: 3 });
     expect(page.categories).toHaveLength(3);
     const feed = page.jobs.find((j) => j.title === 'Remote Copywriter') as PublicJob;
-    expect(feed.credit).toEqual({ source: 'REMOTEOK', url: 'https://remoteok.com/remote-jobs/1' });
+    expect(feed.summary).toBe('Write landing pages and emails for our product.');
+    // The title and "Apliko" link to the job on the board: the link back its terms ask for.
+    expect(feed.applyUrl).toBe('https://remoteok.com/remote-jobs/1');
+    expect(feed).not.toHaveProperty('credit');
   });
 
   it('searches titles and company names, every word, any case, with the type dropdown', async () => {
@@ -112,9 +116,16 @@ describe('Job board (e2e)', () => {
   });
 
   it('reports whether the board is public', async () => {
-    expect((await http().get('/api/v1/jobs/status').expect(200)).body).toEqual({ public: false });
+    // Outside production the sign-in pop-up is on even with console email (codes in the log).
+    expect((await http().get('/api/v1/jobs/status').expect(200)).body).toEqual({
+      public: false,
+      signIn: true,
+    });
     await prisma.siteSettings.update({ where: { id: 1 }, data: { jobBoardPublic: true } });
-    expect((await http().get('/api/v1/jobs/status').expect(200)).body).toEqual({ public: true });
+    expect((await http().get('/api/v1/jobs/status').expect(200)).body).toEqual({
+      public: true,
+      signIn: true,
+    });
   });
 
   it('signs in with an emailed code and records the email consent tick', async () => {

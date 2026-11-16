@@ -77,7 +77,7 @@ export async function JobBoard({ searchParams }: { searchParams: Promise<BoardPa
       {data.jobs.length === 0 ? (
         <p className="text-ink-soft py-16 text-center">{t.jobs.empty}</p>
       ) : (
-        <ul aria-label={t.jobs.listLabel} className="border-line border-t">
+        <ul aria-label={t.jobs.listLabel} className="border-line border-y">
           {data.jobs.map((job) => (
             <JobRow key={job.id} job={job} />
           ))}
@@ -92,6 +92,7 @@ export async function JobBoard({ searchParams }: { searchParams: Promise<BoardPa
           </Button>
         </div>
       )}
+      <FeedCredits />
     </>
   );
 }
@@ -108,5 +109,30 @@ export function JobBoardSkeleton() {
         </div>
       ))}
     </div>
+  );
+}
+
+/** The job boards some jobs come from: their terms ask for a visible credit and link (PLAN D38). */
+const FEEDS = [
+  { name: 'Remote OK', url: 'https://remoteok.com' },
+  { name: 'Jobicy', url: 'https://jobicy.com' },
+  { name: 'Himalayas', url: 'https://himalayas.app' },
+];
+
+function FeedCredits() {
+  const [before, after] = t.jobs.credits.split('{sources}');
+  return (
+    <p className="text-ink-soft pt-2 text-center text-sm">
+      {before}
+      {FEEDS.map((feed, i) => (
+        <span key={feed.name}>
+          {i > 0 && (i === FEEDS.length - 1 ? ` ${t.jobs.creditsAnd} ` : ', ')}
+          <a href={feed.url} className="hover:text-ink underline underline-offset-4">
+            {feed.name}
+          </a>
+        </span>
+      ))}
+      {after}
+    </p>
   );
 }

@@ -28,6 +28,17 @@ function posting(over: Partial<RawPosting> = {}): RawPosting {
 }
 
 describe('remote rule', () => {
+  it('rejects remote jobs that hide office time (PLAN D40)', () => {
+    for (const description of [
+      'You should live within commuting distance of Berlin.',
+      'Local candidates only.',
+      'You are expected to come into the office on Mondays.',
+      'Monthly office visits in Amsterdam.',
+    ]) {
+      expect(checkRemote(posting({ description })).remote).toBe(false);
+    }
+  });
+
   it('accepts remote locations, flags and remote-only boards', () => {
     expect(checkRemote(posting()).remote).toBe(true);
     expect(checkRemote(posting({ locationText: 'Berlin', remote: true })).remote).toBe(true);
@@ -51,36 +62,252 @@ describe('remote rule', () => {
 });
 
 describe('Kosovo eligibility rule', () => {
-  it('accepts worldwide, Europe and Balkans jobs', () => {
+  it('accepts worldwide, Kosovo and confirmed Europe jobs', () => {
     expect(checkEligibility(posting()).region).toBe('WORLDWIDE');
     expect(checkEligibility(posting({ locationText: 'Remote (Anywhere)' })).region).toBe(
       'WORLDWIDE',
     );
-    expect(checkEligibility(posting({ locationText: 'Remote - Europe' })).region).toBe('EUROPE');
-    expect(checkEligibility(posting({ locationText: 'Remote, EMEA' })).region).toBe('EUROPE');
-    expect(checkEligibility(posting({ locationText: 'Remote (CET ±3h)' })).region).toBe('EUROPE');
-    expect(checkEligibility(posting({ locationText: 'Remote - Kosovo' })).region).toBe('BALKANS');
+    const contract = { employmentType: 'Contract' };
+    expect(checkEligibility(posting({ ...contract, locationText: 'Remote - Europe' })).region).toBe(
+      'EUROPE',
+    );
+    expect(checkEligibility(posting({ ...contract, locationText: 'Remote, EMEA' })).region).toBe(
+      'EUROPE',
+    );
+    expect(
+      checkEligibility(posting({ ...contract, locationText: 'Remote (CET ±3h)' })).region,
+    ).toBe('EUROPE');
+    expect(checkEligibility(posting({ locationText: 'Remote - Kosovo' })).region).toBe('KOSOVO');
+    expect(checkEligibility(posting({ locationText: 'Remote - Western Balkans' })).region).toBe(
+      'BALKANS',
+    );
     expect(
       checkEligibility(posting({ source: 'HIMALAYAS', locationText: '', regions: [] })).region,
     ).toBe('WORLDWIDE');
   });
 
-  it('accepts US and UK jobs when they are contractor jobs', () => {
-    const us = checkEligibility(
-      posting({ locationText: 'Remote - US', employmentType: 'Contract' }),
-    );
-    expect(us).toMatchObject({
-      eligible: true,
-      region: 'CONTRACT_ANYWHERE',
-      contract: 'CONTRACTOR',
+  it('rejects "Remote - US" contractor jobs unless they hire contractors internationally (PLAN D40)', () => {
+    expect(
+      checkEligibility(posting({ locationText: 'Remote - US', employmentType: 'Contract' })).rule,
+    ).toBe('not_eligible:location');
+    expect(
+      checkEligibility(
+        posting({
+          locationText: 'Remote (UK)',
+          description: 'This is an independent contractor role.',
+        }),
+      ).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(
+        posting({
+          locationText: 'Remote',
+          employmentType: 'Contractor',
+          description: 'We work with contractors from around the world and collect a W-8BEN.',
+        }),
+      ),
+    ).toMatchObject({ eligible: true, region: 'CONTRACT_ANYWHERE' });
+    expect(
+      checkEligibility(posting({ locationText: 'Remote', employmentType: 'Contractor' })).rule,
+    ).toBe('not_eligible:no_evidence');
+  });
+
+  it('rejects a job board country list without Kosovo, even for contractor jobs (PLAN D38)', () => {
+    const board = { source: 'HIMALAYAS' as const, employmentType: 'Contractor' };
+    // Seen on the board: Himalayas contractor jobs only open to India, or to the US.
+    expect(
+      checkEligibility(posting({ ...board, regions: ['India'], locationText: 'India' })).rule,
+    ).toBe('not_eligible:countries');
+    expect(
+      checkEligibility(
+        posting({ ...board, regions: ['United States'], locationText: 'United States' }),
+      ).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(
+        posting({ ...board, regions: ['Germany', 'France'], locationText: 'Germany, France' }),
+      ).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(
+        posting({
+          source: 'JOBICY',
+          employmentType: 'Contract',
+          regions: ['LATAM'],
+          locationText: 'LATAM',
+        }),
+      ).eligible,
+    ).toBe(false);
+  });
+
+  it('accepts a board country list that includes Kosovo or a region around it', () => {
+    expect(
+      checkEligibility(
+        posting({
+          source: 'HIMALAYAS',
+          regions: ['Albania', 'Kosovo', 'Serbia'],
+          locationText: '',
+        }),
+      ).region,
+    ).toBe('KOSOVO');
+    expect(
+      checkEligibility(posting({ source: 'JOBICY', regions: ['EMEA'], locationText: 'EMEA' })).rule,
+    ).toBe('not_eligible:europe_unconfirmed');
+    expect(
+      checkEligibility(
+        posting({
+          source: 'JOBICY',
+          employmentType: 'Freelance',
+          regions: ['EMEA'],
+          locationText: 'EMEA',
+        }),
+      ).region,
+    ).toBe('EUROPE');
+    expect(
+      checkEligibility(posting({ source: 'HIMALAYAS', regions: [], locationText: '' })).region,
+    ).toBe('WORLDWIDE');
+  });
+
+  it('rejects time zones far from Kosovo and "only candidates in X" wording', () => {
+    expect(
+      checkEligibility(posting({ source: 'HIMALAYAS', regions: [], timezones: [-8, -7, -5] })).rule,
+    ).toBe('not_eligible:timezone');
+    expect(
+      checkEligibility(posting({ source: 'HIMALAYAS', regions: [], timezones: [-5, 0, 1] }))
+        .eligible,
+    ).toBe(true);
+    expect(
+      checkEligibility(
+        posting({ description: 'This role is only open to candidates based in India.' }),
+      ).rule,
+    ).toBe('not_eligible:residence');
+    expect(
+      checkEligibility(posting({ description: 'US-based applicants only, please.' })).rule,
+    ).toBe('not_eligible:residence');
+    expect(
+      checkEligibility(posting({ description: 'We hire people from all countries.' })).eligible,
+    ).toBe(true);
+  });
+
+  it('rejects jobs that require a language people in Kosovo rarely speak (PLAN D39)', () => {
+    // Seen on the board: an Estonian-language job.
+    expect(
+      checkEligibility(
+        posting({ description: 'Requirements: fluent Estonian and English, written and spoken.' }),
+      ).rule,
+    ).toBe('not_eligible:language:estonian');
+    expect(
+      checkEligibility(posting({ title: 'Finnish-speaking Customer Support Agent' })).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(posting({ description: 'Dutch language skills are a must.' })).eligible,
+    ).toBe(false);
+    expect(
+      checkEligibility(posting({ description: 'You speak native-level Japanese.' })).eligible,
+    ).toBe(false);
+  });
+
+  it('keeps jobs where the language is only a plus, or is one spoken in Kosovo', () => {
+    const ok = (description: string, title = 'Support Agent') =>
+      checkEligibility(posting({ title, description })).eligible;
+    expect(ok('Fluent English is required. French is a plus.')).toBe(true);
+    expect(ok('Knowledge of Spanish would be nice to have.')).toBe(true);
+    expect(ok('Fluent German and English required.')).toBe(true);
+    expect(ok('Fluent Albanian or Serbian, and good English.')).toBe(true);
+    expect(ok('You care about polish and strong attention to detail.')).toBe(true);
+    expect(ok('Build apps with React Native.', 'React Native Engineer')).toBe(true);
+  });
+
+  describe('strict evidence (PLAN D40)', () => {
+    const job = (over: Partial<RawPosting>) => checkEligibility(posting(over));
+
+    it('needs something that confirms Kosovo for "Europe" jobs', () => {
+      expect(job({ locationText: 'Remote - Europe' }).rule).toBe('not_eligible:europe_unconfirmed');
+      expect(
+        job({ locationText: 'Remote - Europe', description: 'We pay through Deel.' }).region,
+      ).toBe('EUROPE');
+      expect(
+        job({ locationText: 'Europe', description: 'Open to EU and non-EU countries.' }).region,
+      ).toBe('EUROPE');
+      expect(job({ locationText: 'Remote (EU)', employmentType: 'Contract' }).rule).toBe(
+        'not_eligible:eu_only',
+      );
+      expect(
+        checkEligibility(posting({ locationText: 'Remote - Europe' }), { hiresInKosovo: true })
+          .region,
+      ).toBe('EUROPE');
     });
-    const uk = checkEligibility(
-      posting({
-        locationText: 'Remote (UK)',
-        description: 'This is an independent contractor role.',
-      }),
-    );
-    expect(uk.region).toBe('CONTRACT_ANYWHERE');
+
+    it('follows the admins’ verdict on a company', () => {
+      expect(checkEligibility(posting(), { hiresInKosovo: false }).rule).toBe(
+        'not_eligible:company',
+      );
+      expect(
+        checkEligibility(posting({ locationText: 'Remote' }), { hiresInKosovo: true }).region,
+      ).toBe('KOSOVO');
+    });
+
+    it('rejects Kosovo exclusions, US payroll paperwork and "EU only"', () => {
+      expect(job({ description: 'Open worldwide, except Russia, Belarus and Kosovo.' }).rule).toBe(
+        'not_eligible:excluded',
+      );
+      expect(job({ description: 'You will complete Form I-9 and E-Verify.' }).rule).toBe(
+        'not_eligible:us_payroll',
+      );
+      expect(job({ description: 'Payments go to a US bank account.' }).rule).toBe(
+        'not_eligible:us_payroll',
+      );
+      expect(job({ description: 'You must be living in the EU.' }).rule).toBe(
+        'not_eligible:eu_only',
+      );
+      expect(job({ description: 'EU residents only.' }).rule).toBe('not_eligible:eu_only');
+    });
+
+    it('rejects required travel that needs a visa from Kosovo, not optional or Schengen trips', () => {
+      expect(
+        job({ description: 'You will be required to travel to our New York office every quarter.' })
+          .rule,
+      ).toBe('not_eligible:travel_visa');
+      expect(job({ description: 'Travel to London is mandatory twice a year.' }).rule).toBe(
+        'not_eligible:travel_visa',
+      );
+      expect(job({ description: 'Optional trips to our London office.' }).eligible).toBe(true);
+      expect(job({ description: 'You must travel to Berlin twice a year.' }).eligible).toBe(true);
+    });
+
+    it('rejects a country or region in the title', () => {
+      expect(job({ title: 'Account Executive (US)' }).rule).toBe('not_eligible:title_location');
+      expect(job({ title: 'Customer Success Manager - DACH' }).rule).toBe(
+        'not_eligible:title_location',
+      );
+      expect(job({ title: 'Sales Development Rep, LATAM' }).rule).toBe(
+        'not_eligible:title_location',
+      );
+      expect(job({ title: 'Product Manager, India' }).rule).toBe('not_eligible:title_location');
+      expect(job({ title: 'Senior Engineer, Platform' }).eligible).toBe(true);
+      expect(job({ title: 'Help us build the future (Worldwide)' }).eligible).toBe(true);
+    });
+
+    it('reads "we can hire in the following countries" lists', () => {
+      expect(
+        job({
+          locationText: 'Remote',
+          description: 'We can hire in the following countries: Germany, Spain, Poland.',
+        }).rule,
+      ).toBe('not_eligible:countries_text');
+      expect(
+        job({
+          locationText: 'Remote',
+          description: 'We can hire in the following countries: Albania, Kosovo, North Macedonia.',
+        }).region,
+      ).toBe('KOSOVO');
+    });
+
+    it('treats a bare "Remote" with no evidence as not eligible', () => {
+      expect(job({ locationText: 'Remote', description: 'Join our team.' }).rule).toBe(
+        'not_eligible:no_evidence',
+      );
+    });
   });
 
   it('accepts jobs that hire through an employer of record when the location is open', () => {
@@ -125,7 +352,10 @@ describe('Kosovo eligibility rule', () => {
   it('allows a residence requirement that includes Kosovo', () => {
     expect(
       checkEligibility(
-        posting({ locationText: 'Remote - Europe', description: 'You must be based in Europe.' }),
+        posting({
+          locationText: 'Remote - Europe',
+          description: 'You must be based in Europe. We hire through Deel.',
+        }),
       ).eligible,
     ).toBe(true);
   });

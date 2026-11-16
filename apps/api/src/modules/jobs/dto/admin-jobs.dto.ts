@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsIn, IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 
 export class AddJobCompanyDto {
   @ApiProperty({ example: 'Acme Labs' })
@@ -14,9 +14,16 @@ export class AddJobCompanyDto {
 }
 
 export class UpdateJobCompanyDto {
-  @ApiProperty({ enum: ['ACTIVE', 'DISABLED'] })
+  @ApiPropertyOptional({ enum: ['ACTIVE', 'DISABLED'] })
+  @IsOptional()
   @IsIn(['ACTIVE', 'DISABLED'])
-  status: 'ACTIVE' | 'DISABLED';
+  status?: 'ACTIVE' | 'DISABLED';
+
+  /** Whether the company hires people in Kosovo (PLAN D40). */
+  @ApiPropertyOptional({ enum: ['YES', 'NO', 'UNKNOWN'] })
+  @IsOptional()
+  @IsIn(['YES', 'NO', 'UNKNOWN'])
+  kosovo?: 'YES' | 'NO' | 'UNKNOWN';
 }
 
 export class AddJobBlockDto {

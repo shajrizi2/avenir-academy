@@ -10,6 +10,7 @@ import { JobSeekerCookie } from './seekers/job-seeker.cookie.js';
 import { JobSeekerGuard } from './seekers/job-seeker.guard.js';
 import { JobSeekersController } from './seekers/job-seekers.controller.js';
 import { JobSeekersService } from './seekers/job-seekers.service.js';
+import { COMPANY_DIRECTORY, JOBS_DIRECTORY } from './sources/directory.js';
 import { FetchJobsHttp, JOBS_HTTP } from './sources/http.js';
 
 /** The job board (PLAN D36): daily collection, the public list, job-seeker accounts. */
@@ -24,6 +25,7 @@ import { FetchJobsHttp, JOBS_HTTP } from './sources/http.js';
     JobSeekerCookie,
     JobSeekerGuard,
     { provide: JOBS_HTTP, useClass: FetchJobsHttp },
+    { provide: JOBS_DIRECTORY, useValue: COMPANY_DIRECTORY },
   ],
   exports: [JobsPipelineService, JobSeekersService, CampaignsService],
 })

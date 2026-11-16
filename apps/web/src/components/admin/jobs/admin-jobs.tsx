@@ -227,26 +227,47 @@ function Companies({ act }: { act: Act }) {
                 <div className="min-w-0">
                   <p className="text-ink font-semibold">{c.name}</p>
                   <p className="text-ink-soft text-sm">
-                    {c.ats} · {c.boardToken} · {fmt(a.openJobs, { count: c.openJobs })} ·{' '}
-                    {a.companyStatus[c.status]}
+                    {c.ats ? `${c.ats} · ${c.boardToken} · ` : ''}
+                    {fmt(a.openJobs, { count: c.openJobs })} · {a.companyStatus[c.status]}
                   </p>
                 </div>
-                {c.status !== 'BLOCKED' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    aria-label={fmt(a.kosovoLabel, { name: c.name })}
+                    className="border-line-strong bg-background text-ink h-9 border px-2 text-sm"
+                    value={c.hiresInKosovo === null ? 'UNKNOWN' : c.hiresInKosovo ? 'YES' : 'NO'}
+                    onChange={(e) =>
                       void act(() =>
                         apiFetch(`/admin/jobs/companies/${c.id}`, {
                           method: 'PATCH',
-                          body: { status: c.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' },
+                          body: { kosovo: e.target.value },
                         }),
                       )
                     }
                   >
-                    {c.status === 'ACTIVE' ? a.disable : a.enable}
-                  </Button>
-                )}
+                    {(['UNKNOWN', 'YES', 'NO'] as const).map((v) => (
+                      <option key={v} value={v}>
+                        {a.kosovo[v]}
+                      </option>
+                    ))}
+                  </select>
+                  {c.status !== 'BLOCKED' && c.ats && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        void act(() =>
+                          apiFetch(`/admin/jobs/companies/${c.id}`, {
+                            method: 'PATCH',
+                            body: { status: c.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' },
+                          }),
+                        )
+                      }
+                    >
+                      {c.status === 'ACTIVE' ? a.disable : a.enable}
+                    </Button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

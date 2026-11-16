@@ -507,6 +507,8 @@ enum JobContract {
 
 /// Why someone in Kosovo can apply: the tag shown under the job.
 enum JobRegion {
+  /// The posting (or the admins' verdict on the company) says people in Kosovo can apply.
+  KOSOVO
   WORLDWIDE
   EUROPE
   BALKANS
@@ -536,6 +538,8 @@ model JobCompany {
   ats            JobSourceKind?
   boardToken     String?
   website        String?
+  /// The admins' verdict (PLAN D40): hires people in Kosovo (true), doesn't (false), unknown (null).
+  hiresInKosovo  Boolean?
   status         JobCompanyStatus @default(ACTIVE)
   /// "seed", "admin" or the source that revealed the career page (e.g. "REMOTEOK").
   discoveredFrom String?
@@ -573,8 +577,10 @@ model Job {
   salaryMin      Int?
   salaryMax      Int?
   salaryCurrency String?
-  /// YEAR, MONTH or HOUR.
+  /// YEAR, MONTH, WEEK or HOUR.
   salaryPeriod   String?
+  /// One or two plain-text sentences about the job, shown under the title (PLAN D38).
+  summary        String?
   applyUrl       String
   applySource    JobSourceKind
   status         JobStatus
